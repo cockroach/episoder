@@ -1,7 +1,7 @@
 #!/bin/sh
-# episoder-builddb.sh v0.2.1, http://tools.desire.ch/episoder/
+# episoder-builddb.sh v0.2.2, http://tools.desire.ch/episoder/
 #
-# Copyright (c) 2004 Stefan Ott. All rights reserved.
+# Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License

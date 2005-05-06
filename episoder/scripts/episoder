@@ -1,7 +1,7 @@
 #!/bin/sh
-# episoder v0.2.1, http://tools.desire.ch/episoder/
+# episoder v0.2.2, http://tools.desire.ch/episoder/
 #
-# Copyright (c) 2004 Stefan Ott. All rights reserved.
+# Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-export EPISODER_VERSION=0.2.1
+export EPISODER_VERSION=0.2.2
 export EPISODER_HOME=/usr/share/episoder
 
 show_help() {
