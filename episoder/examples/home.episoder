@@ -1,0 +1,32 @@
+# Datafile
+data=/home/stefan/.episodes
+
+# User agent to be used by wget
+agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
+
+# Joey
+src=http://www.tvtome.com/tvtome/servlet/EpisodeGuideServlet/showid-20952/Joey/
+
+# Scrubs
+src=http://www.tvtome.com/Scrubs/eplist.html
+
+# That '70s show
+src=http://www.tvtome.com/That70sShow/eplist.html
+
+# Monk
+src=http://www.tvtome.com/Monk/eplist.html
+
+# Battlestar Galactica
+src=http://www.tvtome.com/BattlestarGalactica_2004/eplist.html
+
+# CSI
+src=http://www.tvtome.com/CSI/eplist.html
+
+# Star Trek: Enterprise
+src=http://www.tvtome.com/Enterprise/eplist.html
+
+# 24
+src=http://www.tvtome.com/24/eplist.html
+
+# Desperate Housewives
+src=http://www.tvtome.com/DesperateHousewives/eplist.html

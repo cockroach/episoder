@@ -1,0 +1,14 @@
+This is the CHANGELOG file for episoder v0.2.1 by Stefan Ott
+Get the latest version at http://tools.desire.ch/episoder/
+===============================================================================
+
+v0.2.1 (4 Jan 2005)
+===================
+ * The tvtome plugin now understands UNAIRED episodes
+ * Improved the builddb script's debug output
+ * Fixed an issue that would print errors for shows with no upcoming episodes
+ * The debian files are now part of the main distribution
+
+v0.2.0 (13 Sep 2004)
+====================
+ * Initial public release

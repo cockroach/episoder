@@ -1,0 +1,96 @@
+#!/bin/sh
+# episoder v0.2.1, http://tools.desire.ch/episoder/
+#
+# Copyright (c) 2004 Stefan Ott. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+export EPISODER_VERSION=0.2.1
+export EPISODER_HOME=/usr/share/episoder
+
+show_help() {
+    echo Usage: $0 [options] command
+    echo 
+    echo Valid options:
+    echo "	-h, --help	show this help"
+    echo "	-rc, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
+    echo "	-v, --verbose	verbose operation (builddb only)"
+    echo "	-V, --version	get version information"
+    echo
+    echo Commands are:
+    echo "	builddb		rebuild the database"
+    echo "	showlist	show the list of upcoming episodes"
+}
+
+set_verbose() {
+    export VERBOSE=true
+    export WGET_ARGS="-v"
+}
+
+parse_arguments() {
+    EPISODER_RC_FILE=~/.episoder
+
+    for arg in $*; do
+	if [ "$RC_FILE_NEXT" ]; then
+	    EPISODER_RC_FILE=$arg
+	    RC_FILE_NEXT=
+	elif [ "$arg" == "-rc" ]; then
+	    RC_FILE_NEXT=true
+	elif [ ! -z "`echo $arg | grep -- '--rc='`" ]; then
+	    EPISODER_RC_FILE=`echo $arg | cut -d '=' -f 2`
+	elif [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then
+	    show_help
+	    exit 0
+	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
+	    set_verbose
+	elif [ "$arg" == "-V" ] || [ "$arg" == "--version" ]; then
+	    echo $0 v$EPISODER_VERSION
+	    exit 0
+	else
+	    COMMAND=$arg
+	fi
+    done
+}
+
+validate_arguments() {
+    if [ -z "$COMMAND" ]; then show_help; exit 1; fi
+    if [ ! -f "$EPISODER_RC_FILE" ]; then
+	echo "Configuration file $EPISODER_RC_FILE does not exist / is not a regular file"
+	exit 1
+    fi
+    EPISODER_DATAFILE=`cat $EPISODER_RC_FILE | grep '^data=' | cut -b 6-`
+    WGET_USER_AGENT=`cat $EPISODER_RC_FILE | grep '^agent=' | cut -b 7-`
+    if [ -z "$EPISODER_DATAFILE" ]; then
+	echo "No data file specified in configuration file"
+	exit 1
+    fi
+}
+
+parse_arguments $*
+validate_arguments
+
+case "$COMMAND" in
+    builddb)
+    	. $EPISODER_HOME/episoder-builddb.sh
+	build_db
+	;;
+    showlist)
+	. $EPISODER_HOME/episoder-showlist.sh
+	show_episode_list
+	;;
+    *)
+	show_help
+	exit 1
+esac
