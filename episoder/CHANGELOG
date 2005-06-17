@@ -2,10 +2,14 @@ This is the CHANGELOG file for episoder v0.2.2 by Stefan Ott
 Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
-v0.2.2 (some day)
+v0.2.2 (soon)
 ===================
  * Added LICENSE file
  * install.sh now correctly changes the EPISODER_HOME value
+ * Small fixes in the verbose output
+ * Created tvcom plugin
+ * Replaced all functionality from the tvtome plugin with a warning
+ * Now all the available modules are actually loaded
 
 v0.2.1 (4 Jan 2005)
 ===================
