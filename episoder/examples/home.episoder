@@ -4,29 +4,32 @@ data=/home/stefan/.episodes
 # User agent to be used by wget
 agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 
-# Joey
-src=http://www.tvtome.com/tvtome/servlet/EpisodeGuideServlet/showid-20952/Joey/
+# Black Books
+src=http://www.tv.com/black-books/show/5108/episode_listings.html
 
 # Scrubs
-src=http://www.tvtome.com/Scrubs/eplist.html
+src=http://www.tv.com/scrubs/show/3613/episode_listings.html
 
 # That '70s show
-src=http://www.tvtome.com/That70sShow/eplist.html
+src=http://www.tv.com/that-70s-show/show/246/episode_listings.html
 
 # Monk
-src=http://www.tvtome.com/Monk/eplist.html
+src=http://www.tv.com/monk/show/9130/episode_listings.html
 
-# Battlestar Galactica
-src=http://www.tvtome.com/BattlestarGalactica_2004/eplist.html
+# Battlestar Galactica (2003)
+src=http://www.tv.com/battlestar-galactica-2003/show/23557/episode_listings.html
 
 # CSI
-src=http://www.tvtome.com/CSI/eplist.html
-
-# Star Trek: Enterprise
-src=http://www.tvtome.com/Enterprise/eplist.html
+src=http://www.tv.com/csi/show/19/episode_listings.html
 
 # 24
-src=http://www.tvtome.com/24/eplist.html
+src=http://www.tv.com/24/show/3866/episode_listings.html
 
 # Desperate Housewives
-src=http://www.tvtome.com/DesperateHousewives/eplist.html
+src=http://www.tv.com/desperate-housewives/show/24641/episode_listings.html
+
+# The King of Queens
+src=http://www.tv.com/the-king-of-queens/show/239/episode_listings.html
+
+# South Park
+src=http://www.tv.com/south-park/show/344/episode_listings.html
