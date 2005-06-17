@@ -71,8 +71,8 @@ parse() {
     print "[*] Parsing"
     for plugin in ${EPISODER_PLUGINS[@]}; do
 	if [ ! -z "`match_$plugin $url`" ]; then
-	    parse_$plugin
 	    print Using $plugin plugin to parse
+	    parse_$plugin
 	else
 	    print Not using $plugin plugin to parse
 	fi
