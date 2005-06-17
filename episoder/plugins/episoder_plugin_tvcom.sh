@@ -40,7 +40,7 @@ do_parse_tvcom() {
 		print -en "\b $EPISODE_DATE"
 		
 		if [ "$EPISODE_DATE" != "0/0/0" ]; then
-		    echo `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW} ${SEASON_NUMBER}x${EPISODE_NUMBER} | sed s/\ /_/g >> $TMPFILE
+		    echo `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW} Episode ${EPISODE_NUMBER} | sed s/\ /_/g >> $TMPFILE
 		    print ", OK"
 		else
 		    print ', DROPPED - no date'
