@@ -71,7 +71,6 @@ parse_tvcom() {
 
 match_tvcom() {
     echo $1 | grep 'tv.com'
-    echo yes
 }
 
 EPISODER_PLUGINS[${#EPISODER_PLUGINS[*]}]='tvcom'
