@@ -10,6 +10,7 @@ v0.2.2 (17 Jun 2005)
  * Created tvcom plugin
  * Replaced all functionality from the tvtome plugin with a warning
  * Now all the available modules are actually loaded
+ * Some minor changes in the man page
 
 v0.2.1 (4 Jan 2005)
 ===================

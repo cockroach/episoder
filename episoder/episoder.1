@@ -41,14 +41,14 @@ Can be a simple grep for a known part of the URL, e.g. the domain name.
 Parses $WGETFILE and generates a one-item-per-line list of the upcoming episodes.
 The format is YYYY-MM-DD show episode.
 .TP
-In addition to that, the plugin has to enter itself into the EPISODER_PLUGINS array. See episoder_plugin_tvtome.sh for an example.
+In addition to that, the plugin has to add itself to the EPISODER_PLUGINS array. See episoder_plugin_tvcom.sh for an example.
 .SH CONFIG FILE
 .LP
 The configuration file consists of a section with settings for the program
 and a list of sources to be used to build the database.
 .TP
 .B agent=foo
-Set the user-agent string to be used by wget (required, as tvtome now blocks wget)
+Set the user-agent string to be used by wget (was required when tvtome blocked wget, might not be needed nowadays)
 .TP
 .B data=/path/to/file
 Specifies the file to be used to store the information about upcoming shows.
