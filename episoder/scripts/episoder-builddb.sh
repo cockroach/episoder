@@ -21,7 +21,9 @@ load_plugins() {
     print "[*] Loading plugins"
     EPISODER_PLUGINS=( )
 
-    . $EPISODER_HOME/episoder_plugin_*.sh
+    for file in $EPISODER_HOME/episoder_plugin_*.sh; do
+        . $file
+    done
 }
 
 print() {
