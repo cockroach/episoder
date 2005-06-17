@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-parse_tvcom() {
+do_parse_tvcom() {
     SHOW=`grep '<title>' $WGETFILE | sed 's/.*<title>\(.*\) Episode List.*/\1/'`
     SEASON_NUMBER=`grep '<h3 class="pl-5">Season .*</h3>' $WGETFILE | sed 's:.*<h3 class="pl-5">Season \(.*\)</h3>.*:\1:'`
     print "Parsing show: $SHOW, Season $SEASON_NUMBER"
@@ -51,8 +51,27 @@ parse_tvcom() {
     print -e "\b done"
 }
 
+get_tvcom_urls() {
+	grep -e "| \{25\}.*$url" $WGETFILE | sed 's:.*<a href="\(.*\)">.*</a>.*:\1:'
+}
+
+parse_tvcom() {
+	do_parse_tvcom
+
+	MATCH=`echo $url | grep '&season'`
+	if [ -z $MATCH ]; then
+		# we have an index page (= season 1) and need to fetch & parse
+		# all the subpages (other seasons)
+		for URL in `get_tvcom_urls`; do
+			wget -U "$WGET_USER_AGENT" $URL -O $WGETFILE $WGET_ARGS
+			do_parse_tvcom
+		done
+	fi
+}
+
 match_tvcom() {
     echo $1 | grep 'tv.com'
+    echo yes
 }
 
 EPISODER_PLUGINS[${#EPISODER_PLUGINS[*]}]='tvcom'
