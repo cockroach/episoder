@@ -1,5 +1,5 @@
 #!/bin/sh
-# episoder_plugin_tvcom.sh v0.2.2, http://tools.desire.ch/episoder/
+# episoder tv.com plugin, http://tools.desire.ch/episoder/
 #
 # Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
