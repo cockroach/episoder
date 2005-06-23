@@ -58,21 +58,17 @@ get_tvcom_urls() {
 }
 
 parse_tvcom() {
-	do_parse_tvcom
-
-	MATCH=`echo $url | grep '&season'`
-	if [ -z $MATCH ]; then
-		# we have an index page (= season 1) and need to fetch & parse
-		# all the subpages (other seasons)
-		for URL in `get_tvcom_urls`; do
-			wget -U "$WGET_USER_AGENT" $URL -O $WGETFILE $WGET_ARGS
-			do_parse_tvcom
-		done
+	MATCH=`echo $url | grep '&season=0'`
+	if [ -z "`echo $url | grep '&season=0'`" ]; then 
+		echo "ERROR: Please make sure your url points to the 'all seasons' page (season=0)" >&2
+		exit 1
 	fi
+	
+	do_parse_tvcom
 }
 
 match_tvcom() {
-    echo $1 | grep 'tv.com'
+	echo $1 | grep 'tv.com'
 }
 
 EPISODER_PLUGINS[${#EPISODER_PLUGINS[*]}]='tvcom'
