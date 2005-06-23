@@ -1,5 +1,5 @@
 #!/bin/sh
-# episoder installer v0.2.1, http://tools.desire.ch/episoder/
+# episoder installer, http://tools.desire.ch/episoder/
 #
 # Copyright (c) 2004 Stefan Ott. All rights reserved.
 #
