@@ -1,9 +1,14 @@
-This is the CHANGELOG file for episoder v0.2.2 by Stefan Ott
+This is the CHANGELOG file for episoder by Stefan Ott
 Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
+v0.2.3 (23 Jun 2005)
+====================
+ * The tvcom plugin now uses the new "All Seasons" link
+ * Cosmetic changes
+
 v0.2.2 (17 Jun 2005)
-===================
+====================
  * Added LICENSE file
  * install.sh now correctly changes the EPISODER_HOME value
  * Small fixes in the verbose output
