@@ -1,5 +1,5 @@
 #!/bin/sh
-# episoder-showlist.sh v0.2.2, http://tools.desire.ch/episoder/
+# episoder-showlist.sh, http://tools.desire.ch/episoder/
 #
 # Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
@@ -20,37 +20,26 @@
 # $Id$
 
 get_date_by_offset() {
-    OFFSET=$1
-    CURRENT_DATE=`date +%Y-%m-%d`
-    CURRENT_DATE_SECONDS=`date +%s -d $CURRENT_DATE`
-    echo $((CURRENT_DATE_SECONDS + $OFFSET * 86400))
-}
-
-get_seconds_by_date() {
-    DATE=$1
-    echo `date +%s -d $DATE`
-}
-
-get_date_by_string() {
-    STRING=$1
-    echo `date +"%a, %b %d, %Y" -d $STRING`
+	OFFSET=$1
+	echo `date +"%Y-%m-%d" -d "+$OFFSET days"`
 }
 
 show_episode_list() {
-    YESTERDAY=`get_date_by_offset -1`
-    TODAY=`get_date_by_offset 0`
-    TOMORROW=`get_date_by_offset 1`
+	YESTERDAY=`get_date_by_offset -1`
+	TODAY=`get_date_by_offset 0`
 
-    for episode in `cat $EPISODER_DATAFILE | head -n 3 | sed 's/\ /_/g'`; do
-        episode=`echo $episode | sed 's/_/\ /g'`
-        DATE=`echo $episode | cut -d ' ' -f 1`
-        NAME=`echo $episode | cut -b 12-`
-        if [ "`get_seconds_by_date $DATE`" -eq "$TODAY" ]; then
-    	    echo -e "\E[33;1m>`get_date_by_string ${DATE}`<  ${NAME}\E[30;0m"
-        elif [ "`get_seconds_by_date $DATE`" -eq "$TOMORROW" ]; then
-	    echo -e "\E[32;1m `get_date_by_string ${DATE}`   ${NAME}\E[30;0m"
-        elif [ "`get_seconds_by_date $DATE`" -eq "$YESTERDAY" ]; then
-	    echo -e "\E[31;1m `get_date_by_string ${DATE}`   ${NAME}\E[30;0m"
-        fi
-    done
+	echo -ne "\E[31;1m"	# color: red
+	grep "^$YESTERDAY" $EPISODER_DATAFILE | sed s/^/\ /
+
+	echo -ne "\E[33;1m"	# color: yellow
+	grep "^$TODAY" $EPISODER_DATAFILE | sed s/^/\>/ | sed s/$/\</
+
+	echo -ne "\E[32;1m"	# color: green 
+
+	for ((day=1; day <= $NUM_DAYS; day++)); do
+		DATE=`get_date_by_offset $day`
+		grep "^$DATE" $EPISODER_DATAFILE | sed s/^/\ /
+	done
+
+	echo -ne "\E[30;0m"	# color: back to normal
 }
