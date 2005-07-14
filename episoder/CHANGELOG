@@ -2,6 +2,13 @@ This is the CHANGELOG file for episoder by Stefan Ott
 Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
+v0.2.4 (someday)
+====================
+ * Re-arranged the code to remove a 3-episodes-limit in showlist (closes #19)
+ * Added command line option to specify the number of days to show (closes #20)
+ * Brought back season-episode information in the tvcom plugin (closes #15)
+ * Cosmetic changes
+
 v0.2.3 (23 Jun 2005)
 ====================
  * The tvcom plugin now uses the new "All Seasons" link
