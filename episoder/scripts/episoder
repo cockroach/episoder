@@ -30,6 +30,7 @@ show_help() {
     echo "	-rc, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
     echo "	-v, --verbose	verbose operation (builddb only)"
     echo "	-V, --version	get version information"
+    echo "	-n		number of future days to show (default: 1)"
     echo
     echo Commands are:
     echo "	builddb		rebuild the database"
@@ -42,28 +43,33 @@ set_verbose() {
 }
 
 parse_arguments() {
-    EPISODER_RC_FILE=~/.episoder
+	EPISODER_RC_FILE=~/.episoder
 
-    for arg in $*; do
-	if [ "$RC_FILE_NEXT" ]; then
-	    EPISODER_RC_FILE=$arg
-	    RC_FILE_NEXT=
-	elif [ "$arg" == "-rc" ]; then
-	    RC_FILE_NEXT=true
-	elif [ ! -z "`echo $arg | grep -- '--rc='`" ]; then
-	    EPISODER_RC_FILE=`echo $arg | cut -d '=' -f 2`
-	elif [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then
-	    show_help
-	    exit 0
-	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
-	    set_verbose
-	elif [ "$arg" == "-V" ] || [ "$arg" == "--version" ]; then
-	    echo $0 v$EPISODER_VERSION
-	    exit 0
-	else
-	    COMMAND=$arg
-	fi
-    done
+	for arg in $*; do
+		if [ "$RC_FILE_NEXT" ]; then
+			EPISODER_RC_FILE=$arg
+			RC_FILE_NEXT=
+		elif [ "$NUMDAYS_NEXT" ]; then
+			NUM_DAYS=$arg
+			NUMDAYS_NEXT=
+		elif [ "$arg" == "-rc" ]; then
+			RC_FILE_NEXT=true
+		elif [ "$arg" == "-n" ]; then
+			NUMDAYS_NEXT=true
+		elif [ ! -z "`echo $arg | grep -- '--rc='`" ]; then
+			EPISODER_RC_FILE=`echo $arg | cut -d '=' -f 2`
+		elif [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then
+			show_help
+			exit 0
+		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
+			set_verbose
+		elif [ "$arg" == "-V" ] || [ "$arg" == "--version" ]; then
+			echo episoder v$EPISODER_VERSION
+			exit 0
+		else
+			COMMAND=$arg
+		fi
+	done
 }
 
 validate_arguments() {
