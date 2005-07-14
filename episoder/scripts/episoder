@@ -1,5 +1,5 @@
 #!/bin/sh
-# episoder v0.2.2, http://tools.desire.ch/episoder/
+# episoder, http://tools.desire.ch/episoder/
 #
 # Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
@@ -19,7 +19,7 @@
 #
 # $Id$
 
-export EPISODER_VERSION=0.2.2
+export EPISODER_VERSION=0.2.4
 export EPISODER_HOME=/usr/share/episoder
 
 show_help() {
