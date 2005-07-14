@@ -20,37 +20,45 @@
 # $Id$
 
 do_parse_tvcom() {
-    SHOW=`grep '<title>' $WGETFILE | sed 's/.*<title>\(.*\) Episode List.*/\1/'`
-    SEASON_NUMBER=`grep '<h3 class="pl-5">Season .*</h3>' $WGETFILE | sed 's:.*<h3 class="pl-5">Season \(.*\)</h3>.*:\1:'`
-    print "Parsing show: $SHOW, Season $SEASON_NUMBER"
+	SHOW=`grep '<title>' $WGETFILE | sed 's/.*<title>\(.*\) Episode List.*/\1/'`
+	SEASON_NUMBER=`grep '<h3 class="pl-5">Season .*</h3>' $WGETFILE | sed 's:.*<h3 class="pl-5">Season \(.*\)</h3>.*:\1:'`
 
-    echo "`cat $WGETFILE`" | while read line
-    do
-	print_next_status
-	MATCH=`echo $line | grep '[0-9]: *$'`
-	if [ ! -z "$MATCH" ]; then
-	    EPISODE_NUMBER=${MATCH/:/}
-	    EPISODE_NUMBER=`echo $EPISODE_NUMBER | sed 's/^\([0-9]\)$/0\1/'`
-	    print -ne "\b Found episode $EPISODE_NUMBER, looking for date:_"
-	fi
-	if [ ! -z "$EPISODE_NUMBER" ]; then
-	    MATCH=`echo $line | grep ' *[0-9]/[0-9][0-9]*/[0-9]*$'`
-	    if [ ! -z "$MATCH" ]; then
-	        EPISODE_DATE=$MATCH
-		print -en "\b $EPISODE_DATE"
-		
-		if [ "$EPISODE_DATE" != "0/0/0" ]; then
-		    echo `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW} Episode ${EPISODE_NUMBER} | sed s/\ /_/g >> $TMPFILE
-		    print ", OK"
-		else
-		    print ', DROPPED - no date'
+	print "Parsing show: $SHOW"
+
+	echo "`cat $WGETFILE`" | while read line; do
+		print_next_status
+		MATCH=`echo $line | grep '[0-9]: *$'`
+		if [ ! -z "$MATCH" ]; then
+			PARSE=true
+			print -ne "\b Found new episode, looking for date:_"
 		fi
+		if [ ! -z "$PARSE" ]; then
+			MATCH=`echo $line | grep ' *[0-9]/[0-9][0-9]*/[0-9]*$'`
+		    	if [ ! -z "$MATCH" ]; then
+		        	EPISODE_DATE=$MATCH
+				print -en "\b $EPISODE_DATE"
 
-		EPISODE_NUMBER=""
-	    fi
-	fi
-    done
-    print -e "\b done"
+				if [ "$EPISODE_DATE" != "0/0/0" ]; then
+				    print -n ", number:_"
+				else
+				    print ', DROPPED - no date'
+				    EPISODE_DATE=''
+				fi
+			fi
+		fi
+		if [ ! -z "$EPISODE_DATE" ]; then
+			MATCH=`echo $line | grep '[0-9] - [0-9]'`
+			if [ ! -z "$MATCH" ]; then
+				SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
+				EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
+				echo `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW} ${SEASON}x${EPISODE_NUMBER} | sed 's/ /_/g' >> $TMPFILE
+				print -e "\b ${SEASON}x${EPISODE_NUMBER}"
+				EPISODE_DATE=''
+				PARSE=''
+			fi
+		fi
+	done
+	print -e "\b done"
 }
 
 get_tvcom_urls() {
