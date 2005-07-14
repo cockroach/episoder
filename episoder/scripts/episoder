@@ -30,7 +30,7 @@ show_help() {
     echo "	-rc, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
     echo "	-v, --verbose	verbose operation (builddb only)"
     echo "	-V, --version	get version information"
-    echo "	-n		number of future days to show (default: 1)"
+    echo "	-n [days]	number of future days to show (default: 1)"
     echo
     echo Commands are:
     echo "	builddb		rebuild the database"
