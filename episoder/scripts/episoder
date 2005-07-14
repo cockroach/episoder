@@ -44,6 +44,7 @@ set_verbose() {
 
 parse_arguments() {
 	EPISODER_RC_FILE=~/.episoder
+	NUM_DAYS=1
 
 	for arg in $*; do
 		if [ "$RC_FILE_NEXT" ]; then
