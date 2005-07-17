@@ -7,6 +7,7 @@ v0.2.4 (someday)
  * Re-arranged the code to remove a 3-episodes-limit in showlist (closes #19)
  * Added command line option to specify the number of days to show (closes #20)
  * Brought back season-episode information in the tvcom plugin (closes #15)
+ * Added a small FAQ
  * Cosmetic changes
 
 v0.2.3 (23 Jun 2005)
