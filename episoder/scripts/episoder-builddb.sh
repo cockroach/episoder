@@ -28,7 +28,9 @@ put_episode() {
         SEASON=$3
         EPISODE_NUMBER=$4
         EPISODE_NAME=$5
-        echo $OUTPUT_FORMAT | sed "s/%date/$DATE/g" | sed "s/%show/$SHOW/g" | sed "s/%season/$SEASON/g" | sed "s/%episode_number/$EPISODE_NUMBER/g" | sed "s/%episode_name/$EPISODE_NAME/g" | sed s/_/\ /g >> $TMPFILE
+	EPISODE_TOTAL_NUMBER=$6
+	EPISODE_PRODNUM=$7
+        echo $OUTPUT_FORMAT | sed "s/%airdate/$DATE/g" | sed "s/%show/$SHOW/g" | sed "s/%season/$SEASON/g" | sed "s/%epnum/$EPISODE_NUMBER/g" | sed "s/%eptitle/$EPISODE_NAME/g" | sed "s/%totalep/$EPISODE_TOTAL_NUMBER/g" | sed "s/%prodnum/$EPISODE_PRODNUM/g" | sed s/_/\ /g >> $TMPFILE
 }
 
 load_plugins() {

@@ -29,14 +29,13 @@ do_parse_tvcom() {
 		print_next_status
 		MATCH=`echo $line | grep '[0-9]: *$'`
 		if [ ! -z "$MATCH" ]; then
-			PARSE=true
-			print -ne "\b Found new episode, looking for date:_"
+			EPISODE_TOTAL_NUMBER=`echo $MATCH | sed 's/\([0-9]*\):.*/\1/'`
+			print -ne "\b Found episode $EPISODE_TOTAL_NUMBER, date:_"
 		fi
-		if [ ! -z "$PARSE" ]; then
+		if [ ! -z "$EPISODE_TOTAL_NUMBER" ]; then
 			MATCH=`echo $line | grep '</strong>$'`
 			if [ ! -z "$MATCH" ]; then
 				EPISODE_NAME=`echo $line | sed 's/\(.*\)&nbsp;<.strong>/\1/'`
-				PARSE=''
 			fi
 		fi
 		if [ ! -z "$EPISODE_NAME" ]; then
@@ -54,13 +53,21 @@ do_parse_tvcom() {
 			fi
 		fi
 		if [ ! -z "$EPISODE_DATE" ]; then
+			MATCH=`echo $line | grep ' </td>$' | sed 's/^\(.*\) <.td>$/\1/'`
+			if [ ! -z "$MATCH" ] && [ "$MATCH" != "&nbsp;" ]; then
+				EPISODE_PRODNUM=$MATCH
+			fi
+		fi
+		if [ ! -z "$EPISODE_DATE" ]; then
 			MATCH=`echo $line | grep '[0-9] - [0-9]'`
 			if [ ! -z "$MATCH" ]; then
 				SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
 				EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
-				put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME// /_}
-				print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_NAME})"
+				put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME// /_} ${EPISODE_TOTAL_NUMBER} ${EPISODE_PRODNUM// /_}
+				print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_PRODNUM})"
 				EPISODE_DATE=''
+				EPISODE_TOTAL_NUMBER=''
+				EPISODE_PRODNUM=''
 			fi
 		fi
 	done
