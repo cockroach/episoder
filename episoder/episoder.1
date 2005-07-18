@@ -73,6 +73,12 @@ This allows you to customize episoder's output. Available fields are:
 .br
 
 If undefined, the default value of "%airdate %show %seasonx%epnum" (eg. "2005-07-29 Monk 4x04") is used.
+.TP
+.B dateformat=unquoted string describing the format
+Here you can define the date format you'd like to be used for the output. To get a list of all possible fields, see
+.BR date(1).
+
+The default is %a, %b %d, %Y
 .SH CRON
 .LP
 You might want to have your episode db rebuilt on a regular basis (i.e. daily).
