@@ -9,6 +9,7 @@ v0.2.4 (someday)
  * Brought back season-episode information in the tvcom plugin (closes #15)
  * Added the possibility to customize the output format (closes #16)
  * Added a small FAQ
+ * Thanks to Majeed Goldrick for all the bug reports and feature suggestions
  * Cosmetic changes
 
 v0.2.3 (23 Jun 2005)
