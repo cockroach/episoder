@@ -59,6 +59,20 @@ Specifies the file to be used to store the information about upcoming shows.
 .B src=http://some.web.add/ress
 Each src entry specifies a URL with episode information. Make sure you have the
 appropriate plugin before adding random new URLs (See \fBPLUGINS\fR).
+.TP
+.B format="some format string"
+This allows you to customize episoder's output. Available fields are:
+.PP
+        %airdate     The episode's airdate as YYYY-MM-DD
+        %show        Name of the show
+        %season      Current season
+        %epnum       Episode's number in season
+        %eptitle     Title of the episode
+        %totalep     Episode's total number
+        %prodnum     Production number
+.br
+
+If undefined, the default value of "%airdate %show %seasonx%epnum" (eg. "2005-07-29 Monk 4x04") is used.
 .SH CRON
 .LP
 You might want to have your episode db rebuilt on a regular basis (i.e. daily).
