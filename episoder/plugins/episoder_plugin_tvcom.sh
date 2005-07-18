@@ -33,6 +33,13 @@ do_parse_tvcom() {
 			print -ne "\b Found new episode, looking for date:_"
 		fi
 		if [ ! -z "$PARSE" ]; then
+			MATCH=`echo $line | grep '</strong>$'`
+			if [ ! -z "$MATCH" ]; then
+				EPISODE_NAME=`echo $line | sed 's/\(.*\)&nbsp;<.strong>/\1/'`
+				PARSE=''
+			fi
+		fi
+		if [ ! -z "$EPISODE_NAME" ]; then
 			MATCH=`echo $line | grep ' *[0-9]/[0-9][0-9]*/[0-9]*$'`
 		    	if [ ! -z "$MATCH" ]; then
 		        	EPISODE_DATE=$MATCH
@@ -51,10 +58,9 @@ do_parse_tvcom() {
 			if [ ! -z "$MATCH" ]; then
 				SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
 				EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
-				echo `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW} ${SEASON}x${EPISODE_NUMBER} | sed 's/ /_/g' >> $TMPFILE
-				print -e "\b ${SEASON}x${EPISODE_NUMBER}"
+				put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME// /_}
+				print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_NAME})"
 				EPISODE_DATE=''
-				PARSE=''
 			fi
 		fi
 	done

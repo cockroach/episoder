@@ -19,6 +19,16 @@
 #
 # $Id$
 
+put_episode() {
+        format="%date %show %seasonx%episode_number (%episode_name)"
+        DATE=$1
+        SHOW=$2
+        SEASON=$3
+        EPISODE_NUMBER=$4
+        EPISODE_NAME=$5
+        echo $format | sed "s/%date/$DATE/g" | sed "s/%show/$SHOW/g" | sed "s/%season/$SEASON/g" | sed "s/%episode_number/$EPISODE_NUMBER/g" | sed "s/%episode_name/$EPISODE_NAME/g" | sed s/_/\ /g >> $TMPFILE
+}
+
 load_plugins() {
 	print "[*] Loading plugins"
 	EPISODER_PLUGINS=( )
