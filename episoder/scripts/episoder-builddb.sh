@@ -21,7 +21,7 @@
 
 put_episode() {
 	if [ -z "$OUTPUT_FORMAT" ]; then
-		OUTPUT_FORMAT="%date %show %seasonx%episode_number"
+		OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
 	fi
         DATE=$1
         SHOW=$2
