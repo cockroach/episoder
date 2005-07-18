@@ -59,8 +59,8 @@ print_next_status() {
 remove_old_episodes() {
 	print "[*] Removing old episodes"
 	rm -f $TMPFILE2 && touch $TMPFILE2
-	YESTERDAY=$((`date +%s -d $TODAY` - 86400))
-	for episode in `cat $TMPFILE`; do
+	YESTERDAY=$((`date +%s -d "-1 day"`))
+	echo "`cat $TMPFILE`" | while read episode; do
 		DATE=`echo $episode | cut -b 1-10`
 		UNIX_DATE=`date +%s -d $DATE`
 		if [ ! $UNIX_DATE -lt $YESTERDAY ]; then
