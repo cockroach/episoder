@@ -80,7 +80,6 @@ get_episodes() {
 	for url in `cat ~/.episoder | grep '^src=' | cut -b 5-`; do
 		wget -U "$WGET_USER_AGENT" $url -O $WGETFILE $WGET_ARGS
 		parse
-		remove_old_episodes
 		rm -f $WGETFILE
 	done
 }
@@ -117,16 +116,8 @@ destroy_tmpfiles() {
 }
 
 sort_tmpfile() {
-	print "[*] Sorting tmpfiles"
-	for item in `cat $TMPFILE | sort`; do
-		item=`echo $item | sed s/_/\ /g`
-		ITEM_UNIX_TIME=`echo $item | cut -d ' ' -f 1`
-		ITEM_DATE=`date -d $ITEM_UNIX_TIME +%d-%b-%Y`
-		echo $item >> $TMPFILE2
-	done
-	if [ -f "$TMPFILE2" ]; then
-    		mv $TMPFILE2 $TMPFILE
-	fi
+	print "[*] Sorting episodes"
+	cat $TMPFILE | sort > $TMPFILE
 }
 
 write_episodes() {
@@ -141,6 +132,7 @@ build_db() {
 	load_plugins
 	open_tmpfiles
 	get_episodes
+	remove_old_episodes
 	sort_tmpfile
 	write_episodes
 	destroy_tmpfiles
