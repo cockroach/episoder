@@ -7,7 +7,7 @@ agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 # Output format
 # Currently available fields are (last column: example values):
 #
-#  %airdate   	The episode's airdate as YYYY-MM-DD	2005-04-03
+#  %airdate     The episode's airdate                   Sun, Apr 04, 2005
 #  %show   	Name of the show			Monk
 #  %season 	Current season				3
 #  %epnum	Episode's number in season		16
@@ -17,6 +17,9 @@ agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 #
 # Default value: %airdate %show %seasonx%epnum
 #format="%airdate %show %seasonx%epnum"
+
+# Your favourite dateformat as used by the date command (see `man date`)
+#dateformat=%a, %b %d, %Y
 
 # Black Books
 src=http://www.tv.com/black-books/show/5108/episode_listings.html&season=0
@@ -41,9 +44,6 @@ src=http://www.tv.com/24/show/3866/episode_listings.html&season=0
 
 # Desperate Housewives
 src=http://www.tv.com/desperate-housewives/show/24641/episode_listings.html&season=0
-
-# The King of Queens
-src=http://www.tv.com/the-king-of-queens/show/239/episode_listings.html&season=0
 
 # South Park
 src=http://www.tv.com/south-park/show/344/episode_listings.html&season=0
