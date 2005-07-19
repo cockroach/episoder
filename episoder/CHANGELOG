@@ -7,6 +7,7 @@ v0.2.5 (soon)
  * Fixed an alignment problem in showlist (closes #25)
  * Fixed a date-calculation issue in showlist (closes #23)
  * Fixed a documentation mistake about the format string (closes #21)
+ * Fixed the tvcom plugin to parse nun-numeric episode numbers (closes #24)
 
 v0.2.4 (19 Jul 2005)
 ====================

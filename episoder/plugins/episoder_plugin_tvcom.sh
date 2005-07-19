@@ -26,47 +26,58 @@ do_parse_tvcom() {
 
 	echo "`cat $WGETFILE`" | while read line; do
 		print_next_status
-		MATCH=`echo $line | grep '[0-9]: *$'`
-		if [ ! -z "$MATCH" ]; then
-			EPISODE_TOTAL_NUMBER=`echo $MATCH | sed 's/\([0-9]*\):.*/\1/'`
-			print -ne "\b Found episode $EPISODE_TOTAL_NUMBER, date:_"
-		fi
-		if [ ! -z "$EPISODE_TOTAL_NUMBER" ]; then
-			MATCH=`echo $line | grep '</strong>$'`
-			if [ ! -z "$MATCH" ]; then
-				EPISODE_NAME=`echo $line | sed 's/\(.*\)&nbsp;<.strong>/\1/'`
-			fi
-		fi
-		if [ ! -z "$EPISODE_NAME" ]; then
-			MATCH=`echo $line | grep ' *[0-9]/[0-9][0-9]*/[0-9]*$'`
-		    	if [ ! -z "$MATCH" ]; then
-		        	EPISODE_DATE=$MATCH
-				print -en "\b $EPISODE_DATE"
 
-				if [ "$EPISODE_DATE" != "0/0/0" ]; then
-				    print -n ", number:_"
-				else
-				    print ', DROPPED - no date'
-				    EPISODE_DATE=''
+		if [ -z "$PARSE" ] && [ ! -z "`echo $line | grep '<h3 class="pl-5">All Seasons</h3>'`" ]; then
+			print -e "\b Found start of data area, parsing ..."
+			PARSE=true
+		elif [ ! -z "$PARSE" ] && [ ! -z "`echo $line | grep '| All Seasons'`" ]; then
+			print -e "\b Found end of data area."
+			PARSE=''
+			break
+		fi
+		if [ ! -z "$PARSE" ]; then
+			MATCH=`echo $line | grep '[a-zA-Z0-9]: *$'`
+			if [ ! -z "$MATCH" ]; then
+				EPISODE_TOTAL_NUMBER=`echo $MATCH | sed 's/\([0-9]*\):.*/\1/'`
+				print -ne "\b Found episode $EPISODE_TOTAL_NUMBER, date:_"
+			fi
+			if [ ! -z "$EPISODE_TOTAL_NUMBER" ]; then
+				MATCH=`echo $line | grep '</strong>$'`
+				if [ ! -z "$MATCH" ]; then
+					EPISODE_NAME=`echo $line | sed 's/\(.*\)&nbsp;<.strong>/\1/'`
 				fi
 			fi
-		fi
-		if [ ! -z "$EPISODE_DATE" ]; then
-			MATCH=`echo $line | grep ' </td>$' | sed 's/^\(.*\) <.td>$/\1/'`
-			if [ ! -z "$MATCH" ] && [ "$MATCH" != "&nbsp;" ]; then
-				EPISODE_PRODNUM=$MATCH
+			if [ ! -z "$EPISODE_NAME" ]; then
+				MATCH=`echo $line | grep ' *[0-9]/[0-9][0-9]*/[0-9]*$'`
+			    	if [ ! -z "$MATCH" ]; then
+			        	EPISODE_DATE=$MATCH
+					print -en "\b $EPISODE_DATE"
+	
+					if [ "$EPISODE_DATE" != "0/0/0" ]; then
+					    print -n ", number:_"
+					else
+					    print ', DROPPED - no date'
+					    EPISODE_DATE=''
+					fi
+				fi
 			fi
-		fi
-		if [ ! -z "$EPISODE_DATE" ]; then
-			MATCH=`echo $line | grep '[0-9] - [0-9]'`
-			if [ ! -z "$MATCH" ]; then
-				SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
-				EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
-				put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME// /_} ${EPISODE_TOTAL_NUMBER} ${EPISODE_PRODNUM// /_}
-				print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_PRODNUM})"
-				EPISODE_DATE=''
-				EPISODE_TOTAL_NUMBER=''
-				EPISODE_PRODNUM=''
+			if [ ! -z "$EPISODE_DATE" ]; then
+				MATCH=`echo $line | grep ' </td>$' | sed 's/^\(.*\) <.td>$/\1/'`
+				if [ ! -z "$MATCH" ] && [ "$MATCH" != "&nbsp;" ]; then
+					EPISODE_PRODNUM=$MATCH
+				fi
+			fi
+			if [ ! -z "$EPISODE_DATE" ]; then
+				MATCH=`echo $line | grep '[0-9] - [0-9]'`
+				if [ ! -z "$MATCH" ]; then
+					SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
+					EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
+					put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME// /_} ${EPISODE_TOTAL_NUMBER} ${EPISODE_PRODNUM// /_}
+					print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_PRODNUM})"
+					EPISODE_DATE=''
+					EPISODE_TOTAL_NUMBER=''
+					EPISODE_PRODNUM=''
+				fi
 			fi
 		fi
 	done
