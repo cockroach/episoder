@@ -2,6 +2,10 @@ This is the CHANGELOG file for episoder by Stefan Ott
 Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
+v0.2.5 (soon)
+====================
+ * Fixed an alignment problem in showlist (closes #25)
+
 v0.2.4 (19 Jul 2005)
 ====================
  * Re-arranged the code to remove a 3-episodes-limit in showlist (closes #19)

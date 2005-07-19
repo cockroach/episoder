@@ -32,10 +32,10 @@ show_episode_list() {
 	fi
 
 	echo -ne "\E[31;1m"	# color: red
-	grep "^$YESTERDAY" $EPISODER_DATAFILE | sed s/^/\ / | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
+	grep "^$YESTERDAY" $EPISODER_DATAFILE | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
 
 	echo -ne "\E[33;1m"	# color: yellow
-	grep "^$TODAY" $EPISODER_DATAFILE | sed s/^/\>/ | sed s/$/\</ | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
+	grep "^$TODAY" $EPISODER_DATAFILE | sed s/^/\>/ | sed s/$/\</ | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
 
 	echo -ne "\E[32;1m"	# color: green 
 
