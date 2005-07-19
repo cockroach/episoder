@@ -60,7 +60,7 @@ Specifies the file to be used to store the information about upcoming shows.
 Each src entry specifies a URL with episode information. Make sure you have the
 appropriate plugin before adding random new URLs (See \fBPLUGINS\fR).
 .TP
-.B format="some format string"
+.B format=some unquoted format string
 This allows you to customize episoder's output. Available fields are:
 .PP
         %airdate     The episode's airdate as YYYY-MM-DD
@@ -72,7 +72,9 @@ This allows you to customize episoder's output. Available fields are:
         %prodnum     Production number
 .br
 
-If undefined, the default value of "%airdate %show %seasonx%epnum" (eg. "2005-07-29 Monk 4x04") is used.
+If undefined, the default value of 
+.B %airdate %show %seasonx%epnum
+(eg. "2005-07-29 Monk 4x04") is used.
 .TP
 .B dateformat=unquoted string describing the format
 Here you can define the date format you'd like to be used for the output. To get a list of all possible fields, see
