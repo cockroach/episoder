@@ -2,7 +2,7 @@ This is the CHANGELOG file for episoder by Stefan Ott
 Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
-v0.2.5 (soon)
+v0.2.5 (19 Jul 2005)
 ====================
  * Fixed an alignment problem in showlist (closes #25)
  * Fixed a date-calculation issue in showlist (closes #23)
