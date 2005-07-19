@@ -30,7 +30,7 @@ do_parse_tvcom() {
 		if [ -z "$PARSE" ] && [ ! -z "`echo $line | grep '<h3 class="pl-5">All Seasons</h3>'`" ]; then
 			print -e "\b Found start of data area, parsing ..."
 			PARSE=true
-		elif [ ! -z "$PARSE" ] && [ ! -z "`echo $line | grep '| All Seasons'`" ]; then
+		elif [ ! -z "$PARSE" ] && [ ! -z "`echo $line | grep '<div class="gray-box pod cb ml-10 mb-10 f-bold f-med-gray f-12">'`" ]; then
 			print -e "\b Found end of data area."
 			PARSE=''
 			break
