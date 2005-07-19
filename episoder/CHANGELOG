@@ -5,6 +5,7 @@ Get the latest version at http://tools.desire.ch/episoder/
 v0.2.5 (soon)
 ====================
  * Fixed an alignment problem in showlist (closes #25)
+ * Fixed a date-calculation issue in showlist (closes #23)
 
 v0.2.4 (19 Jul 2005)
 ====================

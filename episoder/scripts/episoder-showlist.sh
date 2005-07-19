@@ -32,16 +32,16 @@ show_episode_list() {
 	fi
 
 	echo -ne "\E[31;1m"	# color: red
-	grep "^$YESTERDAY" $EPISODER_DATAFILE | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
+	grep "^$YESTERDAY" $EPISODER_DATAFILE | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $YESTERDAY`/"
 
 	echo -ne "\E[33;1m"	# color: yellow
-	grep "^$TODAY" $EPISODER_DATAFILE | sed s/^/\>/ | sed s/$/\</ | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
+	grep "^$TODAY" $EPISODER_DATAFILE | sed s/^/\>/ | sed s/$/\</ | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT"`/"
 
 	echo -ne "\E[32;1m"	# color: green 
 
 	for ((day=1; day <= $NUM_DAYS; day++)); do
 		DATE=`get_date_by_offset $day`
-		grep "^$DATE" $EPISODER_DATAFILE | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d \1`/"
+		grep "^$DATE" $EPISODER_DATAFILE | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $DATE`/"
 	done
 
 	echo -ne "\E[30;0m"	# color: back to normal
