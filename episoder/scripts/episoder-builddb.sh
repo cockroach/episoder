@@ -116,7 +116,8 @@ destroy_tmpfiles() {
 
 sort_tmpfile() {
 	print "[*] Sorting episodes"
-	cat $TMPFILE | sort > $TMPFILE
+	cat $TMPFILE | sort > $TMPFILE2
+	mv $TMPFILE2 $TMPFILE
 }
 
 write_episodes() {
