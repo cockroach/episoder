@@ -31,6 +31,9 @@ show_help() {
 	echo "	-v, --verbose	verbose operation (builddb only)"
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
+	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
+	echo "	-s [string]	string to search for"
+	echo "	-sa [string]	string to search for ignoring date"
 	echo
 	echo Commands are:
 	echo "	builddb		rebuild the database"
@@ -46,6 +49,9 @@ parse_arguments() {
 	# set some default values
 	EPISODER_RC_FILE=~/.episoder
 	NUM_DAYS=1
+	SEARCH_TEXT=""
+	SEARCHALL_TEXT=""
+	DATE_TEXT=""
 
 	for arg in $*; do
 		if [ "$RC_FILE_NEXT" ]; then
@@ -54,10 +60,25 @@ parse_arguments() {
 		elif [ "$NUMDAYS_NEXT" ]; then
 			NUM_DAYS=$arg
 			NUMDAYS_NEXT=
+		elif [ "$SEARCHTEXT_NEXT" ]; then
+			SEARCH_TEXT=$arg
+			SEARCHTEXT_NEXT=
+		elif [ "$SEARCHALLTEXT_NEXT" ]; then
+			SEARCHALL_TEXT=$arg
+			SEARCHALLTEXT_NEXT=
+		elif [ "$DATE_NEXT" ]; then
+			DATE_TEXT=$arg
+			DATE_NEXT=
 		elif [ "$arg" == "-rc" ]; then
 			RC_FILE_NEXT=true
 		elif [ "$arg" == "-n" ]; then
 			NUMDAYS_NEXT=true
+		elif [ "$arg" == "-s" ]; then
+			SEARCHTEXT_NEXT=true
+		elif [ "$arg" == "-sa" ]; then
+			SEARCHALLTEXT_NEXT=true
+		elif [ "$arg" == "-d" ]; then
+			DATE_NEXT=true
 		elif [ ! -z "`echo $arg | grep -- '--rc='`" ]; then
 			EPISODER_RC_FILE=`echo $arg | cut -d '=' -f 2`
 		elif [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then

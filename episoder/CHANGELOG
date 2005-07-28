@@ -4,7 +4,8 @@ Get the latest version at http://tools.desire.ch/episoder/
 
 v0.2.6 (some day)
 ====================
- * Removed a 1024-episodes-limit in sortlist (thanks to Majeed Goldrick)
+ * Removed a 1024-episodes-limit in sortlist (Majeed)
+ * Added search options (Majeed)
 
 v0.2.5 (19 Jul 2005)
 ====================
