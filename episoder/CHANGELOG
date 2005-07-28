@@ -2,10 +2,11 @@ This is the CHANGELOG file for episoder by Stefan Ott
 Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
-v0.2.6 (some day)
+v0.3.0 (some day)
 ====================
  * Removed a 1024-episodes-limit in sortlist (Majeed)
  * Added search options (Majeed)
+ * Added a couple of tests
 
 v0.2.5 (19 Jul 2005)
 ====================
