@@ -72,7 +72,8 @@ do_parse_tvcom() {
 				if [ ! -z "$MATCH" ]; then
 					SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
 					EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
-					put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME// /_} ${EPISODE_TOTAL_NUMBER} ${EPISODE_PRODNUM// /_}
+					EPISODE_NAME=`echo $EPISODE_NAME | sed 'y:&/ :___:'` # remove evil characters
+					put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME} ${EPISODE_TOTAL_NUMBER} ${EPISODE_PRODNUM// /_}
 					print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_PRODNUM})"
 					EPISODE_DATE=''
 					EPISODE_TOTAL_NUMBER=''
