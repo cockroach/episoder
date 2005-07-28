@@ -63,8 +63,8 @@ show_episode_list() {
 		done
 
 	else
-		output=`grep "$SEARCHALL_TEXT" $EPISODER_DATAFILE | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/\`date +"$DATE_FORMAT" -d \0\`/" | sed -e "s/$SEARCHALL_TEXT/\\\\\E${color_green}\0\\\\\E${color_gray}/g"`
-		echo -e "$output\n"
+		output=`grep "$SEARCHALL_TEXT" $EPISODER_DATAFILE | sed s/^/\ / | sed -e "s/$SEARCHALL_TEXT/\\\\\E${color_green}\0\\\\\E${color_gray}/g"`
+		echo -e "$output"
 	fi
 	echo -ne ${color_gray}
 }
