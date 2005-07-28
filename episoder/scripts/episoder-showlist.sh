@@ -50,7 +50,7 @@ show_episode_list() {
 		grep "^$YESTERDAY" $EPISODER_DATAFILE | grep "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $YESTERDAY`/"
 
 		echo -ne ${color_yellow}
-		grep "^$TODAY" $EPISODER_DATAFILE | grep "$SEARCH_TEXT" | sed s/^/\>/ | sed s/$/\</ | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TODAY`/"
+		grep "^$TODAY" $EPISODER_DATAFILE | grep "$SEARCH_TEXT" | sed 's/.*/>\0</' | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TODAY`/"
 
 		echo -ne ${color_green}	
 		DATE=`get_date_by_offset 1`
