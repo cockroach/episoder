@@ -83,4 +83,4 @@ test_parse_tvcom() {
 set_up
 test_remove_old_episodes
 test_parse_tvcom
-#tear_down
+tear_down
