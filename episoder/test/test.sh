@@ -29,7 +29,13 @@ tear_down() {
 	rm -f $TMPFILE2
 }
 
+clear_files() {
+	tear_down
+}
+
 test_remove_old_episodes() {
+	clear_files
+
 	. ../scripts/episoder-builddb.sh
 
 	# test using DATE_TEXT
@@ -58,6 +64,23 @@ test_remove_old_episodes() {
 	fi
 }
 
+test_parse_tvcom() {
+	clear_files
+
+	. ../plugins/episoder_plugin_tvcom.sh
+
+	WGETFILE=data/tvcom.sample
+	OUTPUT_FORMAT="%airdate %show %seasonx%epnum: %eptitle [%prodnum] (%totalep)"
+
+	do_parse_tvcom
+
+	if [ ! -z "`diff $TMPFILE data/tvcom.output`" ]; then
+		echo "The tvcom plugin's output is wrong:"
+		diff $TMPFILE data/tvcom.output
+	fi
+}
+
 set_up
 test_remove_old_episodes
-tear_down
+test_parse_tvcom
+#tear_down
