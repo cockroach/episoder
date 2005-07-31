@@ -34,6 +34,7 @@ show_help() {
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
 	echo "	-s [string]	string to search for"
 	echo "	-sa [string]	string to search for ignoring date"
+	echo "	-i, --nocase	case insensitive search (with -s or -sa)"
 	echo
 	echo Commands are:
 	echo "	builddb		rebuild the database"
@@ -43,6 +44,11 @@ show_help() {
 set_verbose() {
 	export VERBOSE=true
 	export WGET_ARGS="-v"
+}
+set_nocase() {
+	export NOCASE=true
+	export GREP_ARGS="-i"
+	export SED_ARGS="I"
 }
 
 parse_arguments() {
@@ -86,6 +92,8 @@ parse_arguments() {
 			exit 0
 		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
 			set_verbose
+		elif [ "$arg" == "-i" ] || [ "$arg" == "--nocase" ]; then
+			set_nocase
 		elif [ "$arg" == "-V" ] || [ "$arg" == "--version" ]; then
 			echo episoder v$EPISODER_VERSION
 			exit 0
