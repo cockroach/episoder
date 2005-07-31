@@ -36,8 +36,8 @@ show_episode_list() {
 	color_yellow='\E[33;1m'
 	color_green='\E[32;1m'
 	color_lightblue='\E[36;1m'
-	color_gray='\E[37;1m'
-	color_default='\E[30;0m'
+	color_gray='\E[30;0m'
+	color_default=$color_gray
 
 	if [ -z "$DATE_FORMAT" ]; then
 		DATE_FORMAT="%a, %b %d, %Y"
