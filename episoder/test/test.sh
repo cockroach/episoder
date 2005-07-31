@@ -22,11 +22,13 @@
 set_up() {
 	TMPFILE=/tmp/episoder.testdata.temp1
 	TMPFILE2=/tmp/episoder.testdata.temp2
+	UNZIP_FILE=/tmp/episoder.testdata.unzip
 }
 
 tear_down() {
 	rm -f $TMPFILE
 	rm -f $TMPFILE2
+	rm -f $UNZIP_FILE
 }
 
 clear_files() {
@@ -64,25 +66,39 @@ test_remove_old_episodes() {
 	fi
 }
 
-test_parse_tvcom() {
+test_parse_tvcom_run() {
+	FILENO=$1
+
+	echo -n .
 	clear_files
+	bzip2 -dc data/tvcom.sample${FILENO}.bz2 > $UNZIP_FILE
+	WGETFILE=$UNZIP_FILE
+
+	parse_tvcom
+
+	if [ ! -z "`diff $TMPFILE data/tvcom.output${FILENO}`" ]; then
+		echo "The tvcom plugin's output is wrong at file #${FILENO}:"
+		diff $TMPFILE data/tvcom.output${FILENO}
+	fi
+}
+
+test_parse_tvcom() {
+	echo -n .
 
 	. ../plugins/episoder_plugin_tvcom.sh
 	
 	url='&season=0'
 	EPISODER_HOME=../plugins
-	WGETFILE=data/tvcom.sample
 	OUTPUT_FORMAT="%airdate %show %seasonx%epnum: %eptitle [%prodnum] (%totalep)"
 
-	parse_tvcom
-
-	if [ ! -z "`diff $TMPFILE data/tvcom.output`" ]; then
-		echo "The tvcom plugin's output is wrong:"
-		diff $TMPFILE data/tvcom.output
-	fi
+	for file in data/tvcom.sample*bz2; do
+		num=`echo $file | sed -r 's/.*sample(.*)\.bz2/\1/'`
+		test_parse_tvcom_run $num
+	done
 }
 
 set_up
 test_remove_old_episodes
 test_parse_tvcom
 tear_down
+echo .
