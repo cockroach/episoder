@@ -22,6 +22,15 @@ Enable verbose operation.
 .TP
 .B \-V|\-\-version
 Show program version and quit.
+.TP
+.B -d [YYYY-MM-DD]
+The date to begin search or update from (default: today)
+.TP
+.B -s [string]
+String to search all future episodes for
+.TP
+.B -sa [string]
+String to search all episodes for, ignoring date
 .SH COMMANDS
 .LP
 .TP
@@ -60,7 +69,7 @@ Specifies the file to be used to store the information about upcoming shows.
 Each src entry specifies a URL with episode information. Make sure you have the
 appropriate plugin before adding random new URLs (See \fBPLUGINS\fR).
 .TP
-.B format=some unquoted format string
+.B format=unquoted format string
 This allows you to customize episoder's output. Available fields are:
 .PP
         %airdate     The episode's airdate as YYYY-MM-DD
