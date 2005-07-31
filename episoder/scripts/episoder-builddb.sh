@@ -18,20 +18,6 @@
 #
 # $Id$
 
-put_episode() {
-	if [ -z "$OUTPUT_FORMAT" ]; then
-		OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
-	fi
-        DATE=$1
-        SHOW=$2
-        SEASON=$3
-        EPISODE_NUMBER=$4
-        EPISODE_NAME=$5
-	EPISODE_TOTAL_NUMBER=$6
-	EPISODE_PRODNUM=$7
-        echo $OUTPUT_FORMAT | sed "s/%airdate/$DATE/g" | sed "s/%show/$SHOW/g" | sed "s/%season/$SEASON/g" | sed "s/%epnum/$EPISODE_NUMBER/g" | sed "s/%eptitle/$EPISODE_NAME/g" | sed "s/%totalep/$EPISODE_TOTAL_NUMBER/g" | sed "s/%prodnum/$EPISODE_PRODNUM/g" | sed s/_/\ /g >> $TMPFILE
-}
-
 load_plugins() {
 	print "[*] Loading plugins"
 	EPISODER_PLUGINS=( )

@@ -111,6 +111,9 @@ validate_arguments() {
 		echo "No data file specified in configuration file"
 		exit 1
 	fi
+	if [ -z "$OUTPUT_FORMAT" ]; then
+                OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
+        fi
 }
 
 parse_arguments $*
