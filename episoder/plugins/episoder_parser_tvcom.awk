@@ -5,7 +5,7 @@
 	end = index($0, " Episode List") - start
 	show = substr($0, start, end)
 }
-/[a-zA-Z0-9]: / {
+/  [a-zA-Z0-9]+:/ {
 	if (parse == "true") {
 		epnum = substr($1,1,index($1,":")-1)
 	}
