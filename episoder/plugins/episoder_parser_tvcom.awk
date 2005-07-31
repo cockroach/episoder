@@ -27,7 +27,9 @@
 	episode = fields[2]
 	if (episode < 10) episode = 0 episode
 
-	show_episode(show, epnum, season, episode, prodnum, epdate, eptitle)
+	if (epdate != "0/0/0") {
+		show_episode(show,epnum,season,episode,prodnum,epdate,eptitle)
+	}
 	prodnum = ""
 	epdate = ""
 }
@@ -36,6 +38,8 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 	output = format
 	command = "date +%Y-%m-%d -d " epdate
 	command | getline airdate
+	gsub("&", "and", eptitle)
+	gsub("&", "and", show)
 	gsub("%show", show, output)
 	gsub("%totalep", totalep, output)
 	gsub("%season", season, output)
