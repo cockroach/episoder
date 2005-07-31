@@ -8,6 +8,7 @@ v0.3.0 (some day)
  * Added search options (Majeed)
  * Switched to awk to remove old episodes (>600 times faster)
  * Switched to awk for tv.com parsing (about 10 times faster)
+ * Removed the debian files from the main distribution
  * Added a couple of tests
 
 v0.2.5 (19 Jul 2005)
