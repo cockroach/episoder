@@ -18,77 +18,6 @@
 #
 # $Id$
 
-do_parse_tvcom() {
-	SHOW=`grep '<title>' $WGETFILE | sed 's/.*<title>\(.*\) Episode List.*/\1/'`
-	SEASON_NUMBER=`grep '<h3 class="pl-5">Season .*</h3>' $WGETFILE | sed 's:.*<h3 class="pl-5">Season \(.*\)</h3>.*:\1:'`
-
-	print "Parsing show: $SHOW"
-
-	echo "`cat $WGETFILE`" | while read line; do
-		print_next_status
-
-		if [ -z "$PARSE" ] && [ ! -z "`echo $line | grep '<h3 class="pl-5">All Seasons</h3>'`" ]; then
-			print -e "\b Found start of data area, parsing ..."
-			PARSE=true
-		elif [ ! -z "$PARSE" ] && [ ! -z "`echo $line | grep '<div class="gray-box pod cb ml-10 mb-10 f-bold f-med-gray f-12">'`" ]; then
-			print -e "\b Found end of data area."
-			PARSE=''
-			break
-		fi
-		if [ ! -z "$PARSE" ]; then
-			MATCH=`echo $line | grep '[a-zA-Z0-9]: *$'`
-			if [ ! -z "$MATCH" ]; then
-				EPISODE_TOTAL_NUMBER=`echo $MATCH | sed 's/\([0-9]*\):.*/\1/'`
-				print -ne "\b Found episode $EPISODE_TOTAL_NUMBER, date:_"
-			fi
-			if [ ! -z "$EPISODE_TOTAL_NUMBER" ]; then
-				MATCH=`echo $line | grep '</strong>$'`
-				if [ ! -z "$MATCH" ]; then
-					EPISODE_NAME=`echo $line | sed 's/\(.*\)&nbsp;<.strong>/\1/'`
-				fi
-			fi
-			if [ ! -z "$EPISODE_NAME" ]; then
-				MATCH=`echo $line | grep ' *[0-9]/[0-9][0-9]*/[0-9]*$'`
-			    	if [ ! -z "$MATCH" ]; then
-			        	EPISODE_DATE=$MATCH
-					print -en "\b $EPISODE_DATE"
-	
-					if [ "$EPISODE_DATE" != "0/0/0" ]; then
-					    print -n ", number:_"
-					else
-					    print ', DROPPED - no date'
-					    EPISODE_DATE=''
-					fi
-				fi
-			fi
-			if [ ! -z "$EPISODE_DATE" ]; then
-				MATCH=`echo $line | grep ' </td>$' | sed 's/^\(.*\) <.td>$/\1/'`
-				if [ ! -z "$MATCH" ] && [ "$MATCH" != "&nbsp;" ]; then
-					EPISODE_PRODNUM=$MATCH
-				fi
-			fi
-			if [ ! -z "$EPISODE_DATE" ]; then
-				MATCH=`echo $line | grep '[0-9] - [0-9]'`
-				if [ ! -z "$MATCH" ]; then
-					SEASON=`echo $line | sed 's/.*>\([0-9]*\) - [0-9].*/\1/'`
-					EPISODE_NUMBER=`echo $line | sed 's/.*[0-9] - \([0-9]*\).*/\1/' | sed 's/^\([0-9]\)$/0\1/'`
-					EPISODE_NAME=`echo $EPISODE_NAME | sed 'y:&/ :___:'` # remove evil characters
-					put_episode `date +%Y-%m-%d -d ${EPISODE_DATE}` ${SHOW// /_} ${SEASON} ${EPISODE_NUMBER} ${EPISODE_NAME} ${EPISODE_TOTAL_NUMBER} ${EPISODE_PRODNUM// /_}
-					print -e "\b ${SEASON}x${EPISODE_NUMBER} (${EPISODE_PRODNUM})"
-					EPISODE_DATE=''
-					EPISODE_TOTAL_NUMBER=''
-					EPISODE_PRODNUM=''
-				fi
-			fi
-		fi
-	done
-	print -e "\b done"
-}
-
-get_tvcom_urls() {
-	grep -e "| \{25\}.*$url" $WGETFILE | sed 's:.*<a href="\(.*\)">.*</a>.*:\1:'
-}
-
 parse_tvcom() {
 	MATCH=`echo $url | grep '&season=0'`
 	if [ -z "`echo $url | grep '&season=0'`" ]; then 
@@ -96,7 +25,9 @@ parse_tvcom() {
 		exit 1
 	fi
 	
-	do_parse_tvcom
+	print -n "Parsing $WGETFILE ..."
+	awk -f $EPISODER_HOME/episoder_parser_tvcom.awk format="$OUTPUT_FORMAT" $WGETFILE > $TMPFILE
+	print -e "_\b done"
 }
 
 match_tvcom() {
