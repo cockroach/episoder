@@ -68,11 +68,13 @@ test_parse_tvcom() {
 	clear_files
 
 	. ../plugins/episoder_plugin_tvcom.sh
-
+	
+	url='&season=0'
+	EPISODER_HOME=../plugins
 	WGETFILE=data/tvcom.sample
 	OUTPUT_FORMAT="%airdate %show %seasonx%epnum: %eptitle [%prodnum] (%totalep)"
 
-	do_parse_tvcom
+	parse_tvcom
 
 	if [ ! -z "`diff $TMPFILE data/tvcom.output`" ]; then
 		echo "The tvcom plugin's output is wrong:"
