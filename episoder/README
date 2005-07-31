@@ -3,19 +3,19 @@ Get the latest version at http://tools.desire.ch/episoder/
 ===============================================================================
 
 PURPOSE
-=======
+-------
 episoder is a tool to tell you about new episodes of your favourite TV shows.
 
 
 CONFIGURATION
-=============
+-------------
 See "man episoder"
 
 
 INSTALLATION
-============
-    * Run ./install.sh install [base_dir] where base_dir is the directory you want
-      episoder to be installed under (e.g. /usr or /usr/local).
+------------
+    * Run ./install.sh install [base_dir] where base_dir is the directory you
+      want episoder to be installed under (e.g. /usr or /usr/local).
     * Create a cron job to have your database rebuilt once a day
     * Add "$base_dir/bin/episoder showlist" (e.g. /usr/bin/episoder showlist)
       to your ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc or /etc/profile.
@@ -23,6 +23,6 @@ INSTALLATION
 
 
 CONTACT
-=======
+-------
 If you find any bugs or have any idea of how to improve this tool, please
-use the bug tracker of the forum on our website.
+use the bug tracker or the forum on our website.
