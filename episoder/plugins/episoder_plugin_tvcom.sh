@@ -26,7 +26,8 @@ parse_tvcom() {
 	fi
 	
 	print -n "Parsing $WGETFILE ..."
-	awk -f $EPISODER_HOME/episoder_parser_tvcom.awk format="$OUTPUT_FORMAT" $WGETFILE > $TMPFILE
+	print $OUTPUT_FORMAT
+	awk -f $EPISODER_HOME/episoder_parser_tvcom.awk format="$OUTPUT_FORMAT" $WGETFILE >> $TMPFILE
 	print -e "_\b done"
 }
 
