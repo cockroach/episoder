@@ -32,7 +32,7 @@ show_help() {
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
-	echo "  -nd, --nodate	ignore default cut-off date set in .episoder (with -d)"
+	echo "	-nd, --nodate	ignore default cut-off date set in .episoder (with -d)"
 	echo "	-s [string]	string to search for"
 	echo "	-sa [string]	string to search for ignoring date"
 	echo "	-i, --nocase	case insensitive search (with -s or -sa)"
@@ -129,16 +129,18 @@ validate_arguments() {
 	if [ -z "$OUTPUT_FORMAT" ]; then
         OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
     fi
-	if [ -z "$DEFAULT_DATE" ]; then
-		if [ -z $DATE_TEXT ]; then
-			TODAY=`date +%Y-%m-%d`
-    	    DATE_TEXT=$TODAY
-		fi
-	else
-		if [ -z "$NODATE" ]; then
-			DATE_TEXT=$DEFAULT_DATE
-		fi
-    fi
+	if [ $COMMAND = "builddb" ]; then
+		if [ -z "$DEFAULT_DATE" ]; then
+			if [ -z $DATE_TEXT ]; then
+				TODAY=`date +%Y-%m-%d`
+	    	    DATE_TEXT=$TODAY
+			fi
+		else
+			if [ -z "$NODATE" ]; then
+				DATE_TEXT=$DEFAULT_DATE
+			fi
+    	fi
+	fi
 }
 
 parse_arguments $*
