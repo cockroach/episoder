@@ -32,6 +32,7 @@ show_help() {
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
+	echo "  -nd, --nodate	ignore default cut-off date set in .episoder (with -d)"
 	echo "	-s [string]	string to search for"
 	echo "	-sa [string]	string to search for ignoring date"
 	echo "	-i, --nocase	case insensitive search (with -s or -sa)"
@@ -49,6 +50,9 @@ set_nocase() {
 	export NOCASE=true
 	export GREP_ARGS="-i"
 	export SED_ARGS="I"
+}
+set_nodate() {
+	export NODATE=true
 }
 
 parse_arguments() {
@@ -94,6 +98,8 @@ parse_arguments() {
 			set_verbose
 		elif [ "$arg" == "-i" ] || [ "$arg" == "--nocase" ]; then
 			set_nocase
+		elif [ "$arg" == "-nd" ] || [ "$arg" == "--nodate" ]; then
+			set_nodate
 		elif [ "$arg" == "-V" ] || [ "$arg" == "--version" ]; then
 			echo episoder v$EPISODER_VERSION
 			exit 0
@@ -114,14 +120,25 @@ validate_arguments() {
 	WGET_USER_AGENT=`cat $EPISODER_RC_FILE | grep '^agent=' | cut -b 7-`
 	OUTPUT_FORMAT=`cat $EPISODER_RC_FILE | grep '^format=' | cut -b 8-`
 	DATE_FORMAT=`cat $EPISODER_RC_FILE | grep '^dateformat=' | cut -b 12-`
+	DEFAULT_DATE=`cat $EPISODER_RC_FILE | grep '^default_date=' | cut -b 14-`
 
 	if [ -z "$EPISODER_DATAFILE" ]; then
 		echo "No data file specified in configuration file"
 		exit 1
 	fi
 	if [ -z "$OUTPUT_FORMAT" ]; then
-                OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
-        fi
+        OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
+    fi
+	if [ -z "$DEFAULT_DATE" ]; then
+		if [ -z $DATE_TEXT ]; then
+			TODAY=`date +%Y-%m-%d`
+    	    DATE_TEXT=$TODAY
+		fi
+	else
+		if [ -z "$NODATE" ]; then
+			DATE_TEXT=$DEFAULT_DATE
+		fi
+    fi
 }
 
 parse_arguments $*
@@ -129,7 +146,7 @@ validate_arguments
 
 case "$COMMAND" in
 	builddb)
-	    	. $EPISODER_HOME/episoder-builddb.sh
+	    . $EPISODER_HOME/episoder-builddb.sh
 		build_db
 		;;
 	showlist)

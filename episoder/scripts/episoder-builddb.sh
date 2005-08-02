@@ -57,7 +57,6 @@ remove_old_episodes() {
 
 get_episodes() {
 	print "[*] Getting episodes"
-	TODAY=`date +%Y-%m-%d`
 	for url in `cat ~/.episoder | grep '^src=' | cut -b 5-`; do
 		wget -U "$WGET_USER_AGENT" $url -O $WGETFILE $WGET_ARGS
 		parse
@@ -109,6 +108,8 @@ write_episodes() {
 
 build_db() {
 	print "[*] Building DB"
+	print "[*] Starting on ${DATE_TEXT}"
+	
 	if [ -z "$WGET_ARGS" ]; then WGET_ARGS="-q"; fi
     
 	load_plugins

@@ -21,6 +21,9 @@ agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 # Your favourite dateformat as used by the date command (see `man date`)
 #dateformat=%a, %b %d, %Y
 
+# Default cut-off date for builddb to purge old episodes.  Comment out for current date.
+#default_date=2001-01-01
+
 # Black Books
 src=http://www.tv.com/black-books/show/5108/episode_listings.html&season=0
 
