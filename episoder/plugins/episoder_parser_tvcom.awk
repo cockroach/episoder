@@ -53,7 +53,7 @@
 	prodnum = ""
 	epdate = ""
 }
-/<\/html>/ { 
+END { 
 	if (VERBOSE == "true") {
 	if (dropped == 0) { dropped="0" }
 	if (kept == 0) { kept="0" }
