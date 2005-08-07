@@ -1,4 +1,4 @@
-# episoder-builddb.sh, http://tools.desire.ch/episoder/
+# episoder-builddb.sh, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
@@ -61,7 +61,9 @@ remove_old_episodes() {
 get_episodes() {
 	print "[*] Getting episodes"
 	for url in `cat ~/.episoder | grep '^src=' | cut -b 5-`; do
+		print -n "[*] Downloading"
 		wget -U "$WGET_USER_AGENT" $url -O $WGETFILE $WGET_ARGS
+		print -ne "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
 		parse
 		rm -f $WGETFILE
 	done
