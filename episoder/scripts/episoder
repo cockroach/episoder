@@ -29,7 +29,7 @@ show_help() {
 	echo "	-h, --help	show this help"
 	echo "	-rc, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
 	echo "	-v, --verbose	verbose operation (builddb only)"
-	echo "	-vv, --very_verbose	very verbose operation (builddb only)"
+	echo "	-vv		very verbose operation (builddb only)"
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
@@ -47,7 +47,7 @@ set_verbose() {
 	export VERBOSE=true
 }
 set_very_verbose() {
-	export VERBOSE=true
+	set_verbose
 	export VERY_VERBOSE=true
 	export WGET_ARGS="-v"
 }
@@ -101,8 +101,6 @@ parse_arguments() {
 			exit 0
 		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
 			set_verbose
-		elif [ "$arg" == "-vv" ] || [ "$arg" == "--very_verbose" ]; then
-			set_very_verbose
 		elif [ "$arg" == "-i" ] || [ "$arg" == "--nocase" ]; then
 			set_nocase
 		elif [ "$arg" == "-nd" ] || [ "$arg" == "--nodate" ]; then
