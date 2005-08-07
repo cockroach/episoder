@@ -1,5 +1,5 @@
 #!/bin/sh
-# episoder test suite, http://tools.desire.ch/episoder/
+# episoder test suite, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2005 Stefan Ott. All rights reserved.
 #

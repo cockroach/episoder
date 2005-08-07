@@ -1,4 +1,4 @@
-# episoder-showlist.sh, http://tools.desire.ch/episoder/
+# episoder-showlist.sh, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #

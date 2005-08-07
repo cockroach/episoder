@@ -1,4 +1,4 @@
-# episoder tv.com plugin, http://tools.desire.ch/episoder/
+# episoder tv.com plugin, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
 #
