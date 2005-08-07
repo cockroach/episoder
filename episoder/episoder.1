@@ -18,13 +18,19 @@ Use \fIFILE\fR for configuration values (default is ~/.episoder).
 Specify the number of future days to be shown by showlist (default: 1)
 .TP
 .B \-v|--verbose
-Enable verbose operation.
+Enable verbose operation (builddb only)
+.TP
+.B \-vv
+Enable very verbose operation (builddb only)
 .TP
 .B \-V|\-\-version
-Show program version and quit.
+Show program version and quit
 .TP
 .B -d [YYYY-MM-DD]
 The date to begin search or update from (default: today)
+.TP
+.B \-nd|\-\-nodate
+Ignore default cut-off date set in the config file
 .TP
 .B -s [string]
 String to search all future episodes for
