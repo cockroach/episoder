@@ -1,11 +1,10 @@
-This is the CHANGELOG file for episoder by Stefan Ott
-Get the latest version at http://episoder.sourceforge.net/
+Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
 v0.3.0 (some day)
 ====================
- * Removed a 1024-episodes-limit in sortlist (Majeed)
- * Added search options (Majeed)
+ * Removed a 1024-episodes-limit in sortlist
+ * Added search options
  * Switched to awk to remove old episodes (>600 times faster)
  * Switched to awk for tv.com parsing (>10 times faster)
  * Removed the debian files from the main distribution
