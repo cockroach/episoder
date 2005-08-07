@@ -3,6 +3,8 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 
 v0.3.0 (some day)
 ====================
+ * Majeed Goldrick joined the project
+ * Moved parts of the website to sourceforge
  * Removed a 1024-episodes-limit in sortlist
  * Added search options
  * Switched to awk to remove old episodes (>600 times faster)
