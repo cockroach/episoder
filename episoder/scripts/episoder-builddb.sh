@@ -28,7 +28,10 @@ load_plugins() {
 }
 
 print() {
-	if [ "$VERBOSE" ]; then
+	if [ "$1" == "v" ] && [ "$VERY_VERBOSE" ]; then
+		shift
+		echo $*
+	elif [ "$1" != "v" ] && [ "$VERBOSE" ]; then
 		echo $*
 	fi
 }
@@ -42,7 +45,7 @@ print_next_status() {
 }
 
 remove_old_episodes() {
-	print "[*] Removing old episodes"
+	print "[*] Removing episodes prior to $DATE_TEXT"
 
 	if [ -z "$DATE_TEXT" ]; then
 		DATE_REF="-1 day"
@@ -65,13 +68,13 @@ get_episodes() {
 }
 
 parse() {
-	print "[*] Parsing"
+	#print "[*] Parsing"
 	for plugin in ${EPISODER_PLUGINS[@]}; do
 		if [ ! -z "`match_$plugin $url`" ]; then
-			print Using $plugin plugin to parse
+			print v Using $plugin plugin to parse
 			parse_$plugin
-		else
-	    		print Not using $plugin plugin to parse
+		#else
+	    	print v Not using $plugin plugin to parse
 		fi
 	done
 }
@@ -84,10 +87,10 @@ open_tmpfiles() {
 	WGETFILE="/tmp/episoder.wget.$TIME"
 	rm -f $TMPFILE $TMPFILE2 $WGETFILE
 	touch $TMPFILE $TMPFILE2 $WGETFILE
-	print TIME: $TIME
-	print TMPFILE: $TMPFILE
-	print TMPFILE2: $TMPFILE2
-	print WGETFILE: $WGETFILE
+	print v TIME: $TIME
+	print v TMPFILE: $TMPFILE
+	print v TMPFILE2: $TMPFILE2
+	print v WGETFILE: $WGETFILE
 }
 
 destroy_tmpfiles() {

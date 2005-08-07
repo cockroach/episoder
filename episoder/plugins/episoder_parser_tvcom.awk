@@ -4,6 +4,13 @@
 	start = index($0, "<title>") + 7
 	end = index($0, " Episode List") - start
 	show = substr($0, start, end)
+	if (VERBOSE == "true") {
+		printf " %s... ",show
+	}
+	if (VERY_VERBOSE == "true") {
+		printf "\n"
+	}
+	
 }
 /^ *[a-zA-Z0-9]+: *$/ {
 	if (parse == "true") {
@@ -29,11 +36,35 @@
 
 	if (epdate != "0/0/0") {
 		show_episode(show,epnum,season,episode,prodnum,epdate,eptitle)
+		if (VERBOSE == "true") {
+			kept++
+		}
+		if (VERY_VERBOSE == "true") {
+			printf "Keeping %s %sx%s - %s\n",show,season,episode,eptitle
+		}
+	} else {
+		if (VERBOSE == "true") {
+			dropped++
+		}
+		if (VERY_VERBOSE == "true") {
+			printf "Dropping %s %sx%s - %s\n",show,season,episode,eptitle
+		}
 	}
 	prodnum = ""
 	epdate = ""
 }
+/<\/html>/ { 
+	if (VERBOSE == "true") {
+	if (dropped == 0) { dropped="0" }
+	if (kept == 0) { kept="0" }
+		printf "Keeping %s.  Dropping %s.  ",kept,dropped
+	}
+}
+	
 
+function printout(string){
+
+}
 function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 	output = format
 	command = "date +%Y-%m-%d -d " epdate
@@ -47,5 +78,5 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 	gsub("%prodnum", prodnum, output)
 	gsub("%airdate", airdate, output)
 	gsub("%eptitle", eptitle, output)
-	print output
+	print output >> TMPFILE
 }

@@ -25,9 +25,9 @@ parse_tvcom() {
 		exit 1
 	fi
 	
-	print -n "Parsing $WGETFILE ..."
-	awk -f $EPISODER_HOME/episoder_parser_tvcom.awk format="$OUTPUT_FORMAT" $WGETFILE >> $TMPFILE
-	print -e "_\b done"
+	print -n "[*] Parsing "
+	awk -f $EPISODER_HOME/episoder_parser_tvcom.awk format="$OUTPUT_FORMAT" TMPFILE="$TMPFILE" VERBOSE="$VERBOSE" VERY_VERBOSE="$VERY_VERBOSE" $WGETFILE 
+	print "Done."
 }
 
 match_tvcom() {
