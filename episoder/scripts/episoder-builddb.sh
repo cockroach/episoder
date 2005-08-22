@@ -70,11 +70,12 @@ get_episodes() {
 }
 
 parse() {
-	#print "[*] Parsing"
 	for plugin in ${EPISODER_PLUGINS[@]}; do
 		if [ ! -z "`match_$plugin $url`" ]; then
 			print v -e "\nUsing $plugin plugin to parse"
+			print -n "[*] Parsing "
 			parse_$plugin
+			print "Done."
 		else
 	    		print v -e "\nNot using $plugin plugin to parse"
 		fi
