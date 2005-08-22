@@ -19,7 +19,7 @@
 #
 # $Id$
 
-export EPISODER_VERSION=0.3.1
+export EPISODER_VERSION=0.3.x-CVS
 export EPISODER_HOME=/usr/share/episoder
 
 show_help() {
@@ -27,37 +27,36 @@ show_help() {
 	echo 
 	echo Valid options:
 	echo "	-h, --help	show this help"
-	echo "	-rc, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
+	echo "	-c, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
 	echo "	-v, --verbose	verbose operation (builddb only)"
-	echo "	-vv		very verbose operation (builddb only)"
+	echo "	-w		very verbose operation (builddb only)"
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
-	echo "	-nd, --nodate	ignore default cut-off date set in .episoder (with -d)"
+	echo "	    --nodate	ignore date"
 	echo "	-s [string]	string to search for"
-	echo "	-sa [string]	string to search for ignoring date"
-	echo "	-i, --nocase	case insensitive search (with -s or -sa)"
 	echo
 	echo Commands are:
 	echo "	builddb		rebuild the database"
-	echo "	showlist	show the list of upcoming episodes"
+	echo "	showlist	show the list of upcoming episodes (default)"
 }
 
 set_verbose() {
 	export VERBOSE=true
 }
+
 set_very_verbose() {
 	set_verbose
 	export VERY_VERBOSE=true
 	export WGET_ARGS="-v"
 }
-set_nocase() {
-	export NOCASE=true
-	export GREP_ARGS="-i"
-	export SED_ARGS="I"
-}
+
 set_nodate() {
 	export NODATE=true
+}
+
+show_version() {
+	echo episoder v$EPISODER_VERSION
 }
 
 parse_arguments() {
@@ -65,59 +64,48 @@ parse_arguments() {
 	EPISODER_RC_FILE=~/.episoder
 	NUM_DAYS=1
 	SEARCH_TEXT=""
-	SEARCHALL_TEXT=""
 	DATE_TEXT=""
+	COMMAND="showlist"
 
-	for arg in $*; do
-		if [ "$RC_FILE_NEXT" ]; then
-			EPISODER_RC_FILE=$arg
-			RC_FILE_NEXT=
-		elif [ "$NUMDAYS_NEXT" ]; then
-			NUM_DAYS=$arg
-			NUMDAYS_NEXT=
-		elif [ "$SEARCHTEXT_NEXT" ]; then
-			SEARCH_TEXT=$arg
-			SEARCHTEXT_NEXT=
-		elif [ "$SEARCHALLTEXT_NEXT" ]; then
-			SEARCHALL_TEXT=$arg
-			SEARCHALLTEXT_NEXT=
-		elif [ "$DATE_NEXT" ]; then
-			DATE_TEXT=$arg
-			DATE_NEXT=
-		elif [ "$arg" == "-rc" ]; then
-			RC_FILE_NEXT=true
-		elif [ "$arg" == "-n" ]; then
-			NUMDAYS_NEXT=true
-		elif [ "$arg" == "-s" ]; then
-			SEARCHTEXT_NEXT=true
-		elif [ "$arg" == "-sa" ]; then
-			SEARCHALLTEXT_NEXT=true
-		elif [ "$arg" == "-d" ]; then
-			DATE_NEXT=true
-		elif [ ! -z "`echo $arg | grep -- '--rc='`" ]; then
-			EPISODER_RC_FILE=`echo $arg | cut -d '=' -f 2`
-		elif [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then
-			show_help
-			exit 0
-		elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
-			set_verbose
-		elif [ "$arg" == "-i" ] || [ "$arg" == "--nocase" ]; then
-			set_nocase
-		elif [ "$arg" == "-nd" ] || [ "$arg" == "--nodate" ]; then
-			set_nodate
-		elif [ "$arg" == "-V" ] || [ "$arg" == "--version" ]; then
-			echo episoder v$EPISODER_VERSION
-			exit 0
-		else
-			COMMAND=$arg
-		fi
+	OPTS=`getopt -n $0 -o c:d:hin:s:vVw --long verbose,version,nd,nodate,nocase,help,rc:,vv,sa: -- "$@"`
+
+	eval set -- "$OPTS"
+
+	while true; do
+		case "$1" in
+			-h|--help) 
+				show_help ; exit 0 ; shift ;;
+			-c|--rc) 
+				EPISODER_RC_FILE=$2 ; shift 2 ;;
+			-v|--verbose)
+				set_verbose ; shift ;;
+			-w)
+				set_very_verbose ; shift ;;
+			-V|--version)
+				show_version ; exit 0 ; shift ;;
+			-n)
+				NUM_DAYS=$2 ; shift 2 ;;
+			-d)
+				DATE_TEXT=$2 ; shift 2 ;;
+			--nodate)
+				set_nodate ; shift ;;
+			-s)
+				SEARCH_TEXT=$2 ; shift 2 ;;
+			--)
+				shift ; break ;;
+			*) 
+				echo "Internal error!" ; exit 1 ;;
+		esac
 	done
+	if [ ! -z "$1" ]; then
+		COMMAND=$1
+	fi
 }
 
 validate_arguments() {
 	if [ -z "$COMMAND" ]; then show_help; exit 1; fi
 	if [ ! -f "$EPISODER_RC_FILE" ]; then
-		echo "Configuration file $EPISODER_RC_FILE does not exist / is not a regular file"
+		echo "$0: Configuration file $EPISODER_RC_FILE does not exist / is not a regular file"
 		exit 1
 	fi
 
@@ -128,23 +116,23 @@ validate_arguments() {
 	DEFAULT_DATE=`cat $EPISODER_RC_FILE | grep '^default_date=' | cut -b 14-`
 
 	if [ -z "$EPISODER_DATAFILE" ]; then
-		echo "No data file specified in configuration file"
+		echo "$0: No data file specified in configuration file"
 		exit 1
 	fi
 	if [ -z "$OUTPUT_FORMAT" ]; then
-        OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
-    fi
+		OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
+	fi
 	if [ $COMMAND = "builddb" ]; then
 		if [ -z "$DEFAULT_DATE" ]; then
 			if [ -z $DATE_TEXT ]; then
 				TODAY=`date +%Y-%m-%d`
-	    	    DATE_TEXT=$TODAY
+				DATE_TEXT=$TODAY
 			fi
 		else
 			if [ -z "$NODATE" ]; then
 				DATE_TEXT=$DEFAULT_DATE
 			fi
-    	fi
+		fi
 	fi
 }
 

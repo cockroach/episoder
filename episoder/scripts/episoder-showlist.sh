@@ -43,35 +43,34 @@ show_episode_list() {
 	if [ -z "$DATE_FORMAT" ]; then
 		DATE_FORMAT="%a, %b %d, %Y"
 	fi
-	
-	if [ -z "$SEARCHALL_TEXT" ]; then
 
+	if [ ! -z "$NODATE" ] && [ ! -z "$SEARCH_TEXT" ]; then
+		echo -ne ${color_gray}
+		grep -i "$SEARCH_TEXT" $EPISODER_DATAFILE | while read line; do
+			DATE=${line:0:10}
+			output=`echo $line | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/\`date +\"$DATE_FORMAT\" -d $DATE\`/" | sed -e "s/$SEARCH_TEXT/\\\\\E${color_green}\0\\\\\E${color_gray}/ig"`
+			echo -e $output
+		done
+	else
 		YESTERDAY=`get_date_by_offset -1`
 		TODAY=`get_date_by_offset 0`
 		TOMORROW=`get_date_by_offset 1`
 
 		echo -ne ${color_red}
-		grep "^$YESTERDAY" $EPISODER_DATAFILE | grep $GREP_ARGS "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $YESTERDAY`/"
+		grep "^$YESTERDAY" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $YESTERDAY`/"
 
 		echo -ne ${color_yellow}
-		grep "^$TODAY" $EPISODER_DATAFILE | grep $GREP_ARGS "$SEARCH_TEXT" | sed 's/.*/>\0</' | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TODAY`/"
+		grep "^$TODAY" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed 's/.*/>\0</' | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TODAY`/"
 
 		echo -ne ${color_green}	
-		grep "^$TOMORROW" $EPISODER_DATAFILE | grep $GREP_ARGS "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TOMORROW`/"
+		grep "^$TOMORROW" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TOMORROW`/"
 
 		echo -ne ${color_lightblue}
 		for ((day=2; day <= $NUM_DAYS; day++)); do
 			DATE=`get_date_by_offset $day`
-			grep "^$DATE" $EPISODER_DATAFILE | grep $GREP_ARGS "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $DATE`/"
+			grep "^$DATE" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $DATE`/"
 		done
 
-	else
-		echo -ne ${color_gray}	# color: Gray 
-		grep $GREP_ARGS "$SEARCHALL_TEXT" $EPISODER_DATAFILE | while read line; do
-			DATE=${line:0:10}
-			output=`echo $line | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/\`date +\"$DATE_FORMAT\" -d $DATE\`/" | sed -e "s/$SEARCHALL_TEXT/\\\\\E${color_green}\0\\\\\E${color_gray}/${SED_ARGS}g"`
-			echo -e $output
-		done
 	fi
 	echo -ne ${color_default}
 }

@@ -11,7 +11,7 @@ episoder is a tool to tell you about new episodes of your favourite TV shows
 .B \-h|\-\-help
 Show help and quit.
 .TP
-.B \-rc|\-\-rc\fR=\fIFILE
+.B \-c|\-\-rc \fIFILE\fR
 Use \fIFILE\fR for configuration values (default is ~/.episoder).
 .TP
 .B \-n [days]
@@ -20,7 +20,7 @@ Specify the number of future days to be shown by showlist (default: 1)
 .B \-v|--verbose
 Enable verbose operation (builddb only)
 .TP
-.B \-vv
+.B \-w
 Enable very verbose operation (builddb only)
 .TP
 .B \-V|\-\-version
@@ -29,14 +29,11 @@ Show program version and quit
 .B -d [YYYY-MM-DD]
 The date to begin search or update from (default: today)
 .TP
-.B \-nd|\-\-nodate
-Ignore default cut-off date set in the config file
+.B    \-\-nodate
+Ignore default cut-off date set in the config file (builddb) and ignore the date during search (showlist).
 .TP
 .B -s [string]
 String to search all future episodes for
-.TP
-.B -sa [string]
-String to search all episodes for, ignoring date
 .TP
 .B -i, --nocase
 Case insensitive search (with -s or -sa)
