@@ -19,7 +19,7 @@
 #
 # $Id$
 
-export EPISODER_VERSION=0.2.4
+export EPISODER_VERSION=0.3.1
 export EPISODER_HOME=/usr/share/episoder
 
 show_help() {
