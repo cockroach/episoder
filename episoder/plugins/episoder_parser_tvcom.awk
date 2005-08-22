@@ -54,11 +54,11 @@
 	epdate = ""
 }
 
-END { 
+END {
 	if (VERBOSE == "true") {
-	if (dropped == 0) { dropped="0" }
-	if (kept == 0) { kept="0" }
-		printf "Keeping %s.  Dropping %s.  ",kept,dropped
+		if (dropped == 0) { dropped="0" }
+		if (kept == 0) { kept="0" }
+		printf "Kept %s, dropped %s. ",kept,dropped
 	}
 }
 
