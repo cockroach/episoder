@@ -53,6 +53,7 @@
 	prodnum = ""
 	epdate = ""
 }
+
 END { 
 	if (VERBOSE == "true") {
 	if (dropped == 0) { dropped="0" }
@@ -60,11 +61,7 @@ END {
 		printf "Keeping %s.  Dropping %s.  ",kept,dropped
 	}
 }
-	
 
-function printout(string){
-
-}
 function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 	output = format
 	command = "date +%Y-%m-%d -d " epdate
