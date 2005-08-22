@@ -8,6 +8,7 @@ v0.4.0 (someday)
    below)
  * Search is now alway case-insensitive
  * If no action is specified, episoder now defaults to showlist
+ * Removed the tvtome dummy plugin
 
 v0.3.0 (9 Aug 2005)
 ===================
