@@ -23,22 +23,23 @@ export EPISODER_VERSION=0.3.x-CVS
 export EPISODER_HOME=/usr/share/episoder
 
 show_help() {
-	echo Usage: $0 [options] command
+	echo Usage: $0 [options] 
 	echo 
 	echo Valid options:
 	echo "	-h, --help	show this help"
 	echo "	-c, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
-	echo "	-v, --verbose	verbose operation (builddb only)"
-	echo "	-w		very verbose operation (builddb only)"
+	echo "	-b		build the database"
+	echo "	-v, --verbose	verbose operation (-b only)"
+	echo "	-w		very verbose operation (-b only)"
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
 	echo "	    --nodate	ignore date"
 	echo "	-s [string]	string to search for"
-	echo
-	echo Commands are:
-	echo "	builddb		rebuild the database"
-	echo "	showlist	show the list of upcoming episodes (default)"
+#	echo
+#	echo Commands are:
+#	echo "	builddb		rebuild the database"
+#	echo "	showlist	show the list of upcoming episodes (default)"
 }
 
 set_verbose() {
@@ -58,8 +59,10 @@ set_nodate() {
 show_version() {
 	echo episoder v$EPISODER_VERSION
 }
+set_builddb() {
+	COMMAND=builddb
+}
 
-parse_arguments() {
 	# set some default values
 	EPISODER_RC_FILE=~/.episoder
 	NUM_DAYS=1
@@ -67,11 +70,11 @@ parse_arguments() {
 	DATE_TEXT=""
 	COMMAND="showlist"
 
-	OPTS=`getopt -n $0 -o c:d:hin:s:vVw --long verbose,version,nd,nodate,nocase,help,rc:,vv,sa: -- "$@"`
+	OPTS=`getopt -o c:d:hin:s:vVwb --long verbose,version,nd,nodate,nocase,help,rc:,vv,sa: -n $0 -- "$@"`
 
 	eval set -- "$OPTS"
 
-	while true; do
+	while true ; do
 		case "$1" in
 			-h|--help) 
 				show_help ; exit 0 ; shift ;;
@@ -91,6 +94,8 @@ parse_arguments() {
 				set_nodate ; shift ;;
 			-s)
 				SEARCH_TEXT=$2 ; shift 2 ;;
+			-b)
+				set_builddb ; shift ;;
 			--)
 				shift ; break ;;
 			*) 
@@ -100,9 +105,7 @@ parse_arguments() {
 	if [ ! -z "$1" ]; then
 		COMMAND=$1
 	fi
-}
 
-validate_arguments() {
 	if [ -z "$COMMAND" ]; then show_help; exit 1; fi
 	if [ ! -f "$EPISODER_RC_FILE" ]; then
 		echo "$0: Configuration file $EPISODER_RC_FILE does not exist / is not a regular file"
@@ -134,10 +137,8 @@ validate_arguments() {
 			fi
 		fi
 	fi
-}
 
-parse_arguments $*
-validate_arguments
+
 
 case "$COMMAND" in
 	builddb)
