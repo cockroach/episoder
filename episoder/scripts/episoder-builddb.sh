@@ -62,10 +62,20 @@ get_episodes() {
 	print "[*] Getting episodes"
 	for url in `cat ~/.episoder | grep '^src=' | cut -b 5-`; do
 		print -n "[*] Downloading"
-		wget -U "$WGET_USER_AGENT" $url -O $WGETFILE $WGET_ARGS
+		wget -U "$WGET_USER_AGENT" "$url" -O $WGETFILE $WGET_ARGS
+		EXIT_STATUS=$?
 		print -ne "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
-		parse
-		rm -f $WGETFILE
+		if [ "$EXIT_STATUS" -eq 0 ]; then
+			parse
+			rm -f $WGETFILE
+		else
+			color_red='\E[31;1m'
+			echo -ne ${color_red}
+			print "Download failed. $url"
+			color_default='\E[30;0m'
+			echo -ne ${color_default}
+		fi
+		
 	done
 }
 

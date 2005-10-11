@@ -49,7 +49,7 @@ set_verbose() {
 set_very_verbose() {
 	set_verbose
 	export VERY_VERBOSE=true
-	export WGET_ARGS="-v"
+	export WGET_ARGS="-v -t 5 --retry-connrefused "
 }
 
 set_nodate() {
