@@ -70,10 +70,10 @@ get_episodes() {
 			rm -f $WGETFILE
 		else
 			color_red='\E[31;1m'
-			echo -ne ${color_red}
+			print -ne ${color_red}
 			print "Download failed. $url"
 			color_default='\E[30;0m'
-			echo -ne ${color_default}
+			print -ne ${color_default}
 		fi
 		
 	done
