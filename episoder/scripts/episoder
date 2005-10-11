@@ -19,7 +19,7 @@
 #
 # $Id$
 
-export EPISODER_VERSION=0.3.x-CVS
+export EPISODER_VERSION=0.4.0
 export EPISODER_HOME=/usr/share/episoder
 
 show_help() {
@@ -36,10 +36,6 @@ show_help() {
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
 	echo "	    --nodate	ignore date"
 	echo "	-s [string]	string to search for"
-#	echo
-#	echo Commands are:
-#	echo "	builddb		rebuild the database"
-#	echo "	showlist	show the list of upcoming episodes (default)"
 }
 
 set_verbose() {
