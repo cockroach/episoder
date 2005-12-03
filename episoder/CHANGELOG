@@ -1,7 +1,7 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
-v0.4.0 (someday)
+v0.4.0 (3 Dec 2005)
 ===================
  * Re-organized options: -vv is now -w, -rc is now -c (or --rc), -nd is gone
    (use --nodate), -sa is gone (use -s and --nodate instead), -i is gone (see
