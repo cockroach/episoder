@@ -3,7 +3,8 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 
 v0.4.1 (some day)
 ===================
- * Did some minor internal changes to get episoder to work on solaris
+ * Did some minor internal changes to get episoder to work on non-linux systems
+ * Removed long options
 
 v0.4.0 (3 Dec 2005)
 ===================
