@@ -19,8 +19,8 @@
 #
 # $Id$
 
-export EPISODER_VERSION=0.4.0
-export EPISODER_HOME=/usr/share/episoder
+EPISODER_VERSION=0.4.0
+EPISODER_HOME=/usr/share/episoder
 
 show_help() {
 	echo Usage: $0 [options] 
