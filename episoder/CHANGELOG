@@ -1,6 +1,10 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.1 (some day)
+===================
+ * Did some minor internal changes to get episoder to work on solaris
+
 v0.4.0 (3 Dec 2005)
 ===================
  * Re-organized options: -vv is now -w, -rc is now -c (or --rc), -nd is gone

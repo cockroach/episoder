@@ -34,7 +34,7 @@ show_help() {
 	echo "	-V, --version	get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
-	echo "	    --nodate	ignore date"
+	echo "	-i  --nodate	ignore date"
 	echo "	-s [string]	string to search for"
 }
 
@@ -55,8 +55,22 @@ set_nodate() {
 show_version() {
 	echo episoder v$EPISODER_VERSION
 }
+
 set_builddb() {
 	COMMAND=builddb
+}
+
+episoder_dump() {
+	echo "Config file = ${EPISODER_RC_FILE}"
+	echo "Command = ${COMMAND}"
+	echo "Days = ${NUM_DAYS}"
+	echo "Episoder version = ${EPISODER_VERSION}"
+	echo "Ignore date = ${NODATE}"
+	echo "Search text = ${SEARCH_TEXT}"
+	echo "Startdate = ${DATE_TEXT}"
+	echo "Wget arguments = ${WGET_ARGS}"
+	echo "Verbose = ${VERBOSE}"
+	echo "Very verbose = ${VERY_VERBOSE}"
 }
 
 	# set some default values
@@ -66,43 +80,41 @@ set_builddb() {
 	DATE_TEXT=""
 	COMMAND="showlist"
 
-	OPTS=`getopt -o c:d:hin:s:vVwb --long verbose,version,nd,nodate,nocase,help,rc:,vv,sa: -n $0 -- "$@"`
-
-	eval set -- "$OPTS"
-
-	while true ; do
-		case "$1" in
-			-h|--help) 
-				show_help ; exit 0 ; shift ;;
-			-c|--rc) 
-				EPISODER_RC_FILE=$2 ; shift 2 ;;
-			-v|--verbose)
-				set_verbose ; shift ;;
-			-w)
-				set_very_verbose ; shift ;;
-			-V|--version)
-				show_version ; exit 0 ; shift ;;
-			-n)
-				NUM_DAYS=$2 ; shift 2 ;;
-			-d)
-				DATE_TEXT=$2 ; shift 2 ;;
-			--nodate)
-				set_nodate ; shift ;;
-			-s)
-				SEARCH_TEXT=$2 ; shift 2 ;;
-			-b)
-				set_builddb ; shift ;;
-			--)
-				shift ; break ;;
-			*) 
-				echo "Internal error!" ; exit 1 ;;
+	while getopts  "c:d:hin:s:vVwb" flag ; do
+		case "$flag" in
+			h)
+				show_help ; exit 0 ;;
+			c)
+				EPISODER_RC_FILE=$OPTARG ;;
+			v)
+				set_verbose ;;
+			w)
+				set_very_verbose ;;
+			V)
+				show_version ; exit 0 ;;
+			n)
+				NUM_DAYS=$OPTARG ;;
+			d)
+				DATE_TEXT=$OPTARG ;;
+			i)
+				set_nodate ;;
+			s)
+				SEARCH_TEXT=$OPTARG ;;
+			b)
+				set_builddb ;;
+			*)
+				show_help ; exit 1 ;;
 		esac
 	done
+
+	shift $((OPTIND-1))
+
 	if [ ! -z "$1" ]; then
 		COMMAND=$1
 	fi
 
 	if [ -z "$COMMAND" ]; then show_help; exit 1; fi
+
 	if [ ! -f "$EPISODER_RC_FILE" ]; then
 		echo "$0: Configuration file $EPISODER_RC_FILE does not exist / is not a regular file"
 		exit 1
@@ -144,6 +156,9 @@ case "$COMMAND" in
 	showlist)
 		. $EPISODER_HOME/episoder-showlist.sh
 		show_episode_list
+		;;
+	dump)
+		episoder_dump
 		;;
 	*)
 		show_help
