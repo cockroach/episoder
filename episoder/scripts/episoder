@@ -60,7 +60,7 @@ set_builddb() {
 }
 
 	# set some default values
-	EPISODER_RC_FILE=~/.episoder
+	EPISODER_RC_FILE=${HOME}/.episoder
 	NUM_DAYS=1
 	SEARCH_TEXT=""
 	DATE_TEXT=""
