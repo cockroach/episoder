@@ -1,5 +1,12 @@
-/<h3 class="pl-5">All Seasons<\/h3>/ { parse = "true" }
-/<div class="gray-box pod cb ml-10 mb-10 f-bold f-med-gray f-12">/ { parse = "false" }
+/<span class="f-18 f-bold">All Seasons<\/span>/ {
+	parse = "true"
+	season = 0
+}
+/<span class="f-18 f-bold">Season .*<\/span>/ {
+	parse = "true"
+	season = substr($0, 38, index($0, "</span>") - 38)
+}
+/<\/div id="main-col">/ { parse = "false" }
 /<title>.*Episode List/ {
 	start = index($0, "<title>") + 7
 	end = index($0, " Episode List") - start
@@ -10,48 +17,68 @@
 	if (VERY_VERBOSE == "true") {
 		printf "\n"
 	}
-	
 }
 /^ *[a-zA-Z0-9]+: *$/ {
 	if (parse == "true") {
 		epnum = substr($1,1,index($1,":")-1)
 	}
 }
-/&nbsp;<\/strong>/ { 
-	eptitle = substr($0, 22, index($0, "&nbsp;</strong>") - 22)
+/summary.html">/ {
+	if (parse == "true") {
+		start = index($0, "summary.html") + 14
+		end = index($0, "</a>") - start
+		eptitle = substr($0, start, end)
+	}
 }
 /[0-9]\/[0-9][0-9]*\/[0-9]*$/ {
 	epdate = $1
 }
-/[-_a-zA-Z0-9] *<\/td>$/ {
-	# assuming the prod# never contains spaces
-	prodnum = $1
-}
-/([0-9] - [0-9])/ {
-	episode = substr($0, 121, index($0, "</td>") - 121)
-	split(episode, fields, / - /)
-	season = fields[1]
-	episode = fields[2]
-	if (episode < 10) episode = 0 episode
-
-	if (epdate != "0/0/0") {
-		show_episode(show,epnum,season,episode,prodnum,epdate,eptitle)
-		if (VERBOSE == "true") {
-			kept++
-		}
-		if (VERY_VERBOSE == "true") {
-			printf "Keeping %s %sx%s - %s\n",show,season,episode,eptitle
-		}
-	} else {
-		if (VERBOSE == "true") {
-			dropped++
-		}
-		if (VERY_VERBOSE == "true") {
-			printf "Dropping %s %sx%s - %s\n",show,season,episode,eptitle
-		}
+/ *[-_a-zA-Z0-9]$/ {
+	if (prodnum_coming == "true") {
+		# assuming the prod# never contains spaces
+		prodnum = $1
+		prodnum_coming = "false"
 	}
-	prodnum = ""
-	epdate = ""
+}
+/[a-zA-Z0-9]$/ {
+	if (epnum_coming == "true") {
+		totalep = $1
+		if (! firstep) {
+			firstep = totalep
+		}
+		if (season == 0) {
+			epnum = 0
+		} else {
+			epnum = totalep - firstep
+			if (epnum < 10) epnum = 0 epnum
+		}
+		epnum_coming = "false"
+
+		if (epdate != "0/0/0") {
+			show_episode(show,totalep,season,epnum,prodnum,epdate,eptitle)
+			if (VERBOSE == "true") {
+				kept++
+			}
+			if (VERY_VERBOSE == "true") {
+				printf "Keeping %s %sx%s - %s\n",show,season,episode,eptitle
+			}
+		} else {
+			if (VERBOSE == "true") {
+				dropped++
+			}
+			if (VERY_VERBOSE == "true") {
+				printf "Dropping %s %sx%s - %s\n",show,season,episode,eptitle
+			}
+		}
+		prodnum = ""
+		epdate = ""
+	}
+}
+/<td class="f-666 f-11 ta-c" style="width:1%;">/ {
+	prodnum_coming = "true"
+}
+/<td class="first f-bold ta-c" style="width:1%;" nowrap="nowrap">/ {
+	epnum_coming = "true"
 }
 
 END {
@@ -75,5 +102,6 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 	gsub("%prodnum", prodnum, output)
 	gsub("%airdate", airdate, output)
 	gsub("%eptitle", eptitle, output)
-	print output >> TMPFILE
+	print output
+	# print output >> TMPFILE
 }

@@ -19,11 +19,6 @@
 # $Id$
 
 parse_tvcom() {
-	MATCH=`echo $url | grep '&season=0'`
-	if [ -z "`echo $url | grep '&season=0'`" ]; then 
-		echo "ERROR: Please make sure your url points to the 'all seasons' page (season=0)" >&2
-		exit 1
-	fi
 	awk -f $EPISODER_HOME/episoder_parser_tvcom.awk format="$OUTPUT_FORMAT" TMPFILE="$TMPFILE" VERBOSE="$VERBOSE" VERY_VERBOSE="$VERY_VERBOSE" $WGETFILE 
 }
 
