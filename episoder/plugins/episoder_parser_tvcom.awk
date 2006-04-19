@@ -18,11 +18,6 @@
 		printf "\n"
 	}
 }
-/^ *[a-zA-Z0-9]+: *$/ {
-	if (parse == "true") {
-		epnum = substr($1,1,index($1,":")-1)
-	}
-}
 /summary.html">/ {
 	if (parse == "true") {
 		start = index($0, "summary.html") + 14
@@ -49,11 +44,14 @@
 		if (season == 0) {
 			epnum = 0
 		} else {
-			epnum = totalep - firstep
+			epnum = totalep - (firstep - 1)
 			if (epnum < 10) epnum = 0 epnum
 		}
 		epnum_coming = "false"
-
+	}
+}
+/ *<.tr>$/ {
+	if (parse == "true" && epnum != "") {
 		if (epdate != "0/0/0") {
 			show_episode(show,totalep,season,epnum,prodnum,epdate,eptitle)
 			if (VERBOSE == "true") {
@@ -72,7 +70,12 @@
 		}
 		prodnum = ""
 		epdate = ""
+		epnum = ""
 	}
+}
+/^ *$/ {
+	prodnum_coming = "false"
+	epnum_coming = "false"
 }
 /<td class="f-666 f-11 ta-c" style="width:1%;">/ {
 	prodnum_coming = "true"
@@ -102,6 +105,5 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 	gsub("%prodnum", prodnum, output)
 	gsub("%airdate", airdate, output)
 	gsub("%eptitle", eptitle, output)
-	print output
-	# print output >> TMPFILE
+	print output >> TMPFILE
 }
