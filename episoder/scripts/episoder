@@ -1,7 +1,7 @@
 #!/bin/bash
 # episoder, http://episoder.sourceforge.net/
 #
-# Copyright (c) 2004, 2005 Stefan Ott. All rights reserved.
+# Copyright (c) 2004-2006 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -26,15 +26,15 @@ show_help() {
 	echo Usage: $0 [options] 
 	echo 
 	echo Valid options:
-	echo "	-h, --help	show this help"
-	echo "	-c, --rc=FILE	use configuration from FILE (default: ~/.episoder)"
+	echo "	-h		show this help"
+	echo "	-c FILE		use configuration from FILE (default: ~/.episoder)"
 	echo "	-b		build the database"
-	echo "	-v, --verbose	verbose operation (-b only)"
+	echo "	-v		verbose operation (-b only)"
 	echo "	-w		very verbose operation (-b only)"
-	echo "	-V, --version	get version information"
+	echo "	-V		get version information"
 	echo "	-n [days]	number of future days to show (default: 1)"
 	echo "	-d [YYYY-MM-DD]	date to begin search or update from"
-	echo "	-i  --nodate	ignore date"
+	echo "	-i		ignore date"
 	echo "	-s [string]	string to search for"
 }
 
@@ -79,6 +79,7 @@ episoder_dump() {
 	SEARCH_TEXT=""
 	DATE_TEXT=""
 	COMMAND="showlist"
+	WGET="wget"
 
 	while getopts  "c:d:hin:s:vVwb" flag ; do
 		case "$flag" in
