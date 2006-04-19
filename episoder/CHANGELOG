@@ -1,10 +1,11 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
-v0.4.1 (some day)
-===================
+v0.4.1 (19 Apr 2006)
+====================
  * Did some minor internal changes to get episoder to work on non-linux systems
  * Removed long options
+ * Hotfix for the tv.com website changes
 
 v0.4.0 (3 Dec 2005)
 ===================
