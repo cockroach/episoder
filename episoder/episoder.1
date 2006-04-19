@@ -4,47 +4,39 @@ episoder \- TV show episode reminder.
 .SH SYNOPSIS
 .B episoder
 [options]
-.B COMMAND
 .SH DESCRIPTION
 episoder is a tool to tell you about new episodes of your favourite TV shows
 .SH OPTIONS
-.B \-h|\-\-help
+.TP
+.B \-h
 Show help and quit.
 .TP
-.B \-c|\-\-rc \fIFILE\fR
+.B \-c \fIFILE\fR
 Use \fIFILE\fR for configuration values (default is ~/.episoder).
 .TP
-.B \-n [days]
-Specify the number of future days to be shown by showlist (default: 1)
+.B \-b
+(Re)build episoder's database
 .TP
-.B \-v|--verbose
+.B \-v
 Enable verbose operation (builddb only)
 .TP
 .B \-w
 Enable very verbose operation (builddb only)
 .TP
-.B \-V|\-\-version
+.B \-V
 Show program version and quit
+.TP
+.B \-n [days]
+Specify the number of future days to be shown by showlist (default: 1)
 .TP
 .B -d [YYYY-MM-DD]
 The date to begin search or update from (default: today)
 .TP
-.B    \-\-nodate
+.B -i
 Ignore default cut-off date set in the config file (builddb) and ignore the date during search (showlist).
 .TP
 .B -s [string]
 String to search all future episodes for
-.TP
-.B -i, --nocase
-Case insensitive search (with -s or -sa)
-.SH COMMANDS
-.LP
-.TP
-.B builddb
-Rebuild the database
-.TP
-.B showlist
-Show the list of upcoming episodes
 .SH PLUGINS
 .LP
 episoder uses a set of plugins to parse the source files. The plugins are called
