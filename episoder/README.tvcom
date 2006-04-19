@@ -3,3 +3,18 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 
 STATE OF THE TV.COM PLUGIN
 --------------------------
+
+(2006-04-19)
+
+A few days ago, tv.com reorganized their website. The new version does not
+contain the season numbers on the "All seasons" page anymore, thus episoder
+can't figure it out.
+
+Your options are to either keep using the "All seasons" page, in which case
+you'll just have to live without season and episode-in-season information.
+The other option is to use a specific season's page (a "season=x" url) which
+episoder can parse properly. The downside of this solution is that you'll
+have to periodically update your config file and point your sources to the
+current season.
+
+A future version of episoder will get rid of this limitation.
