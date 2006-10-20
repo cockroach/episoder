@@ -60,7 +60,7 @@ remove_old_episodes() {
 
 get_episodes() {
 	print "[*] Getting episodes"
-	for url in `cat ~/.episoder | grep '^src=' | cut -b 5-`; do
+	for url in `cat $EPISODER_RC_FILE | grep '^src=' | cut -b 5-`; do
 		print -n "[*] Downloading"
 		wget -U "$WGET_USER_AGENT" "$url" -O $WGETFILE $WGET_ARGS
 		EXIT_STATUS=$?
@@ -71,7 +71,7 @@ get_episodes() {
 		else
 			color_red='\E[31;1m'
 			print -ne ${color_red}
-			print "Download failed. $url"
+			print -e "\nDownload failed: $url"
 			color_default='\E[30;0m'
 			print -ne ${color_default}
 		fi
@@ -125,9 +125,9 @@ write_episodes() {
 build_db() {
 	print "[*] Building DB"
 	print "[*] Starting on ${DATE_TEXT}"
-	
+
 	if [ -z "$WGET_ARGS" ]; then WGET_ARGS="-q"; fi
-    
+
 	load_plugins
 	open_tmpfiles
 	get_episodes

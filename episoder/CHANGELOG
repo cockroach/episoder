@@ -1,6 +1,11 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.2 (21 Oct 2006)
+====================
+ * Don't ignore the config file passed with -c anymore when building the db
+ * Added parser for epguides.com (closes #38)
+
 v0.4.1 (20 Apr 2006)
 ====================
  * Did some minor internal changes to get episoder to work on non-linux systems
