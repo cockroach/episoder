@@ -6,19 +6,30 @@
 
 	titleEnd = index($0, "(a Titles ");
 
-	show = substr($0, titleStart, titleEnd - titleStart - 1);
+	set_show(substr($0, titleStart, titleEnd - titleStart - 1));
 }
 
 /^<meta name="description"/ {
 	start = index($0, "of the TV series") + 17;
 	end = index($0, ".\"");
-	show = substr($0, start, end - start)
+	set_show(substr($0, start, end - start));
 }
 
 /^<META NAME="description"/ {
 	start = index($0, "of the TV series") + 17;
 	end = index($0, ".\"");
-	show = substr($0, start, end - start)
+	set_show(substr($0, start, end - start));
+}
+
+function set_show(showName) {
+	show = showName
+
+	if (VERBOSE == "true") {
+		printf " %s...", show
+	}
+	if (VERY_VERBOSE == "true") {
+		printf "\n"
+	}
 }
 
 /^Season/ {
