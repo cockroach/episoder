@@ -1,7 +1,7 @@
 #!/bin/sh
 # episoder test suite, http://episoder.sourceforge.net/
 #
-# Copyright (c) 2005 Stefan Ott. All rights reserved.
+# Copyright (c) 2005/2006 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -80,6 +80,9 @@ test_parse_tvcom_run() {
 		echo "The tvcom plugin's output is wrong at file #${FILENO}:"
 		diff $TMPFILE data/tvcom.output${FILENO}
 	fi
+	echo .
+	echo "$1 done - <enter> to continue"
+	read
 }
 
 test_parse_tvcom() {
@@ -87,7 +90,7 @@ test_parse_tvcom() {
 
 	. ../plugins/episoder_plugin_tvcom.sh
 	
-	url='&season=0'
+	#url='&season=0'
 	EPISODER_HOME=../plugins
 	OUTPUT_FORMAT="%airdate %show %seasonx%epnum: %eptitle [%prodnum] (%totalep)"
 
@@ -97,8 +100,62 @@ test_parse_tvcom() {
 	done
 }
 
+test_tvcom_multi() {
+	. ../plugins/episoder_plugin_tvcom.sh
+
+	EPISODER_HOME=../plugins
+	WGET="touch"
+
+	base="/tmp/episoder-tvcom-multi"
+	url="$base?season=2"
+	tvcom_get_files
+
+	url="$base&season=2"
+	tvcom_get_files
+
+	url="$base?season=0"
+	tvcom_get_files
+
+	url="$base"
+	tvcom_get_files
+}
+
+test_parse_epguides_run() {
+	FILENO=$1
+
+	echo -n .
+	clear_files
+	bzip2 -dc data/epguides.sample${FILENO}.bz2 > $UNZIP_FILE
+	WGETFILE=$UNZIP_FILE
+
+	parse_epguides
+
+	if [ ! -z "`diff $TMPFILE data/epguides.output${FILENO}`" ]; then
+		echo "The epguide plugin's output is wrong at file #${FILENO}:"
+		diff $TMPFILE data/epguides.output${FILENO}
+	fi
+	echo -n .
+}
+
+test_parse_epguides() {
+	echo -n .
+
+	. ../plugins/episoder_plugin_epguides.sh
+
+	EPISODER_HOME=../plugins
+	OUTPUT_FORMAT="%airdate %show %seasonx%epnum: %eptitle (%totalep)"
+	
+	for file in data/epguides.sample*bz2; do
+		num=`echo $file | sed -r 's/.*sample(.*)\.bz2/\1/'`
+		test_parse_epguides_run $num
+	done
+}
+
+
 set_up
-test_remove_old_episodes
-test_parse_tvcom
+#test_remove_old_episodes
+#test_parse_tvcom
+#test_tvcom_multi
+test_parse_epguides
 tear_down
 echo .

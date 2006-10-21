@@ -4,14 +4,20 @@
 	titleStart = index($0, "<title>") + 8;
 	titlePart = substr($0, titleStart);
 
-	titleEnd = index($0, "(a Titles and Air Dates Guide");
+	titleEnd = index($0, "(a Titles ");
 
 	show = substr($0, titleStart, titleEnd - titleStart - 1);
 }
 
+/^<meta name="description"/ {
+	start = index($0, "of the TV series") + 17;
+	end = index($0, ".\"");
+	show = substr($0, start, end - start)
+}
+
 /^<META NAME="description"/ {
 	start = index($0, "of the TV series") + 17;
-	end = index($0, ".\">");
+	end = index($0, ".\"");
 	show = substr($0, start, end - start)
 }
 
@@ -33,6 +39,10 @@
 	eptitle = substr(epnameHTML, fooIndex + 1, length(epnameHTML) - fooIndex - 4)
 	
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
+}
+
+BEGIN {
+	IGNORECASE = 1
 }
 
 END {
