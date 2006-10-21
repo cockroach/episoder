@@ -153,7 +153,7 @@ test_parse_epguides() {
 
 
 set_up
-#test_remove_old_episodes
+test_remove_old_episodes
 #test_parse_tvcom
 #test_tvcom_multi
 test_parse_epguides
