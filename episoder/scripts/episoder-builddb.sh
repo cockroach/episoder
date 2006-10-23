@@ -60,13 +60,20 @@ remove_old_episodes() {
 
 get_episodes() {
 	print "[*] Getting episodes"
-	for url in `cat $EPISODER_RC_FILE | grep '^src=' | cut -b 5-`; do
+	cat $EPISODER_RC_FILE | grep '^src=' | while read line; do
+		url=`echo $line | cut -b 5- | cut -d ' ' -f 1`
+		if [ ! -z "`echo $line | grep 'name='`" ]; then
+			name=`echo $line | sed "s/src=.* name=\(.*\)/\1/"`
+			print "[*] Overriding next source's name with \"$name\""
+		else
+			name=''
+		fi
 		print -n "[*] Downloading"
 		wget -U "$WGET_USER_AGENT" "$url" -O $WGETFILE $WGET_ARGS
 		EXIT_STATUS=$?
 		print -ne "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
 		if [ "$EXIT_STATUS" -eq 0 ]; then
-			parse
+			parse ${name/ /_}
 			rm -f $WGETFILE
 		else
 			color_red='\E[31;1m'
@@ -80,6 +87,8 @@ get_episodes() {
 }
 
 parse() {
+	nameOverride=$1
+
 	for plugin in ${EPISODER_PLUGINS[@]}; do
 		if [ ! -z "`match_$plugin $url`" ]; then
 			print v -e "\nUsing $plugin plugin to parse"
@@ -131,7 +140,7 @@ build_db() {
 	load_plugins
 	open_tmpfiles
 	get_episodes
-	remove_old_episodes
+	if [ ! -z "$NODATE" ]; then remove_old_episodes; fi
 	sort_tmpfile
 	write_episodes
 	destroy_tmpfiles

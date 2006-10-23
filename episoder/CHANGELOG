@@ -1,6 +1,14 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.3 (xx xxx 2006)
+====================
+ * We now actually honor the -i option when building the database
+ * Added the possibility to override a show's name in the config file
+ * Oops, forgot to update episoder's version number in the last release...
+ * Fixed a bug in the new epguides.com parser which would not drop episodes
+   without a date
+
 v0.4.2 (21 Oct 2006)
 ====================
  * Don't ignore the config file passed with -c anymore when building the db

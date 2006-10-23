@@ -22,7 +22,11 @@
 }
 
 function set_show(showName) {
-	show = showName
+	if (SHOW_NAME == "") {
+		show = showName
+	} else {
+		show = SHOW_NAME
+	}
 
 	if (VERBOSE == "true") {
 		printf " %s...", show
@@ -45,6 +49,7 @@ function set_show(showName) {
 
 	prodnum = substr($0, 16, 9)
 	epdate = substr($0, 28, 10)
+	gsub (/ *$/, "", epdate)
 	epnameHTML = substr($0, 40)
 	fooIndex = index(epnameHTML, ">")
 	eptitle = substr(epnameHTML, fooIndex + 1, length(epnameHTML) - fooIndex - 4)
@@ -65,6 +70,10 @@ END {
 }
 
 function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
+	if (epdate == "") {
+		dropped++
+		return
+	}
 	output = format
 	command = "date +%Y-%m-%d -d '" epdate "'"
 	command | getline airdate

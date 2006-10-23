@@ -67,6 +67,10 @@ Specifies the file to be used to store the information about upcoming shows.
 Each src entry specifies a URL with episode information. Make sure you have the
 appropriate plugin before adding random new URLs (See \fBPLUGINS\fR).
 .TP
+.B src=http://some.web.add/ress name=some name
+Optionally you can specify a name to use for your show instead of the one extracted from the website.
+Be aware, however, that currently all spaces in the name you supply will be substituted by underscores.
+.TP
 .B format=unquoted format string
 This allows you to customize episoder's output. Available fields are:
 .PP

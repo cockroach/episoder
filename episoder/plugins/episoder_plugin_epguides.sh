@@ -19,7 +19,12 @@
 # $Id$
 
 parse_epguides() {
-	awk -f $EPISODER_HOME/episoder_parser_epguides.awk format="$OUTPUT_FORMAT" TMPFILE="$TMPFILE" VERBOSE="$VERBOSE" VERY_VERBOSE="$VERY_VERBOSE" $WGETFILE 
+	if [ ! -z "$nameOverride" ]; then
+		EXTRA="SHOW_NAME=${nameOverride}"
+	else
+		EXTRA=''
+	fi
+	awk -f $EPISODER_HOME/episoder_parser_epguides.awk format="$OUTPUT_FORMAT" TMPFILE="$TMPFILE" VERBOSE="$VERBOSE" VERY_VERBOSE="$VERY_VERBOSE" $EXTRA $WGETFILE 
 }
 
 match_epguides() {
