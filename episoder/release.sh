@@ -23,7 +23,8 @@ cp episoder-$VERSION.tar.gz tgz
 mv episoder-$VERSION.tar.gz episoder_$VERSION.orig.tar.gz
 
 cd episoder-$VERSION
-cp -r ../../../episoder-debian-files/debian .
+mkdir debian
+cp -r ../../../episoder-debian-files/* debian
 rm -rf debian/CVS
 debuild -kF01DFE92
 

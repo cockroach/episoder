@@ -1,6 +1,11 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.4 (19 Nov 2006)
+====================
+ * Fixed the -i option when building the database (did the exact opposite of
+   what it was supposed to do)
+
 v0.4.3 (24 Oct 2006)
 ====================
  * We now actually honor the -i option when building the database

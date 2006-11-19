@@ -140,7 +140,7 @@ build_db() {
 	load_plugins
 	open_tmpfiles
 	get_episodes
-	if [ ! -z "$NODATE" ]; then remove_old_episodes; fi
+	if [ -z "$NODATE" ]; then remove_old_episodes; fi
 	sort_tmpfile
 	write_episodes
 	destroy_tmpfiles
