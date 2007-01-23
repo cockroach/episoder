@@ -1,6 +1,10 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.5 (xx Jan 2007)
+====================
+ * Fixed an epguides parser issue concerning season numbers
+
 v0.4.4 (19 Nov 2006)
 ====================
  * Fixed the -i option when building the database (did the exact opposite of

@@ -37,7 +37,7 @@ function set_show(showName) {
 }
 
 /^Season/ {
-	season = $2
+	season = strtonum($2)
 }
 
 /^ *[0-9]+\./ {
