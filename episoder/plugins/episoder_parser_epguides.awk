@@ -53,6 +53,7 @@ function set_show(showName) {
 	epnameHTML = substr($0, 40)
 	fooIndex = index(epnameHTML, ">")
 	eptitle = substr(epnameHTML, fooIndex + 1, length(epnameHTML) - fooIndex - 4)
+	gsub (/<$/, "", eptitle);
 	
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
