@@ -1,6 +1,12 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.6 (24 Feb 2007)
+====================
+ * Discovered yet another formatting possibility on epguides.com (used for
+   instance for the show "Midsomer Murders") and adapted the parser accordingly
+ * Slightly updated the man page
+
 v0.4.5 (23 Jan 2007)
 ====================
  * Fixed some epguides parser issues

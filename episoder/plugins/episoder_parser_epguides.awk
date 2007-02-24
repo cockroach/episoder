@@ -29,16 +29,9 @@
 	set_show(substr($0, titleStart, titleEnd - titleStart - 1));
 }
 
-/^<meta name="description"/ {
-	start = index($0, "of the TV series") + 17;
-	end = index($0, ".\"");
-	set_show(substr($0, start, end - start));
-}
-
-/^<META NAME="description"/ {
-	start = index($0, "of the TV series") + 17;
-	end = index($0, ".\"");
-	set_show(substr($0, start, end - start));
+/^<h1>/ {
+	match ($0, /<h1><a href=\".*\">(.*)<\/a><\/h1>/, res)
+	set_show(res[1])
 }
 
 function set_show(showName) {
@@ -60,6 +53,11 @@ function set_show(showName) {
 	season = strtonum($2)
 }
 
+/^<a href="guide.shtml#[0-9].*Series/ {
+	match ($0, /guide.shtml#([0-9]+)/, res);
+	season = res [1]
+}
+
 /^ *[0-9]+\./ {
 	totalep = substr ($1, 0, index($1, "."))
 	gsub (/\.$/, "", totalep)
@@ -69,8 +67,11 @@ function set_show(showName) {
 	}
 
 	prodnum = substr($0, 16, 9)
-	epdate = substr($0, 28, 10)
+
+	match ($0, /([0-9]+ [A-Z][a-z][a-z] [0-9]+)/, res)
+	epdate = res [1]
 	gsub (/ *$/, "", epdate)
+
 	epnameHTML = substr($0, 40)
 	fooIndex = index(epnameHTML, ">")
 	eptitle = substr(epnameHTML, fooIndex + 1, length(epnameHTML) - fooIndex - 4)
@@ -81,6 +82,7 @@ function set_show(showName) {
 
 BEGIN {
 	IGNORECASE = 1
+	season = 0
 }
 
 END {

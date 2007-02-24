@@ -18,10 +18,10 @@ Use \fIFILE\fR for configuration values (default is ~/.episoder).
 (Re)build episoder's database
 .TP
 .B \-v
-Enable verbose operation (builddb only)
+Enable verbose operation (only when building the db)
 .TP
 .B \-w
-Enable very verbose operation (builddb only)
+Enable very verbose operation (only when building the db)
 .TP
 .B \-V
 Show program version and quit
@@ -33,7 +33,7 @@ Specify the number of future days to be shown by showlist (default: 1)
 The date to begin search or update from (default: today)
 .TP
 .B -i
-Ignore default cut-off date set in the config file (builddb) and ignore the date during search (showlist).
+Ignore default cut-off date set in the config file (when building) and ignore the date during search (when showing).
 .TP
 .B -s [string]
 String to search all future episodes for
@@ -98,7 +98,7 @@ You might want to have your episode db rebuilt on a regular basis (i.e. daily).
 The easiest way to achieve this is with a simple cron job:
 .PP
     crontab -l > crontab
-    echo "40 5 * * * episoder builddb" >> crontab
+    echo "40 5 * * * episoder -b" >> crontab
     crontab crontab
 .br
 .SH FILES
