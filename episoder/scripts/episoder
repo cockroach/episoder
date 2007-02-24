@@ -19,7 +19,7 @@
 #
 # $Id$
 
-EPISODER_VERSION=0.4.5
+EPISODER_VERSION=0.4.6
 EPISODER_HOME=/usr/share/episoder
 
 show_help() {
