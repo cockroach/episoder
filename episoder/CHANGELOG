@@ -1,6 +1,10 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.4.7 (24 Feb 2007)
+====================
+ * Fixed a parsing issue introduced with 0.4.6 
+
 v0.4.6 (24 Feb 2007)
 ====================
  * Discovered yet another formatting possibility on epguides.com (used for

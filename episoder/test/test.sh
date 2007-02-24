@@ -144,6 +144,9 @@ test_parse_epguides() {
 
 	EPISODER_HOME=../plugins
 	OUTPUT_FORMAT="%airdate %show %seasonx%epnum: %eptitle (%totalep)"
+
+#	export VERBOSE=true
+#	export VERY_VERBOSE=true
 	
 	for file in data/epguides.sample*bz2; do
 		num=`echo $file | sed -r 's/.*sample(.*)\.bz2/\1/'`

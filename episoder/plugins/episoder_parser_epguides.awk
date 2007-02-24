@@ -68,7 +68,7 @@ function set_show(showName) {
 
 	prodnum = substr($0, 16, 9)
 
-	match ($0, /([0-9]+ [A-Z][a-z][a-z] [0-9]+)/, res)
+	match ($0, /([1-3]?[0-9] [A-Z][a-z][a-z] [0-9][0-9]) /, res)
 	epdate = res [1]
 	gsub (/ *$/, "", epdate)
 
