@@ -1,17 +1,17 @@
 # episoder epguides.com parser
 #
-# Copyright (c) 2006/2007 Stefan Ott. All rights reserved.
+# Copyright (c) 2006-2008 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -35,18 +35,11 @@
 }
 
 function set_show(showName) {
-	if (SHOW_NAME == "") {
-		show = showName
-	} else {
-		show = SHOW_NAME
-	}
+	print "Show:" >> output
+	print "  title: " showName >> output
+	print "  episodes: " >> output
 
-	if (VERBOSE == "true") {
-		printf " %s...", show
-	}
-	if (VERY_VERBOSE == "true") {
-		printf "\n"
-	}
+	printf "%s... ", showName
 }
 
 /^Season/ {
@@ -67,6 +60,7 @@ function set_show(showName) {
 	}
 
 	prodnum = substr($0, 16, 9)
+	gsub (/^ */, "", prodnum)
 
 	match ($0, /([1-3]?[0-9] [A-Z][a-z][a-z] [0-9][0-9]) /, res)
 	epdate = res [1]
@@ -76,7 +70,7 @@ function set_show(showName) {
 	fooIndex = index(epnameHTML, ">")
 	eptitle = substr(epnameHTML, fooIndex + 1, length(epnameHTML) - fooIndex - 4)
 	gsub (/<$/, "", eptitle);
-	
+
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
 
@@ -86,11 +80,9 @@ BEGIN {
 }
 
 END {
-	if (VERBOSE == "true") {
-		if (dropped == 0) { dropped="0" }
-		if (kept == 0) { kept="0" }
-		printf "Kept %s, dropped %s. ",kept,dropped
-	}
+	if (dropped == 0) { dropped="0" }
+	if (kept == 0) { kept="0" }
+	printf "Kept %s, dropped %s.\n", kept, dropped
 }
 
 function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
@@ -98,23 +90,15 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 		dropped++
 		return
 	}
-	output = format
+
 	command = "date +%Y-%m-%d -d '" epdate "'"
 	command | getline airdate
-	gsub("&", "and", eptitle)
-	gsub("&", "and", show)
-	gsub("%show", show, output)
-	gsub("%totalep", totalep, output)
-	gsub("%season", season, output)
-	gsub("%epnum", epnum, output)
-	gsub("%prodnum", prodnum, output)
-	gsub("%airdate", airdate, output)
-	gsub("%eptitle", eptitle, output)
-	if (VERBOSE == "true") {
-		kept++
-	}
-	if (VERY_VERBOSE == "true") {
-		print "Found " output
-	}
-	print output >> TMPFILE
+	print "    - title: " eptitle >> output
+	print "      season: " season >> output
+	print "      episode: " epnum >> output
+	print "      airdate: " airdate >> output
+	print "      prodnum: " prodnum >> output
+	print "      totalepnum: " totalep >> output
+
+	kept++
 }

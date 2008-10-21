@@ -26,4 +26,6 @@ match_tvcom() {
 	echo $1 | grep 'tv.com'
 }
 
+exit 1
+
 EPISODER_PLUGINS[${#EPISODER_PLUGINS[*]}]='tvcom'
