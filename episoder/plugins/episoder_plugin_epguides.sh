@@ -19,16 +19,19 @@
 # $Id$
 
 parse_epguides() {
-	awkscript="${EPISODER_HOME}/episoder_parser_epguides.awk"
 	local url="$1"
-	wgetfile=$( tempfile )
+	local log=$( tempfile )
+	local wgetfile=$( tempfile )
+	local yamlfile=$( tempfile )
+	local awkscript="${EPISODER_HOME}/episoder_parser_epguides.awk"
+
 	episoder_get_file "${url}" "${wgetfile}" || return 2
-	yamlfile=$( tempfile )
-	log=$( tempfile )
+
 	awk -f ${awkscript} output="${yamlfile}" ${wgetfile} >> ${log} 2>&1
-	retcode=$?
+	local retcode=$?
 
 	rm -f ${wgetfile}
+
 	if [ ${retcode} -eq 0 ] ; then
 		rm -f ${log}
 		echo ${yamlfile}
@@ -48,6 +51,7 @@ match_epguides() {
 }
 
 url=$1
+
 if [ ! -z "$( match_epguides ${url} )" ] ; then
 	echo "Accepting ${url} in epguides.com plugin" >&2
 	parse_epguides "${url}"
