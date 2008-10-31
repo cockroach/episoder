@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#
 # episoder old episode remover, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004-2008 Stefan Ott. All rights reserved.
@@ -21,106 +21,8 @@
 # $Id$
 
 import sys
-import yaml
 import datetime
-import shutil
-from tempfile import mkstemp
-from os import fdopen
-
-class Show(object):
-	def __init__(self, title):
-		self.title = title
-		self.episodes = []
-
-	def addEpisode(self, episode):
-		self.episodes.append(episode)
-
-	def removeEpisodesBefore(self, then):
-		newEpisodes = []
-
-		for episode in self.episodes:
-			if episode.airdate >= then:
-				newEpisodes.append(episode)
-
-		self.episodes = newEpisodes
-
-	def accept(self, visitor):
-		visitor.visit(self)
-
-	def __str__(self):
-		return "%s (%d episodes)" % (self.title, len(self.episodes))
-
-class Episode(object):
-	def __init__(self, title, season, episode, airdate, prodnum, total):
-		self.title = title
-		self.season = season
-		self.episode = episode
-		self.airdate = airdate
-		self.prodnum = prodnum or ''
-		self.total = total
-
-	def __str__(self):
-		return "%sx%s: %s" % (self.season, self.episode, self.title)
-
-class EpisoderData(object):
-	def __init__(self, datafile):
-		self.datafile = datafile
-		self.shows = []
-
-	def load(self):
-		file = open(self.datafile)
-		data = yaml.load(file.read())
-		file.close()
-		if not data['Shows']:
-			return 1
-		for showData in data['Shows']:
-			title = showData['title']
-			show = Show(title)
-			for episodeData in showData['episodes']:
-				episodeNum = episodeData['episode']
-				airDate = episodeData['airdate']
-				season = episodeData['season']
-				title = episodeData['title']
-				totalEpNum = episodeData['totalepnum']
-				prodnum = episodeData['prodnum']
-				episode = Episode(title, season, episodeNum,
-					airDate, prodnum, totalEpNum)
-				show.addEpisode(episode)
-			self.shows.append(show)
-
-	def removeBefore(self, baseDate, numDays):
-		difference = datetime.timedelta(days=numDays)
-		then = baseDate - difference
-		for show in self.shows:
-			show.removeEpisodesBefore(then)
-
-	def save(self):
-		data = {}
-		data['Shows'] = []
-
-		for show in self.shows:
-			showData = {}
-			showData['title'] = show.title
-			showData['episodes'] = []
-			for episode in show.episodes:
-				episodeData = {}
-				episodeData['episode'] = episode.episode
-				episodeData['airdate'] = episode.airdate
-				episodeData['season'] = episode.season
-				episodeData['title'] = episode.title
-				episodeData['totalepnum'] = episode.total
-				episodeData['prodnum'] = episode.prodnum
-				showData['episodes'].append(episodeData)
-			data['Shows'].append(showData)
-
-		try:
-			(fd, name) = mkstemp()
-			file = fdopen(fd, 'w')
-			file.write(yaml.safe_dump(data))
-			file.close()
-			shutil.move(name, self.datafile)
-		except IOError:
-			print "Could not write data"
+from episoder import *
 
 def usage():
 	print "Usage: %s <datafile> <days-in-past> [base-date]" % sys.argv[0]

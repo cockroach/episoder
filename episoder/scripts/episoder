@@ -24,6 +24,9 @@ EPISODER_VERSION=0.5.0-pre
 [ -z "${EPISODER_PREFIX}" ] && EPISODER_PREFIX=/usr
 EPISODER_HOME=${EPISODER_PREFIX}/share/episoder
 
+# For python plugins
+export PYTHONPATH=${EPISODER_HOME}
+
 show_help() {
 	echo Usage: $0 [options]
 	echo
@@ -136,7 +139,7 @@ episoder_dump() {
 	if [ -z "$OUTPUT_FORMAT" ]; then
 		OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
 	fi
-	[ -z "${OUTPUT_PLUGIN}" ] && OUTPUT_PLUGIN="legacy"
+	[ -z "${OUTPUT_PLUGIN}" ] && OUTPUT_PLUGIN="plain"
 
 	if [ $COMMAND = "builddb" ]; then
 		if [ -z "$DEFAULT_DATE" ]; then
