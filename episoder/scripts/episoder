@@ -124,6 +124,7 @@ episoder_dump() {
 
 	EPISODER_DATAFILE=`grep '^data=' ${EPISODER_RC_FILE} | cut -b 6-`
 	WGET_USER_AGENT=`grep '^agent=' ${EPISODER_RC_FILE} | cut -b 7-`
+	OUTPUT_PLUGIN=`grep '^output_plugin=' ${EPISODER_RC_FILE} | cut -b 15-`
 	OUTPUT_FORMAT=`grep '^format=' ${EPISODER_RC_FILE} | cut -b 8-`
 	DATE_FORMAT=`grep '^dateformat=' ${EPISODER_RC_FILE} | cut -b 12-`
 	DEFAULT_DATE=`grep '^default_date=' ${EPISODER_RC_FILE} | cut -b 14-`
@@ -135,6 +136,8 @@ episoder_dump() {
 	if [ -z "$OUTPUT_FORMAT" ]; then
 		OUTPUT_FORMAT="%airdate %show %seasonx%epnum"
 	fi
+	[ -z "${OUTPUT_PLUGIN}" ] && OUTPUT_PLUGIN="legacy"
+
 	if [ $COMMAND = "builddb" ]; then
 		if [ -z "$DEFAULT_DATE" ]; then
 			if [ -z $DATE_TEXT ]; then

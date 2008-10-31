@@ -1,0 +1,7 @@
+#!/bin/sh
+outfile="/tmp/webisoder.yaml"
+datafile=$1
+
+rm -f ${outfile} || exit 1
+tempfile -n ${outfile} >/dev/null || exit 2
+cat ${datafile} >${outfile} || exit 3

@@ -144,8 +144,8 @@ get_episodes() {
 		print v "--- URL: ${url}"
 
 		local htmlfile=$( tempfile )
-		episoder_get_file "${url}" "${htmlfile}"
-#		cp /tmp/filec5E5sv ${htmlfile}
+#		episoder_get_file "${url}" "${htmlfile}"
+		cp /tmp/filec5E5sv ${htmlfile}
 		local exitcode=$?
 		if [ ${exitcode} -ne 0 ] ; then
 			rm -f ${htmlfile}
@@ -190,6 +190,26 @@ get_episodes() {
 	rm -f ${yamldata}
 }
 
+# Write episoder output
+#
+#   $1	local data file
+#   $2  the output plugin to use
+#
+write_output() {
+	local datafile=$1
+	local plugin=$2
+	print "[*] Writing output"
+	print v "--- Using ${plugin} plugin on ${datafile}"
+
+	${EPISODER_HOME}/episoder_output_${plugin} "${datafile}"
+	local exitcode=$?
+
+	print v "--- Returned with code ${exitcode}"
+	[ ${exitcode} -ne 0 ] && print_error "Error writing output"
+
+	rm -f ${datafile}
+}
+
 write_episodes() {
 	# TODO: implement something like this
 	print "[*] Writing episodes"
@@ -218,7 +238,9 @@ build_db() {
 	fi
 
 	[ -z "${NODATE}" ] && remove_old_episodes "${datafile}"
-	echo "${datafile}"
+
+	write_output "${datafile}" "${OUTPUT_PLUGIN}"
+
 #	sort_tmpfile
 #	write_episodes
 #	destroy_tmpfiles
