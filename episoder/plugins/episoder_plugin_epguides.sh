@@ -20,12 +20,10 @@
 
 parse_epguides() {
 	local url="$1"
+	local wgetfile="$2"
 	local log=$( tempfile )
-	local wgetfile=$( tempfile )
 	local yamlfile=$( tempfile )
 	local awkscript="${EPISODER_HOME}/episoder_parser_epguides.awk"
-
-	episoder_get_file "${url}" "${wgetfile}" || return 2
 
 	awk -f ${awkscript} output="${yamlfile}" ${wgetfile} >> ${log} 2>&1
 	local retcode=$?
@@ -51,9 +49,12 @@ match_epguides() {
 }
 
 url=$1
+wgetfile=$2
 
 if [ ! -z "$( match_epguides ${url} )" ] ; then
 	echo "Accepting ${url} in epguides.com plugin" >&2
-	parse_epguides "${url}"
+	parse_epguides "${url}" "${wgetfile}"
 	exit $?
+else
+	exit 1
 fi

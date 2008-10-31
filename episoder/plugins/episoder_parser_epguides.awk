@@ -35,9 +35,9 @@
 }
 
 function set_show(showName) {
-	print "Show:" >> output
-	print "  title: " showName >> output
-	print "  episodes: " >> output
+#	print "Show:" >> output
+	print "  - title: " showName >> output
+	print "    episodes: " >> output
 
 	printf "%s... ", showName
 }
@@ -93,12 +93,15 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 
 	command = "date +%Y-%m-%d -d '" epdate "'"
 	command | getline airdate
-	print "    - title: " eptitle >> output
-	print "      season: " season >> output
-	print "      episode: " epnum >> output
-	print "      airdate: " airdate >> output
-	print "      prodnum: " prodnum >> output
-	print "      totalepnum: " totalep >> output
+
+	gsub("'", "''", eptitle)
+
+	print "      - title: '" eptitle "'" >> output
+	print "        season: " season >> output
+	print "        episode: " epnum >> output
+	print "        airdate: " airdate >> output
+	print "        prodnum: " prodnum >> output
+	print "        totalepnum: " totalep >> output
 
 	kept++
 }

@@ -20,7 +20,9 @@
 # $Id$
 
 EPISODER_VERSION=0.5.0-pre
-EPISODER_HOME=/usr/share/episoder
+
+[ -z "${EPISODER_PREFIX}" ] && EPISODER_PREFIX=/usr
+EPISODER_HOME=${EPISODER_PREFIX}/share/episoder
 
 show_help() {
 	echo Usage: $0 [options]
@@ -53,7 +55,7 @@ set_nodate() {
 }
 
 show_version() {
-	echo episoder v$EPISODER_VERSION
+	echo episoder v${EPISODER_VERSION}
 }
 
 set_builddb() {
@@ -110,22 +112,21 @@ episoder_dump() {
 
 	shift $((OPTIND-1))
 
-	if [ ! -z "$1" ]; then
-		COMMAND=$1
-	fi
+	[ ! -z "$1" ] && COMMAND=$1
 
 	if [ -z "$COMMAND" ]; then show_help; exit 1; fi
 
 	if [ ! -f "$EPISODER_RC_FILE" ]; then
-		echo "$0: Configuration file $EPISODER_RC_FILE does not exist / is not a regular file"
+		echo "$0: Configuration file $EPISODER_RC_FILE does not " \
+			"exist / is not a regular file"
 		exit 1
 	fi
 
-	EPISODER_DATAFILE=`cat $EPISODER_RC_FILE | grep '^data=' | cut -b 6-`
-	WGET_USER_AGENT=`cat $EPISODER_RC_FILE | grep '^agent=' | cut -b 7-`
-	OUTPUT_FORMAT=`cat $EPISODER_RC_FILE | grep '^format=' | cut -b 8-`
-	DATE_FORMAT=`cat $EPISODER_RC_FILE | grep '^dateformat=' | cut -b 12-`
-	DEFAULT_DATE=`cat $EPISODER_RC_FILE | grep '^default_date=' | cut -b 14-`
+	EPISODER_DATAFILE=`grep '^data=' ${EPISODER_RC_FILE} | cut -b 6-`
+	WGET_USER_AGENT=`grep '^agent=' ${EPISODER_RC_FILE} | cut -b 7-`
+	OUTPUT_FORMAT=`grep '^format=' ${EPISODER_RC_FILE} | cut -b 8-`
+	DATE_FORMAT=`grep '^dateformat=' ${EPISODER_RC_FILE} | cut -b 12-`
+	DEFAULT_DATE=`grep '^default_date=' ${EPISODER_RC_FILE} | cut -b 14-`
 
 	if [ -z "$EPISODER_DATAFILE" ]; then
 		echo "$0: No data file specified in configuration file"
@@ -148,14 +149,13 @@ episoder_dump() {
 	fi
 
 
-
-case "$COMMAND" in
+case "${COMMAND}" in
 	builddb)
-		. $EPISODER_HOME/episoder-builddb.sh
+		. ${EPISODER_HOME}/episoder-builddb.sh
 		build_db
 		;;
 	showlist)
-		. $EPISODER_HOME/episoder-showlist.sh
+		. ${EPISODER_HOME}/episoder-showlist.sh
 		show_episode_list
 		;;
 	dump)
