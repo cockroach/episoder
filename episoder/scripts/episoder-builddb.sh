@@ -51,6 +51,7 @@ remove_old_episodes() {
 	${EPISODER_HOME}/remove-old.py ${datafile} 1 "${DATE_TEXT}"
 	local exitcode=$?
 	print v "--- Returned with exit code ${exitcode}"
+	[ ${exitcode} -ne 0 ] && print_error "External command failed"
 	return ${exitcode}
 }
 
