@@ -1,4 +1,6 @@
-# episoder epguides.com plugin, http://episoder.sourceforge.net/
+#!/bin/sh
+#
+# episoder epguides.com parser, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004-2008 Stefan Ott. All rights reserved.
 #
