@@ -25,7 +25,7 @@ parse_epguides() {
 	local wgetfile="$2"
 	local log=$( tempfile )
 	local yamlfile=$( tempfile )
-	local awkscript="${EPISODER_HOME}/episoder_parser_epguides.awk"
+	local awkscript="${EPISODER_HOME}/episoder_helper_epguides.awk"
 
 	awk -f ${awkscript} output="${yamlfile}" ${wgetfile} >> ${log} 2>&1
 	local retcode=$?
