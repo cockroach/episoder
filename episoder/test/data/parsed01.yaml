@@ -1,0 +1,573 @@
+Shows:
+  - title: House, M.D.
+    episodes: 
+      - title: 'Pilot'
+        season: 1
+        episode: 01
+        airdate: 2004-11-16
+        prodnum: HOU-101  
+        totalepnum: 1
+      - title: 'Paternity'
+        season: 1
+        episode: 02
+        airdate: 2004-11-23
+        prodnum: HOU-105  
+        totalepnum: 2
+      - title: 'Occam''s Razor'
+        season: 1
+        episode: 03
+        airdate: 2004-11-30
+        prodnum: HOU-102  
+        totalepnum: 3
+      - title: 'Maternity'
+        season: 1
+        episode: 04
+        airdate: 2004-12-07
+        prodnum: HOU-104  
+        totalepnum: 4
+      - title: 'Damned If You Do'
+        season: 1
+        episode: 05
+        airdate: 2004-12-14
+        prodnum: HOU-106  
+        totalepnum: 5
+      - title: 'The Socratic Method'
+        season: 1
+        episode: 06
+        airdate: 2004-12-21
+        prodnum: HOU-103  
+        totalepnum: 6
+      - title: 'Fidelity'
+        season: 1
+        episode: 07
+        airdate: 2004-12-28
+        prodnum: HOU-107  
+        totalepnum: 7
+      - title: 'Poison'
+        season: 1
+        episode: 08
+        airdate: 2005-01-25
+        prodnum: HOU-108  
+        totalepnum: 8
+      - title: 'DNR'
+        season: 1
+        episode: 09
+        airdate: 2005-02-01
+        prodnum: HOU-110  
+        totalepnum: 9
+      - title: 'Histories'
+        season: 1
+        episode: 10
+        airdate: 2005-02-08
+        prodnum: HOU-111  
+        totalepnum: 10
+      - title: 'Detox'
+        season: 1
+        episode: 11
+        airdate: 2005-02-15
+        prodnum: HOU-112  
+        totalepnum: 11
+      - title: 'Sports Medicine'
+        season: 1
+        episode: 12
+        airdate: 2005-02-22
+        prodnum: HOU-109  
+        totalepnum: 12
+      - title: 'Cursed'
+        season: 1
+        episode: 13
+        airdate: 2005-03-01
+        prodnum: HOU-113  
+        totalepnum: 13
+      - title: 'Control'
+        season: 1
+        episode: 14
+        airdate: 2005-03-15
+        prodnum: HOU-114  
+        totalepnum: 14
+      - title: 'Mob Rules'
+        season: 1
+        episode: 15
+        airdate: 2005-03-22
+        prodnum: HOU-115  
+        totalepnum: 15
+      - title: 'Heavy'
+        season: 1
+        episode: 16
+        airdate: 2005-03-29
+        prodnum: HOU-116  
+        totalepnum: 16
+      - title: 'Role Model'
+        season: 1
+        episode: 17
+        airdate: 2005-04-12
+        prodnum: HOU-117  
+        totalepnum: 17
+      - title: 'Babies & Bathwater'
+        season: 1
+        episode: 18
+        airdate: 2005-04-19
+        prodnum: HOU-118  
+        totalepnum: 18
+      - title: 'Kids'
+        season: 1
+        episode: 19
+        airdate: 2005-05-03
+        prodnum: HOU-119  
+        totalepnum: 19
+      - title: 'Love Hurts'
+        season: 1
+        episode: 20
+        airdate: 2005-05-10
+        prodnum: HOU-120  
+        totalepnum: 20
+      - title: 'Three Stories'
+        season: 1
+        episode: 21
+        airdate: 2005-05-17
+        prodnum: HOU-121  
+        totalepnum: 21
+      - title: 'Honeymoon'
+        season: 1
+        episode: 22
+        airdate: 2005-05-24
+        prodnum: HOU-122  
+        totalepnum: 22
+      - title: 'Acceptance'
+        season: 2
+        episode: 01
+        airdate: 2005-09-13
+        prodnum: HOU-201  
+        totalepnum: 23
+      - title: 'Autopsy'
+        season: 2
+        episode: 02
+        airdate: 2005-09-20
+        prodnum: HOU-202  
+        totalepnum: 24
+      - title: 'Humpty Dumpty'
+        season: 2
+        episode: 03
+        airdate: 2005-09-27
+        prodnum: HOU-203  
+        totalepnum: 25
+      - title: 'TB or Not TB'
+        season: 2
+        episode: 04
+        airdate: 2005-11-01
+        prodnum: HOU-204  
+        totalepnum: 26
+      - title: 'Daddy''s Boy'
+        season: 2
+        episode: 05
+        airdate: 2005-11-08
+        prodnum: HOU-205  
+        totalepnum: 27
+      - title: 'Spin'
+        season: 2
+        episode: 06
+        airdate: 2005-11-15
+        prodnum: HOU-206  
+        totalepnum: 28
+      - title: 'Hunting'
+        season: 2
+        episode: 07
+        airdate: 2005-11-22
+        prodnum: HOU-207  
+        totalepnum: 29
+      - title: 'The Mistake'
+        season: 2
+        episode: 08
+        airdate: 2005-11-29
+        prodnum: HOU-208  
+        totalepnum: 30
+      - title: 'Deception'
+        season: 2
+        episode: 09
+        airdate: 2005-12-13
+        prodnum: HOU-209  
+        totalepnum: 31
+      - title: 'Failure to Communicate'
+        season: 2
+        episode: 10
+        airdate: 2006-01-10
+        prodnum: HOU-210  
+        totalepnum: 32
+      - title: 'Need to Know'
+        season: 2
+        episode: 11
+        airdate: 2006-02-07
+        prodnum: HOU-211  
+        totalepnum: 33
+      - title: 'Distractions'
+        season: 2
+        episode: 12
+        airdate: 2006-02-14
+        prodnum: HOU-212  
+        totalepnum: 34
+      - title: 'Skin Deep'
+        season: 2
+        episode: 13
+        airdate: 2006-02-20
+        prodnum: HOU-213  
+        totalepnum: 35
+      - title: 'Sex Kills'
+        season: 2
+        episode: 14
+        airdate: 2006-03-07
+        prodnum: HOU-214  
+        totalepnum: 36
+      - title: 'Clueless'
+        season: 2
+        episode: 15
+        airdate: 2006-03-28
+        prodnum: HOU-215  
+        totalepnum: 37
+      - title: 'Safe'
+        season: 2
+        episode: 16
+        airdate: 2006-04-04
+        prodnum: HOU-216  
+        totalepnum: 38
+      - title: 'All In'
+        season: 2
+        episode: 17
+        airdate: 2006-04-11
+        prodnum: HOU-217  
+        totalepnum: 39
+      - title: 'Sleeping Dogs Lie'
+        season: 2
+        episode: 18
+        airdate: 2006-04-18
+        prodnum: HOU-218  
+        totalepnum: 40
+      - title: 'House vs. God'
+        season: 2
+        episode: 19
+        airdate: 2006-04-25
+        prodnum: HOU-219  
+        totalepnum: 41
+      - title: 'Euphoria (1)'
+        season: 2
+        episode: 20
+        airdate: 2006-05-02
+        prodnum: HOU-220  
+        totalepnum: 42
+      - title: 'Euphoria (2)'
+        season: 2
+        episode: 21
+        airdate: 2006-05-03
+        prodnum: HOU-221  
+        totalepnum: 43
+      - title: 'Forever'
+        season: 2
+        episode: 22
+        airdate: 2006-05-09
+        prodnum: HOU-222  
+        totalepnum: 44
+      - title: 'Who''s Your Daddy?'
+        season: 2
+        episode: 23
+        airdate: 2006-05-16
+        prodnum: HOU-223  
+        totalepnum: 45
+      - title: 'No Reason'
+        season: 2
+        episode: 24
+        airdate: 2006-05-23
+        prodnum: HOU-224  
+        totalepnum: 46
+      - title: 'Meaning'
+        season: 3
+        episode: 01
+        airdate: 2006-09-05
+        prodnum: HOU-301  
+        totalepnum: 47
+      - title: 'Cane & Able'
+        season: 3
+        episode: 02
+        airdate: 2006-09-12
+        prodnum: HOU-302  
+        totalepnum: 48
+      - title: 'Informed Consent'
+        season: 3
+        episode: 03
+        airdate: 2006-09-19
+        prodnum: HOU-303  
+        totalepnum: 49
+      - title: 'Lines in the Sand'
+        season: 3
+        episode: 04
+        airdate: 2006-09-26
+        prodnum: HOU-304  
+        totalepnum: 50
+      - title: 'Fools for Love'
+        season: 3
+        episode: 05
+        airdate: 2006-10-31
+        prodnum: HOU-305  
+        totalepnum: 51
+      - title: 'Que Será Será'
+        season: 3
+        episode: 06
+        airdate: 2006-11-07
+        prodnum: HOU-306  
+        totalepnum: 52
+      - title: 'Son of Coma Guy'
+        season: 3
+        episode: 07
+        airdate: 2006-11-14
+        prodnum: HOU-307  
+        totalepnum: 53
+      - title: 'Whac-A-Mole'
+        season: 3
+        episode: 08
+        airdate: 2006-11-21
+        prodnum: HOU-308  
+        totalepnum: 54
+      - title: 'Finding Judas'
+        season: 3
+        episode: 09
+        airdate: 2006-11-28
+        prodnum: HOU-309  
+        totalepnum: 55
+      - title: 'Merry Little Christmas'
+        season: 3
+        episode: 10
+        airdate: 2006-12-12
+        prodnum: HOU-310  
+        totalepnum: 56
+      - title: 'Words and Deeds'
+        season: 3
+        episode: 11
+        airdate: 2007-01-09
+        prodnum: HOU-311  
+        totalepnum: 57
+      - title: 'One Day, One Room'
+        season: 3
+        episode: 12
+        airdate: 2007-01-30
+        prodnum: HOU-313  
+        totalepnum: 58
+      - title: 'Needle in a Haystack'
+        season: 3
+        episode: 13
+        airdate: 2007-02-06
+        prodnum: HOU-312  
+        totalepnum: 59
+      - title: 'Insensitive'
+        season: 3
+        episode: 14
+        airdate: 2007-02-13
+        prodnum: HOU-314  
+        totalepnum: 60
+      - title: 'Half-Wit'
+        season: 3
+        episode: 15
+        airdate: 2007-03-06
+        prodnum: HOU-315  
+        totalepnum: 61
+      - title: 'Top Secret'
+        season: 3
+        episode: 16
+        airdate: 2007-03-27
+        prodnum: HOU-316  
+        totalepnum: 62
+      - title: 'Fetal Position'
+        season: 3
+        episode: 17
+        airdate: 2007-04-03
+        prodnum: HOU-317  
+        totalepnum: 63
+      - title: 'Airborne'
+        season: 3
+        episode: 18
+        airdate: 2007-04-10
+        prodnum: HOU-318  
+        totalepnum: 64
+      - title: 'Act Your Age'
+        season: 3
+        episode: 19
+        airdate: 2007-04-17
+        prodnum: HOU-319  
+        totalepnum: 65
+      - title: 'House Training'
+        season: 3
+        episode: 20
+        airdate: 2007-04-24
+        prodnum: HOU-320  
+        totalepnum: 66
+      - title: 'Family'
+        season: 3
+        episode: 21
+        airdate: 2007-05-01
+        prodnum: HOU-321  
+        totalepnum: 67
+      - title: 'Resignation'
+        season: 3
+        episode: 22
+        airdate: 2007-05-08
+        prodnum: HOU-322  
+        totalepnum: 68
+      - title: 'The Jerk'
+        season: 3
+        episode: 23
+        airdate: 2007-05-15
+        prodnum: HOU-323  
+        totalepnum: 69
+      - title: 'Human Error'
+        season: 3
+        episode: 24
+        airdate: 2007-05-29
+        prodnum: HOU-324  
+        totalepnum: 70
+      - title: 'Alone'
+        season: 4
+        episode: 01
+        airdate: 2007-09-25
+        prodnum: HOU-401  
+        totalepnum: 71
+      - title: 'The Right Stuff'
+        season: 4
+        episode: 02
+        airdate: 2007-10-02
+        prodnum: HOU-402  
+        totalepnum: 72
+      - title: '97 Seconds'
+        season: 4
+        episode: 03
+        airdate: 2007-10-09
+        prodnum: HOU-403  
+        totalepnum: 73
+      - title: 'Guardian Angels'
+        season: 4
+        episode: 04
+        airdate: 2007-10-23
+        prodnum: HOU-404  
+        totalepnum: 74
+      - title: 'Mirror, Mirror'
+        season: 4
+        episode: 05
+        airdate: 2007-10-30
+        prodnum: HOU-405  
+        totalepnum: 75
+      - title: 'Whatever It Takes'
+        season: 4
+        episode: 06
+        airdate: 2007-11-06
+        prodnum: HOU-406  
+        totalepnum: 76
+      - title: 'Ugly'
+        season: 4
+        episode: 07
+        airdate: 2007-11-13
+        prodnum: HOU-407  
+        totalepnum: 77
+      - title: 'You Don''t Want to Know'
+        season: 4
+        episode: 08
+        airdate: 2007-11-20
+        prodnum: HOU-408  
+        totalepnum: 78
+      - title: 'Games'
+        season: 4
+        episode: 09
+        airdate: 2007-11-27
+        prodnum: HOU-409  
+        totalepnum: 79
+      - title: 'It''s A Wonderful Lie'
+        season: 4
+        episode: 10
+        airdate: 2008-01-29
+        prodnum: HOU-410  
+        totalepnum: 80
+      - title: 'Frozen'
+        season: 4
+        episode: 11
+        airdate: 2008-02-03
+        prodnum: HOU-411  
+        totalepnum: 81
+      - title: 'Don''t Ever Change'
+        season: 4
+        episode: 12
+        airdate: 2008-02-05
+        prodnum: HOU-412  
+        totalepnum: 82
+      - title: 'No More Mr. Nice Guy'
+        season: 4
+        episode: 13
+        airdate: 2008-04-28
+        prodnum: HOU-413  
+        totalepnum: 83
+      - title: 'Living the Dream'
+        season: 4
+        episode: 14
+        airdate: 2008-05-05
+        prodnum: HOU-414  
+        totalepnum: 84
+      - title: 'House''s Head (1)'
+        season: 4
+        episode: 15
+        airdate: 2008-05-12
+        prodnum: HOU-415  
+        totalepnum: 85
+      - title: 'Wilson''s Heart (2)'
+        season: 4
+        episode: 16
+        airdate: 2008-05-19
+        prodnum: HOU-416  
+        totalepnum: 86
+      - title: 'Dying Changes Everything'
+        season: 5
+        episode: 01
+        airdate: 2008-09-16
+        prodnum: 
+        totalepnum: 87
+      - title: 'Not Cancer'
+        season: 5
+        episode: 02
+        airdate: 2008-09-23
+        prodnum: 
+        totalepnum: 88
+      - title: 'Adverse Events'
+        season: 5
+        episode: 03
+        airdate: 2008-09-30
+        prodnum: HOU-503  
+        totalepnum: 89
+      - title: 'Birthmarks'
+        season: 5
+        episode: 04
+        airdate: 2008-10-14
+        prodnum: 
+        totalepnum: 90
+      - title: 'Lucky Thirteen'
+        season: 5
+        episode: 05
+        airdate: 2008-10-21
+        prodnum: 
+        totalepnum: 91
+      - title: 'Joy'
+        season: 5
+        episode: 06
+        airdate: 2008-10-28
+        prodnum: HOU-506  
+        totalepnum: 92
+      - title: 'The Itch'
+        season: 5
+        episode: 07
+        airdate: 2008-11-11
+        prodnum: 
+        totalepnum: 93
+      - title: 'Emancipation'
+        season: 5
+        episode: 08
+        airdate: 2008-11-18
+        prodnum: 
+        totalepnum: 94
+      - title: 'Last Resort'
+        season: 5
+        episode: 09
+        airdate: 2008-11-25
+        prodnum: 
+        totalepnum: 95
