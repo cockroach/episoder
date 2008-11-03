@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import unittest
 from episoder import *
 
@@ -82,7 +83,7 @@ class EpisoderDataTest(unittest.TestCase):
 		show = self.data.shows[0]
 		self.assertEqual(95, len(show.episodes))
 
-		episode = Episode('Paternity', 1, 2, datetime.date(2004, 11, 23),
+		episode = Episode('Paternity', 1, 2,datetime.date(2004, 11, 23),
 			'HOU-105', 2)
 		self.assertEqual(episode, show.episodes[1])
 
@@ -100,6 +101,42 @@ class EpisoderDataTest(unittest.TestCase):
 		self.data.removeBefore(datetime.date(2008, 9, 17), 1)
 		show = self.data.shows[0]
 		self.assertEqual(9, len(show.episodes))
+
+	def testSave(self):
+		(fd, name) = mkstemp()
+#		file = fdopen(fd, 'w')
+		data = EpisoderData(name)
+
+		show1 = Show('TestShow1')
+		show2 = Show('TestShow2')
+		episode1 = Episode('Test1', 1, 2,datetime.date(2004, 11, 23),
+			'HOU-105', 2)
+		episode2 = Episode('Test2', 1, 2,datetime.date(2004, 11, 23),
+			'HOU-105', 2)
+		episode3 = Episode('Test3', 1, 2,datetime.date(2004, 11, 23),
+			'HOU-105', 2)
+		episode4 = Episode('Test4', 1, 2,datetime.date(2004, 11, 23),
+			'HOU-105', 2)
+		show1.addEpisode(episode1)
+		show1.addEpisode(episode2)
+		show1.addEpisode(episode3)
+		show2.addEpisode(episode4)
+
+		data.shows.append(show1)
+		data.shows.append(show2)
+
+		data.save()
+
+		data2 = EpisoderData(name)
+		data2.load()
+		shows2 = data2.shows
+
+		self.assertEquals(episode1, shows2[0].episodes[0])
+		self.assertEquals(episode2, shows2[0].episodes[1])
+		self.assertEquals(episode3, shows2[0].episodes[2])
+		self.assertEquals(episode4, shows2[1].episodes[0])
+
+		os.remove(name)
 
 if __name__ == "__main__":
 	unittest.main()
