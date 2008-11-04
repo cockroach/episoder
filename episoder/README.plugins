@@ -1,0 +1,53 @@
+Get the latest version of this file at http://episoder.sourceforge.net/
+===============================================================================
+
+HOW THE PLUGIN SYSTEM WORKS
+---------------------------
+
+There are two kinds of plugins: Parsers and output generators. Parsers are
+called to transform an HTML to a YAML representation, output generators will
+then take that YAML data and write it to its final destination.
+
+
+PARSERS
+-------
+
+For every URL in the config file, episoder downloads that file and then calls
+eac parser (scripts named episoder_parser_*) with the url and the path to the
+locally cached file as arguments, eg:
+
+	episoder_parser_epguides http://epguides.com/CSI /tmp/myfile
+
+The plugin can then either decide to accept that URL (eg. the tvcom plugin
+would accept any URL starting with 'http://www.tv.com/') or reject it,
+signalling its decision to episoder via its exit code according to the
+following table:
+
+	0	accept url
+	1	reject url
+	[2-9	reserved]
+	10+	error
+
+If the URL was accepted, episoder expects the sole output on stdout to be the
+path to a temporary file containing the parsed data from that URL as a valid
+YAML file.
+
+Debugging output / error messages printed to STDERR will be picked up by
+episoder and dealt with accordingly.
+
+As soon as a plugin returns with an exit code of 0, episoder will stop
+processing the URL in question. Wrongfully returning 0 will prevent other
+plugins from being called, thus check your exit codes.
+
+Once all the URLs have been processed, episoder will collect data from all the
+temporary YAML files and pass it on to the output renderer.
+
+
+OUTPUT GENERATORS
+-----------------
+
+Output plugins (scripts named episoder_output_*) will be called with the path
+to the parsed and cleaned (old episodes will have been removed at that point)
+YAML file as the sole argument. Note that only one output plugin is called,
+namely the one specified by the 'output_plugin' option in the episoder config
+file.

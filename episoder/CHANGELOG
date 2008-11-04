@@ -3,7 +3,11 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 
 v0.5.0 (xx xxx 2008)
 ====================
- * Completely rewrote the plugin API
+ * Completely rewrote the plugin API (see README.plugins)
+ * Episoder now requires python to run
+ * New tv.com plugin (see README.tvcom)
+ * New output layer
+ * Switched to YAML for intermediate data storage
 
 v0.4.7 (24 Feb 2007)
 ====================

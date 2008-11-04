@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
 	if len(argv) != 3:
 		sys.stderr.write("Syntax: %s <url> <cached-file>\n" % argv[0])
-		sys.exit(3)
+		sys.exit(10)
 
 	url = argv[1]
 	cached = argv[2]
@@ -167,5 +167,5 @@ if __name__ == "__main__":
 		yamlfile = page.parse()
 	except:
 		traceback.print_exc(file=sys.stderr)
-		sys.exit(2)
+		sys.exit(11)
 	print yamlfile

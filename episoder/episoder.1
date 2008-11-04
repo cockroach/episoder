@@ -37,21 +37,6 @@ Ignore default cut-off date set in the config file (when building) and ignore th
 .TP
 .B -s [string]
 String to search all future episodes for
-.SH PLUGINS
-.LP
-episoder uses a set of plugins to parse the source files. The plugins are called
-episoder_plugin_pluginName.sh and are placed in the episoder home directory
-(see below). Each plugin has to offer two functions:
-.TP
-.B match_pluginName
-Returns something, if this plugin is supposed to be used for the URL (passed as $1).
-Can be a simple grep for a known part of the URL, e.g. the domain name.
-.TP
-.B parse_pluginName
-Parses $WGETFILE and generates a one-item-per-line list of the upcoming episodes.
-The format is YYYY-MM-DD show episode.
-.TP
-In addition to that, the plugin has to add itself to the EPISODER_PLUGINS array. See episoder_plugin_tvcom.sh for an example.
 .SH CONFIG FILE
 .LP
 The configuration file consists of a section with settings for the program
@@ -62,6 +47,9 @@ Set the user-agent string to be used by wget (was required when tvtome blocked w
 .TP
 .B data=/path/to/file
 Specifies the file to be used to store the information about upcoming shows.
+.TP
+.B output_plugin=unquoted_plugin_name
+Specifies the output plugin to be used, defaults to 'plain' for backwards compatibility.
 .TP
 .B src=http://some.web.add/ress
 Each src entry specifies a URL with episode information. Make sure you have the
@@ -83,9 +71,12 @@ This allows you to customize episoder's output. Available fields are:
         %prodnum     Production number
 .br
 
-If undefined, the default value of 
+If undefined, the default value of
 .B %airdate %show %seasonx%epnum
 (eg. "2005-07-29 Monk 4x04") is used.
+.br
+
+Whether this option is honored or not is up to the chosen output plugin.
 .TP
 .B dateformat=unquoted string describing the format
 Here you can define the date format you'd like to be used for the output. To get a list of all possible fields, see
@@ -101,6 +92,9 @@ The easiest way to achieve this is with a simple cron job:
     echo "40 5 * * * episoder -b" >> crontab
     crontab crontab
 .br
+.SH PLUGINS
+.LP
+episoder uses a set of plugins to parse the source files and to generate its output. See README.plugins for details.
 .SH FILES
 .B ~/.episoder
 - default configuration file

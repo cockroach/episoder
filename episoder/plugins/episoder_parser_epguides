@@ -41,7 +41,7 @@ parse_epguides() {
 		cat ${log} >&2
 		rm -f ${log}
 		rm -f ${yamlfile}
-		return 2
+		return 10
 	fi
 }
 
