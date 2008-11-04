@@ -86,7 +86,7 @@ parse_url() {
 	local found_parser=0
 
 	print "[*] Calling parsers"
-	for parser in ${EPISODER_HOME}/episoder_plugin_*.sh ; do
+	for parser in ${EPISODER_HOME}/episoder_parser_* ; do
 		local log_stdout=$( tempfile )
 		local log_stderr=$( tempfile )
 		${parser} ${url} ${wgetfile} 2>${log_stderr} >${log_stdout}
@@ -97,7 +97,7 @@ parse_url() {
 
 		if [ ${retcode} -eq 0 ] ; then
 			found_parser=1
-			local yamlfile=$( cat $log_stdout )
+			local yamlfile=$( cat ${log_stdout} )
 			if [ ! -z ${name} ] ; then
 				sed -i "s/  title: .*/  title: ${name}/" \
 					${yamlfile}
@@ -144,8 +144,9 @@ get_episodes() {
 		print v "--- URL: ${url}"
 
 		local htmlfile=$( tempfile )
-#		episoder_get_file "${url}" "${htmlfile}"
-		cp /tmp/filec5E5sv ${htmlfile}
+		episoder_get_file "${url}" "${htmlfile}"
+#		cp /tmp/filec5E5sv ${htmlfile}
+#		cp /tmp/episode_listings.html ${htmlfile}
 		local exitcode=$?
 		if [ ${exitcode} -ne 0 ] ; then
 			rm -f ${htmlfile}
@@ -201,11 +202,15 @@ write_output() {
 	print "[*] Writing output"
 	print v "--- Using ${plugin} plugin on ${datafile}"
 
+	export EPISODER_RC_FILE
 	${EPISODER_HOME}/episoder_output_${plugin} "${datafile}"
 	local exitcode=$?
 
 	print v "--- Returned with code ${exitcode}"
-	[ ${exitcode} -ne 0 ] && print_error "Error writing output"
+	if [ ${exitcode} -ne 0 ] ; then
+		print_error "Error writing output"
+	fi
+	cp ${datafile} /tmp/saved
 
 	rm -f ${datafile}
 }
