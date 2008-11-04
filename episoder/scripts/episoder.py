@@ -43,9 +43,6 @@ class Show(object):
 
 		self.episodes = newEpisodes
 
-	def accept(self, visitor):
-		visitor.visit(self)
-
 	def __str__(self):
 		return "%s (%d episodes)" % (self.title, len(self.episodes))
 
@@ -53,13 +50,23 @@ class Episode(object):
 	def __init__(self, title, season, episode, airdate, prodnum, total):
 		self.title = title
 		self.season = season
-		self.episode = episode
+		self.episode = int(episode)
 		self.airdate = airdate
-		self.prodnum = prodnum or ''
+		self.prodnum = str(prodnum)
 		self.total = total
 
 	def __str__(self):
-		return "%sx%s: %s" % (self.season, self.episode, self.title)
+		return "%dx%02d: %s" % (self.season, self.episode, self.title)
+
+	def __eq__(self, other):
+		return (
+			self.title == other.title and
+			self.season == other.season and
+			self.episode == other.episode and
+			self.airdate == other.airdate and
+			self.prodnum == other.prodnum and
+			self.total == other.total
+		)
 
 class EpisoderData(object):
 	def __init__(self, datafile):
@@ -67,9 +74,11 @@ class EpisoderData(object):
 		self.shows = []
 
 	def load(self):
+		self.shows = []
 		file = open(self.datafile)
-		data = yaml.load(file.read())
+		fileData = file.read()
 		file.close()
+		data = yaml.load(fileData.decode('iso-8859-1'))
 		if not data['Shows']:
 			return 1
 		for showData in data['Shows']:
