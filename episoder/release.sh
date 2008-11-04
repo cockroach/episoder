@@ -22,14 +22,14 @@ mkdir tgz
 cp episoder-$VERSION.tar.gz tgz
 mv episoder-$VERSION.tar.gz episoder_$VERSION.orig.tar.gz
 
-cd episoder-$VERSION
-mkdir debian
-cp -r ../../../episoder-debian-files/* debian
-rm -rf debian/CVS
-debuild -kF01DFE92
+#cd episoder-$VERSION
+#mkdir debian
+#cp -r ../../../episoder-debian-files/* debian
+#rm -rf debian/CVS
+#debuild -kF01DFE92
 
-cd ..
-rm -rf episoder-0.4.3
+#cd ..
+#rm -rf episoder-0.4.3
 
-mkdir deb
-mv epi* deb
+#mkdir deb
+#mv epi* deb
