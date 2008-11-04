@@ -68,6 +68,7 @@ class PlainRenderer(object):
 		for episode in episodes:
 			text = self.format
 			epnum = "%02d" % episode.episode
+
 			text = text.replace("%airdate", str(episode.airdate))
 			text = text.replace("%show", episode.show)
 			text = text.replace("%season", str(episode.season))
@@ -75,7 +76,7 @@ class PlainRenderer(object):
 			text = text.replace("%eptitle", episode.title)
 			text = text.replace("%totalep", str(episode.total))
 			text = text.replace("%prodnum", str(episode.prodnum))
-			file.write("%s\n" % text)
+			file.write("%s\n" % text.encode('iso-8859-1'))
 
 		file.close()
 		shutil.move(name, self.outfile)
