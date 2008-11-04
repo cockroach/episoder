@@ -25,6 +25,7 @@ import sys
 import time
 import urllib2
 import traceback
+from os import environ
 from episoder import *
 from tempfile import mkstemp
 from BeautifulSoup import BeautifulSoup
@@ -83,9 +84,10 @@ class TVComSeason(object):
 		return episodes
 
 class TVComPage(object):
-	def __init__(self, url, cached):
+	def __init__(self, url, cached, startDate=datetime.date.min):
 		self.url = url
 		self.cached = cached
+		self.startDate = startDate
 
 	def getSoup(self):
 		try:
@@ -126,13 +128,19 @@ class TVComPage(object):
 		seasons = self.findSeasons(soup)
 		title = self.findTitle(soup)
 
+		seasons.reverse()
+
 		show = Show(title)
 
 		for season in seasons:
 			try:
 				episodes = self.getSeason(season)
+				if len(episodes) == 0:
+					continue
 				for episode in episodes:
 					show.addEpisode(episode)
+				if episodes[0].airdate <= self.startDate:
+					break
 			except urllib2.HTTPError:
 				sys.stderr.write("Error fetching season %d\n"
 					% season)
@@ -161,8 +169,14 @@ if __name__ == "__main__":
 	if not re.match('^http://www.tv.com/.*episode_listings.html$', url):
 		sys.exit(1)
 
+	if 'DATE_TEXT' in environ:
+		(year, month, day) = environ['DATE_TEXT'].split('-')
+		startDate = datetime.date(int(year), int(month), int(day))
+	else:
+		startDate = datetime.date.min
+
 	try:
-		page = TVComPage(url, cached)
+		page = TVComPage(url, cached, startDate)
 		yamlfile = page.parse()
 	except:
 		traceback.print_exc(file=sys.stderr)

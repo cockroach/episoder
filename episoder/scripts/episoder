@@ -19,7 +19,7 @@
 #
 # $Id$
 
-EPISODER_VERSION=0.5.0-pre
+EPISODER_VERSION=0.5.0-RC1
 
 [ -z "${EPISODER_PREFIX}" ] && EPISODER_PREFIX=/usr
 EPISODER_HOME=${EPISODER_PREFIX}/share/episoder
@@ -153,7 +153,6 @@ episoder_dump() {
 			fi
 		fi
 	fi
-
 
 case "${COMMAND}" in
 	builddb)

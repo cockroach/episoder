@@ -7,10 +7,14 @@ STATE OF THE TV.COM PLUGIN
 (2008-11-04)
 
 Be warned, the new tv.com parser is highly experimental. If you notice any
-issues with it (wrong parsing results, crashes, ...) please report the via
+issues with it (wrong parsing results, crashes, ...) please report them via
 our bug tracker.
 
-Also, for the time being the plugin has to send an additional request to tv.com
-for each season (so a show with 6 seasons will lead to 7 requests). This might
-be fixed in a future version of the plugin, but if you're sensitive about
-bandwidth and/or server abuse, please use the epguides.com plugin instead.
+Also, since tv.com does not include season information in the html pages, episoder
+has to download each season individually, leading to a high number of downloads per
+show. To reduce this effect, seasons are downloaded in reverse order and downloading
+stops as soon as an episode older than the requested start date is found, but still,
+at least two downloads per show and run are required.
+
+If you want to build a complete list of all episodes from a specific show, please use
+epguides.com instead since that parser only needs to download one page per show.

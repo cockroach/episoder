@@ -85,19 +85,23 @@ parse_url() {
 	local wgetfile="$2"
 	local found_parser=0
 
+	# Helps the tv.com plugin not to download unneeded pages
+	export DATE_TEXT
+
 	print "[*] Calling parsers"
 	for parser in ${EPISODER_HOME}/episoder_parser_* ; do
+		print v "--- Trying ${parser##*/}"
 		local log_stdout=$( tempfile )
 		local log_stderr=$( tempfile )
 		${parser} ${url} ${wgetfile} 2>${log_stderr} >${log_stdout}
 		local retcode=$?
 
-		print v "--- Code ${retcode} from ${parser##*/}"
-		print v "--- Data written to ${log_stdout}"
+		print v "--- Got code ${retcode} from plugin"
 
 		if [ ${retcode} -eq 0 ] ; then
 			found_parser=1
 			local yamlfile=$( cat ${log_stdout} )
+			print v "--- Data written to ${yamlfile}"
 			if [ ! -z ${name} ] ; then
 				sed -i "s/  title: .*/  title: ${name}/" \
 					${yamlfile}
@@ -108,7 +112,7 @@ parse_url() {
 			rm -f ${log_stderr}
 			break
 		elif [ ${retcode} -eq 1 ] ; then
-			print "--- Rejected by ${parser}"
+			print "--- Rejected by ${parser##*/}"
 		else
 			echo "Caught exit code ${retcode}" >>${log_stderr}
 			cat ${log_stderr}
