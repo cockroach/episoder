@@ -24,7 +24,9 @@ import re
 import sys
 import time
 import urllib2
+import traceback
 from episoder import *
+from tempfile import mkstemp
 from BeautifulSoup import BeautifulSoup
 
 class TVComSeason(object):
@@ -36,7 +38,13 @@ class TVComSeason(object):
 
 	def __extract_field(self, row, name):
 		td = row.findChild(attrs={'class': name})
-		contents = td.contents[0].contents[0]
+		if not td:
+			return ''
+
+		tdcontents = td.contents[0]
+		if len(tdcontents) == 0:
+			return ''
+		contents = tdcontents.contents[0]
 		return contents.string
 
 	def parse(self):
@@ -51,8 +59,9 @@ class TVComSeason(object):
 		for i in range(0, len(tbody.contents)):
 			tr = tbody.contents[i]
 
-			episodeNum = i
+			episodeNum = i+1
 			title = self.__extract_field(tr, 'ep_title')
+			title = title.encode('iso-8859-1')
 			prodCode = self.__extract_field(tr, 'ep_prod_code')
 			airDateRaw = self.__extract_field(tr, 'ep_air_date')
 
@@ -79,6 +88,18 @@ class TVComPage(object):
 		self.url = url
 		self.cached = cached
 
+	def getSoup(self):
+		try:
+			file = open(self.cached, 'r')
+		except IOError:
+			sys.stderr.write("Error opening %s\n" % self.cached)
+			return
+
+		page = file.read()
+		file.close()
+
+		return BeautifulSoup(page)
+
 	def findSeasons(self, soup):
 		seasons = []
 
@@ -102,17 +123,7 @@ class TVComPage(object):
 		return title
 
 	def parse(self):
-		try:
-			file = open(self.cached, 'r')
-		except IOError:
-			sys.stderr.write("Error opening %s\n" % self.cached)
-			return
-
-		page = file.read()
-		file.close()
-
-		soup = BeautifulSoup(page)
-
+		soup = self.getSoup()
 		seasons = self.findSeasons(soup)
 		title = self.findTitle(soup)
 
@@ -127,27 +138,34 @@ class TVComPage(object):
 				sys.stderr.write("Error fetching season %d\n"
 					% season)
 
-		data = EpisoderData('/tmp/foo')
+		(_, fileName) = mkstemp()
+		data = EpisoderData(fileName)
 		data.shows.append(show)
 		data.save()
+
+		return fileName
 
 	def getSeason(self, season):
 		season = TVComSeason(season, self.url)
 		return season.parse()
-
 
 if __name__ == "__main__":
 	argv = sys.argv
 
 	if len(argv) != 3:
 		sys.stderr.write("Syntax: %s <url> <cached-file>\n" % argv[0])
-		sys.exit(2)
+		sys.exit(3)
 
 	url = argv[1]
 	cached = argv[2]
 
-	if not re.match('^http://www.tv.com/.*', url):
+	if not re.match('^http://www.tv.com/.*episode_listings.html$', url):
 		sys.exit(1)
 
-	page = TVComPage(url, cached)
-	page.parse()
+	try:
+		page = TVComPage(url, cached)
+		yamlfile = page.parse()
+	except:
+		traceback.print_exc(file=sys.stderr)
+		sys.exit(2)
+	print yamlfile
