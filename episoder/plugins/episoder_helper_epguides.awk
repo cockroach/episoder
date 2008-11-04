@@ -1,4 +1,4 @@
-# episoder epguides.com parser
+# episoder epguides.com parser helper
 #
 # Copyright (c) 2006-2008 Stefan Ott. All rights reserved.
 #

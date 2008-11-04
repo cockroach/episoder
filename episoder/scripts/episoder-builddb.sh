@@ -1,4 +1,4 @@
-# episoder-builddb.sh, http://episoder.sourceforge.net/
+# episoder database builder, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004-2008 Stefan Ott. All rights reserved.
 #
@@ -145,8 +145,6 @@ get_episodes() {
 
 		local htmlfile=$( tempfile )
 		episoder_get_file "${url}" "${htmlfile}"
-#		cp /tmp/filec5E5sv ${htmlfile}
-#		cp /tmp/episode_listings.html ${htmlfile}
 		local exitcode=$?
 		if [ ${exitcode} -ne 0 ] ; then
 			rm -f ${htmlfile}
@@ -215,12 +213,6 @@ write_output() {
 	rm -f ${datafile}
 }
 
-write_episodes() {
-	# TODO: implement something like this
-	print "[*] Writing episodes"
-	mv $TMPFILE $EPISODER_DATAFILE
-}
-
 # Build the episoder database
 #
 build_db() {
@@ -245,8 +237,4 @@ build_db() {
 	[ -z "${NODATE}" ] && remove_old_episodes "${datafile}"
 
 	write_output "${datafile}" "${OUTPUT_PLUGIN}"
-
-#	sort_tmpfile
-#	write_episodes
-#	destroy_tmpfiles
 }

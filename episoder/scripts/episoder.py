@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# episoder python classes, http://episoder.sourceforge.net/
+# episoder core python classes, http://episoder.sourceforge.net/
 #
 # Copyright (c) 2004-2008 Stefan Ott. All rights reserved.
 #

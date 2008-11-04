@@ -53,10 +53,8 @@ match_epguides() {
 url=$1
 wgetfile=$2
 
-if [ ! -z "$( match_epguides ${url} )" ] ; then
-	echo "Accepting ${url} in epguides.com plugin" >&2
-	parse_epguides "${url}" "${wgetfile}"
-	exit $?
-else
-	exit 1
-fi
+[ -z "$( match_epguides ${url} )" ] && exit 1
+
+echo "Accepting ${url} in epguides.com plugin" >&2
+parse_epguides "${url}" "${wgetfile}"
+exit $?

@@ -33,7 +33,6 @@ class TVComSeason(object):
 	def __init__(self, season, baseURL):
 		self.season = season
 		self.url = "%s?season=%d" % (baseURL, season)
-#		self.url = "%s_%d" % (baseURL, season)
 		self.fetcher = urllib2
 
 	def __extract_field(self, row, name):
