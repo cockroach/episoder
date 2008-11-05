@@ -1,8 +1,13 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
-v0.5.0 (xx xxx 2008)
-====================
+v0.5.0-RC2 (06 Nov 2008)
+========================
+ * Fixed an issue where combining data from tv.com and epguides.com would
+   create corrupted YAML files
+
+v0.5.0-RC1 (05 Nov 2008)
+========================
  * Completely rewrote the plugin API (see README.plugins)
  * Episoder now requires python to run (see README)
  * New tv.com plugin (see README.tvcom)

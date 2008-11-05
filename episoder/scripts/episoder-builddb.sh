@@ -47,7 +47,7 @@ print_error() {
 #
 remove_old_episodes() {
 	local datafile="$1"
-	print "[*] Removing episodes prior to ${DATE_TEXT}"
+	print "[*] Removing episodes prior to ${DATE_TEXT} from ${datafile}"
 	${EPISODER_HOME}/remove-old.py ${datafile} 1 "${DATE_TEXT}"
 	local exitcode=$?
 	print v "--- Returned with exit code ${exitcode}"
@@ -189,7 +189,7 @@ get_episodes() {
 		fi
 	done
 
-	cat ${yamldata} >> ${datafile}
+	grep -v '^Shows:' ${yamldata} >> ${datafile}
 	rm -f ${yamldata}
 }
 
@@ -238,7 +238,10 @@ build_db() {
 		cp ${datafile} ~/.episoder-data
 	fi
 
-	[ -z "${NODATE}" ] && remove_old_episodes "${datafile}"
+	if [ -z "${NODATE}" ] ; then
+		remove_old_episodes "${datafile}"
+		[ $? -eq 0 ] || exit 1
+	fi
 
 	write_output "${datafile}" "${OUTPUT_PLUGIN}"
 }
