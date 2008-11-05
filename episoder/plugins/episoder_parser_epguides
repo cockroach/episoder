@@ -34,7 +34,11 @@ parse_epguides() {
 
 	if [ ${retcode} -eq 0 ] ; then
 		rm -f ${log}
-		echo ${yamlfile}
+		local utf8yamlfile=$( tempfile )
+		konwert winlatin1-UTF8 ${yamlfile} > ${utf8yamlfile} \
+			|| return 11
+		rm -f ${yamlfile}
+		echo ${utf8yamlfile}
 		return 0
 	else
 		echo "Awk script failed, debug output:" >&2

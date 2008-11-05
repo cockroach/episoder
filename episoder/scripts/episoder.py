@@ -78,11 +78,13 @@ class EpisoderData(object):
 		file = open(self.datafile)
 		fileData = file.read()
 		file.close()
-		data = yaml.load(fileData.decode('iso-8859-1'))
+		data = yaml.load(fileData.decode('utf8'))
 		if not data['Shows']:
 			return 1
 		for showData in data['Shows']:
 			title = showData['title']
+			print title
+			print showData
 			show = Show(title)
 			for episodeData in showData['episodes']:
 				episodeNum = episodeData['episode']

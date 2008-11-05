@@ -1,3 +1,3 @@
 - Redo shell tests
 - Test the tv.com dont-download-old-seasons feature
-- Remove duplicate YAML root nodes
+- Check for dependencies
