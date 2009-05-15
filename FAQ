@@ -1,0 +1,8 @@
+Get the latest version of this file at http://episoder.sourceforge.net/
+===============================================================================
+
+Q: 	I get "ERROR: Please make sure your url points to the 'all seasons'
+	page (season=0)" but I can't find such a page
+
+A:	For shows which only have one season, this link is not shown. Just add
+	&season=0 to your url.

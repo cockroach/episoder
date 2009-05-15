@@ -3,7 +3,7 @@ import sqlite3
 import logging
 import datetime
 
-version="0.5.0-RC2+SVN"
+version="0.5.0-SVN-20090515"
 
 class DataStore(object):
 	def __init__(self, path):

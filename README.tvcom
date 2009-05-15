@@ -1,0 +1,22 @@
+Get the latest version of this file at http://episoder.sourceforge.net/
+===============================================================================
+
+STATE OF THE TV.COM PLUGIN
+--------------------------
+
+(2008-11-04)
+
+Be warned, the new tv.com parser is highly experimental. If you notice any
+issues with it (wrong parsing results, crashes, ...) please report them via
+our bug tracker.
+
+Also, since tv.com does not include season information in the html pages,
+episoder has to download each season individually, leading to a high number of
+downloads per show. To reduce this effect, seasons are downloaded in reverse
+order and downloading stops as soon as an episode older than the requested
+start date is found, but still, at least two downloads per show and run are
+required.
+
+If you want to build a complete list of all episodes from a specific show,
+please use epguides.com instead since that parser only needs to download one
+page per show.

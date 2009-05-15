@@ -1,0 +1,104 @@
+.TH EPISODER 1 
+.SH NAME
+episoder \- TV show episode reminder.
+.SH SYNOPSIS
+.B episoder
+[options]
+.SH DESCRIPTION
+episoder is a tool to tell you about new episodes of your favourite TV shows
+.SH OPTIONS
+.TP
+.B \-h
+Show help and quit.
+.TP
+.B \-c \fIFILE\fR
+Use \fIFILE\fR for configuration values (default is ~/.episoder).
+.TP
+.B \-b
+(Re)build episoder's database
+.TP
+.B \-v
+Enable verbose operation (only when building the db)
+.TP
+.B \-w
+Enable very verbose operation (only when building the db)
+.TP
+.B \-V
+Show program version and quit
+.TP
+.B \-n [days]
+Specify the number of future days to be shown by showlist (default: 1)
+.TP
+.B -d [YYYY-MM-DD]
+The date to begin search or update from (default: today)
+.TP
+.B -i
+Ignore default cut-off date set in the config file (when building) and ignore the date during search (when showing).
+.TP
+.B -s [string]
+String to search all future episodes for
+.SH CONFIG FILE
+.LP
+The configuration file consists of a section with settings for the program
+and a list of sources to be used to build the database.
+.TP
+.B agent=foo
+Set the user-agent string to be used by wget (was required when tvtome blocked wget, might not be needed nowadays)
+.TP
+.B data=/path/to/file
+Specifies the file to be used to store the information about upcoming shows.
+.TP
+.B output_plugin=unquoted_plugin_name
+Specifies the output plugin to be used, defaults to 'plain' for backwards compatibility.
+.TP
+.B src=http://some.web.add/ress
+Each src entry specifies a URL with episode information. Make sure you have the
+appropriate plugin before adding random new URLs (See \fBPLUGINS\fR).
+.TP
+.B src=http://some.web.add/ress name=some name
+Optionally you can specify a name to use for your show instead of the one extracted from the website.
+Be aware, however, that currently all spaces in the name you supply will be substituted by underscores.
+.TP
+.B format=unquoted format string
+This allows you to customize episoder's output. Available fields are:
+.PP
+        %airdate     The episode's airdate as YYYY-MM-DD
+        %show        Name of the show
+        %season      Current season
+        %epnum       Episode's number in season
+        %eptitle     Title of the episode
+        %totalep     Episode's total number
+        %prodnum     Production number
+.br
+
+If undefined, the default value of
+.B %airdate %show %seasonx%epnum
+(eg. "2005-07-29 Monk 4x04") is used.
+.br
+
+Whether this option is honored or not is up to the chosen output plugin.
+.TP
+.B dateformat=unquoted string describing the format
+Here you can define the date format you'd like to be used for the output. To get a list of all possible fields, see
+.BR date(1).
+
+The default is %a, %b %d, %Y
+.SH CRON
+.LP
+You might want to have your episode db rebuilt on a regular basis (i.e. daily).
+The easiest way to achieve this is with a simple cron job:
+.PP
+    crontab -l > crontab
+    echo "40 5 * * * episoder -b" >> crontab
+    crontab crontab
+.br
+.SH PLUGINS
+.LP
+episoder uses a set of plugins to parse the source files and to generate its output. See README.plugins for details.
+.SH FILES
+.B ~/.episoder
+- default configuration file
+.SH AUTHOR
+This manual page was written by Stefan Ott
+.SH "SEE ALSO"
+.BR crontab(1).

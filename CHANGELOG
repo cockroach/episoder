@@ -1,0 +1,125 @@
+Get the latest version of this file at http://episoder.sourceforge.net/
+===============================================================================
+
+v0.5.0-RC3 (xx xxx 2009)
+========================
+ * Realized that the previous attempt at improving episoder was flawed
+ * Rewrote the whole thing in python
+ * Parsed data is now stored in an sqlite3 database
+
+v0.5.0-RC2 (06 Nov 2008)
+========================
+ * Fixed an issue where combining data from tv.com and epguides.com would
+   create corrupted YAML files
+
+v0.5.0-RC1 (05 Nov 2008)
+========================
+ * Completely rewrote the plugin API (see README.plugins)
+ * Episoder now requires python to run (see README)
+ * New tv.com plugin (see README.tvcom)
+ * New output layer (see README.plugins)
+ * Switched to YAML for intermediate data storage
+ * Updated docs
+
+v0.4.7 (24 Feb 2007)
+====================
+ * Fixed a parsing issue introduced with 0.4.6
+
+v0.4.6 (24 Feb 2007)
+====================
+ * Discovered yet another formatting possibility on epguides.com (used for
+   instance for the show "Midsomer Murders") and adapted the parser accordingly
+ * Slightly updated the man page
+
+v0.4.5 (23 Jan 2007)
+====================
+ * Fixed some epguides parser issues
+
+v0.4.4 (19 Nov 2006)
+====================
+ * Fixed the -i option when building the database (did the exact opposite of
+   what it was supposed to do)
+
+v0.4.3 (24 Oct 2006)
+====================
+ * We now actually honor the -i option when building the database
+ * Added the possibility to override a show's name in the config file. This was
+   needed for the new webisoder, a web-based episoder. Find out more about it
+   at http://www.webisoder.net/
+ * Oops, forgot to update episoder's version number in the last release...
+ * Fixed a bug in the new epguides.com parser which would not drop episodes
+   without a date
+
+v0.4.2 (21 Oct 2006)
+====================
+ * Don't ignore the config file passed with -c anymore when building the db
+ * Added parser for epguides.com (closes #38)
+
+v0.4.1 (20 Apr 2006)
+====================
+ * Did some minor internal changes to get episoder to work on non-linux systems
+ * Removed long options
+ * Hotfix for the tv.com website changes
+
+v0.4.0 (3 Dec 2005)
+===================
+ * Re-organized options: -vv is now -w, -rc is now -c (or --rc), -nd is gone
+   (use --nodate), -sa is gone (use -s and --nodate instead), -i is gone (see
+   below)
+ * Search is now alway case-insensitive
+ * If no action is specified, episoder now defaults to showlist
+ * Removed the tvtome dummy plugin
+
+v0.3.0 (9 Aug 2005)
+===================
+ * Majeed Goldrick joined the project
+ * Moved parts of the website to sourceforge
+ * Removed a 1024-episodes-limit in sortlist
+ * Added search options
+ * Switched to awk to remove old episodes (>600 times faster)
+ * Switched to awk for tv.com parsing (>10 times faster)
+ * Removed the debian files from the main distribution
+ * Added a couple of tests
+
+v0.2.5 (19 Jul 2005)
+====================
+ * Fixed an alignment problem in showlist (closes #25)
+ * Fixed a date-calculation issue in showlist (closes #23)
+ * Fixed a documentation mistake about the format string (closes #21)
+ * Added support for nun-numeric episode numbers (closes #24)
+
+v0.2.4 (19 Jul 2005)
+====================
+ * Re-arranged the code to remove a 3-episodes-limit in showlist (closes #19)
+ * Added command line option to specify the number of days to show (closes #20)
+ * Brought back season-episode information in the tvcom plugin (closes #15)
+ * Added the possibility to customize the output format (closes #16)
+ * Added a small FAQ
+ * Thanks to Majeed Goldrick for all the bug reports and feature suggestions
+ * Cosmetic changes
+
+v0.2.3 (23 Jun 2005)
+====================
+ * The tvcom plugin now uses the new "All Seasons" link
+ * Cosmetic changes
+
+v0.2.2 (17 Jun 2005)
+====================
+ * Added LICENSE file
+ * install.sh now correctly changes the EPISODER_HOME value
+ * Small fixes in the verbose output
+ * Created tvcom plugin
+ * Replaced all functionality from the tvtome plugin with a warning
+ * Now all the available modules are actually loaded
+ * Some minor changes in the man page
+
+v0.2.1 (4 Jan 2005)
+===================
+ * The tvtome plugin now understands UNAIRED episodes
+ * Improved the builddb script's debug output
+ * Fixed an issue that would print errors for shows with no upcoming episodes
+ * The debian files are now part of the main distribution
+
+v0.2.0 (13 Sep 2004)
+====================
+ * Initial public release
