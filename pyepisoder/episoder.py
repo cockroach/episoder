@@ -1,0 +1,118 @@
+import sys
+import sqlite3
+import logging
+import datetime
+
+version="0.5.0-RC2+SVN"
+
+class DataStore(object):
+	def __init__(self, path):
+		self.logger = logging.getLogger('DataStore')
+		self.conn = sqlite3.connect(path)
+
+	def clear(self):
+		try:
+			self._initdb()
+		except sqlite3.OperationalError, msg:
+			self.logger.error(msg)
+			self.logger.error('If you have an old episoder data ' +
+				'file, please move it away')
+			sys.stderr.write('ERROR\n')
+			sys.exit(10)
+
+	def _initdb(self):
+		self.conn.execute('DROP TABLE IF EXISTS shows')
+		self.conn.execute('CREATE TABLE shows (show_id INTEGER ' +
+			'PRIMARY KEY, show_name TEXT)')
+
+		self.conn.execute('DROP TABLE IF EXISTS episodes')
+		self.conn.execute('CREATE TABLE episodes (show_id INTEGER,' +
+				' num INTEGER, airdate TEXT, season INTEGER,' +
+				' title TEXT, totalnum INTEGER, prodnum TEXT)')
+
+	def addShow(self, show):
+		result = self.conn.execute('INSERT INTO shows VALUES (NULL, ?)',
+				[show])
+		return result.lastrowid
+
+	def getShows(self):
+		shows = self.conn.execute('SELECT * FROM shows')
+		return shows.fetchall()
+
+	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
+		episodes = []
+		result = self.conn.execute('SELECT show_id, show_name, title,' +
+			'season, num, airdate, prodnum, totalnum FROM ' +
+			'episodes NATURAL JOIN shows WHERE airdate >= ? AND ' +
+			'airdate <= ? ORDER BY airdate ASC', [basedate,
+				basedate + datetime.timedelta(n_days)])
+
+		shows = []
+		episodes = []
+
+		for item in result.fetchall():
+			show = Show(item[1], item[0])
+			if show in shows:
+				show = shows[shows.index(show)]
+			else:
+				shows.append(show)
+
+			airdate = datetime.datetime.strptime(item[5],"%Y-%m-%d")
+
+			episode = Episode(show, item[2], item[3], item[4],
+				airdate.date(), item[6], item[7])
+			episodes.append(episode)
+
+		return episodes
+
+	def addEpisode(self, show, episode):
+		num = episode['episode']
+		airdate = episode['airdate']
+		season = episode['season']
+		title = episode['title']
+		totalnum = episode['totalepnum']
+		prodnum = episode['prodnum']
+
+		self.conn.execute('INSERT INTO episodes VALUES (?, ?, ?, ?,' +
+				'?, ?, ?)', [show, num, airdate, season, title,
+					totalnum, prodnum])
+
+	def commit(self):
+		self.conn.commit()
+
+	def rollback(self):
+		self.conn.rollback()
+
+	def removeBefore(self, date):
+		self.conn.execute('DELETE FROM episodes WHERE airdate < ?',
+				[date.isoformat()])
+		self.commit()
+
+class Episode(object):
+	def __init__(self, show, title, season, episode, airdate, prodnum,
+			total):
+		self.title = title
+		self.season = season
+		self.episode = int(episode)
+		self.airdate = airdate
+		self.prodnum = str(prodnum)
+		self.total = total
+		self.show = show
+
+	def __str__(self):
+		return "%s %dx%02d: %s" % (self.show.name, self.season,
+				self.episode, self.title)
+
+class Show(object):
+	def __init__(self, name, id=-1):
+		self.name = name
+		self.episodes = []
+
+	def addEpisode(self, episode):
+		self.episodes.append(episode)
+
+	def __str__(self):
+		return 'Show("%s")' % self.name
+
+	def __eq__(self, other):
+		return self.name == other.name

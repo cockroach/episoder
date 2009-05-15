@@ -1,0 +1,197 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import getopt
+import logging
+import datetime
+import pyepisoder.episoder as episoder
+import pyepisoder.plugins as plugins
+
+from pyepisoder.episoder import version
+
+def show_version():
+	print 'This is episoder ' + version
+
+def show_help():
+	print """Usage: episoder [options]
+
+Global options:
+  -h			show this help
+  -c <file>		use configuration from file (default: ~/.episoder)
+  -b			update the database
+  -v			verbose operation
+  -w			very verbose (debug) operation
+  -V			show version information
+
+Options for database update:
+  -d <YYYY-MM-DD>	remove episodes prior to this date (default: yesterday)
+  -i			ignore date (don't remove old episodes)
+
+Options for console output:
+  -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
+  -i			ignore date
+  -n <days>		number of future days to show (default: 2),
+			relative to the date set with -d
+  -s <string>		search database for string (NOT IMPLEMENTED YET)
+
+Note that -i overrules -d and -n
+
+Report episoder bugs on http://episoder.sf.net/"""
+
+def parse_rc(path):
+	datafile = None
+	format = '%airdate %show %seasonx%epnum'
+	dateformat = '%a, %b %d, %Y'
+	agent='episoder/' + version
+
+	if not os.path.exists(path):
+		sys.stderr.write(path + ' does not exist\n')
+		sys.exit(2)
+
+	sources = []
+
+	try:
+		rc = open(path)
+	except Exception, msg:
+		sys.stderr.write("%s\n" % msg)
+		sys.exit(2)
+
+	for line in rc:
+		line = line.strip()
+		if line.startswith('data='):
+			(_, datafile) = line.split('=')
+		elif line.startswith('format='):
+			(_, format) = line.split('=')
+		elif line.startswith('dateformat='):
+			(_, dateformat) = line.split('=')
+		elif line.startswith('agent='):
+			(_, agent) = line.split('=')
+		elif line.startswith('src='):
+			data = {}
+			name = None
+			if ' ' in line:
+				(src, opts) = line.split(' ')
+				if opts.startswith('name='):
+					(_, name) = opts.split('=')
+				data['name'] = name
+			else:
+				src = line
+
+			(_, url) = src.split('=')
+			data['url'] = url
+
+			sources.append(data)
+			logging.debug('new source: %s (%s)' % (url, name))
+
+	rc.close()
+
+	if not datafile:
+		sys.stderr.write('No data file defined in configuration\n')
+		sys.exit(3)
+	if len(sources) < 1:
+		sys.stderr.write('No sources defined in configuration\n')
+		sys.exit(3)
+
+	logging.debug('datafile=' + datafile)
+	logging.debug('format=' + format)
+	logging.debug('dateformat=' + dateformat)
+	logging.debug('agent=' + agent)
+
+	config = {
+		'datafile': datafile,
+		'format': format,
+		'dateformat': dateformat,
+		'sources': sources,
+		'agent': agent
+	}
+
+	logging.info('Loaded rcfile')
+
+	return config
+
+def show_data(options, config):
+	store = episoder.DataStore(config['datafile'])
+	renderer = plugins.all()['output'][0]
+	renderer.render(store, options, config)
+
+def update_data(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.clear()
+
+	for source in config['sources']:
+		url = source['url']
+		parser = plugins.parser_for(url)
+
+		if not parser:
+			logging.warning('No parser found for %s' % url)
+			continue
+
+		parser.parse(source, store)
+
+	if not options['nodate']:
+		basedate = options['date']
+		store.removeBefore(basedate)
+
+def get_options():
+	rcfile = os.path.join(os.environ["HOME"], '.episoder')
+	loglevel = logging.WARNING
+	daysahead = 2
+	date = datetime.date.today() - datetime.timedelta(1)
+	nodate = False
+	search = ''
+	command = show_data
+
+	try:
+		options, args = getopt.getopt(sys.argv[1:], "c:d:hin:s:vVwb")
+	except getopt.error, msg:
+		print msg
+		print "for help use -h"
+		sys.exit(1)
+
+	for option, argument in options:
+		if option == '-h':
+			show_help()
+			sys.exit(0)
+		elif option == '-c':
+			rcfile = argument
+		elif option == '-v':
+			loglevel = logging.INFO
+		elif option == '-w':
+			loglevel = logging.DEBUG
+		elif option == '-V':
+			show_version()
+			sys.exit(0)
+		elif option == '-n':
+			daysahead = int(argument)
+		elif option == '-d':
+			parts = argument.split('-')
+			date = datetime.date(int(parts[0]), int(parts[1]),
+					int(parts[2]))
+		elif option == '-i':
+			nodate = True
+		elif option == '-s':
+			search = argument
+			print "Search is not implemented yet, sorry."
+			sys.exit(99)
+		elif option == '-b':
+			command = update_data
+
+	return {
+		'rcfile': rcfile,
+		'loglevel': loglevel,
+		'days': daysahead,
+		'date': date,
+		'nodate': nodate,
+		'search': search,
+		'command': command
+	}
+
+def main():
+	options = get_options()
+	logging.basicConfig(level=options['loglevel'])
+	config = parse_rc(options['rcfile'])
+	options['command'](options, config)
+
+if __name__ == "__main__":
+	main()
