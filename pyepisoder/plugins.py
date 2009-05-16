@@ -1,13 +1,17 @@
 import os
+import re
 import yaml
 import logging
 import urllib2
 import tempfile
 import datetime
 
+from BeautifulSoup import BeautifulSoup
+
 def all():
 	return {
-		'parsing': [ EpguidesParser(), DummyParser() ],
+		'parsing': [ EpguidesParser(), TVComParser(), 
+			TVComDummyParser() ],
 		'output': [ ConsoleRenderer() ]
 	}
 
@@ -19,6 +23,15 @@ def parser_for(url):
 			return parser
 
 	return None
+
+def parser_named(name):
+	parsers = all()['parsing']
+
+	for parser in parsers:
+		if parser.__class__.__name__ == name:
+			return parser
+
+	raise Exception('Parser %s not found\n' % name)
 
 class DummyParser(object):
 	def __init__(self):
@@ -43,7 +56,6 @@ class EpguidesParser(object):
 		return url.startswith('http://www.epguides.com/')
 
 	def parse(self, source, store):
-		self.store = store
 		url = source['url']
 
 		if 'name' in source:
@@ -52,10 +64,14 @@ class EpguidesParser(object):
 			name = None
 
 		webdata = self._fetchPage(url)
-		yamlfile = self._runAwk(webdata)
+		self.parseFile(webdata, store, name)
+		os.unlink(webdata)
+
+	def parseFile(self, file, store, name=None):
+		self.store = store
+		yamlfile = self._runAwk(file)
 		data = self._readYaml(yamlfile, name)
 		self.store.commit()
-		os.unlink(webdata)
 		os.unlink(yamlfile)
 
 	def _fetchPage(self, url):
@@ -120,6 +136,117 @@ class EpguidesParser(object):
 			self.logger.debug('Found episode %s' % episode['title'])
 			self.store.addEpisode(show_id, episode)
 
+class TVComDummyParser(object):
+	def __str__(self):
+		return 'dummy tv.com parser to detect old urls (DO NOT USE)'
+
+	def accept(self, url):
+		return url.startswith('http://www.tv.com')
+
+	def parse(self, source, _):
+		logging.error("The url %s needs to be updated" % source['url'])
+
+class TVComParser(object):
+	def __init__(self):
+		self.logger = logging.getLogger('TVComParser')
+
+	def __str__(self):
+		return 'tv.com parser'
+
+	def accept(self, url):
+		return re.match('http://(www.)?tv.com/\w+/show/\d+/?', url)
+
+	def parse(self, source, store):
+		url = source['url']
+
+		if 'name' in source:
+			name = source['name']
+		else:
+			name = None
+
+		print url
+
+	def parseFile(self, filename, store, name=None):
+		self.store = store
+		self.episodes = {}
+
+		file = open(filename)
+		data = file.read()
+		soup = BeautifulSoup(data.decode('ISO-8859-1'))
+		file.close()
+
+		elements = soup.findAll('li',
+				{ 'class': re.compile('episode.*')})
+
+		switch = soup.find('a', { 'class': 'switch_to_guide'})
+
+		if (switch):
+			self.logger.debug('This is a list view page')
+			self.parseListViewPage(soup)
+		else:
+			self.logger.debug('This is a guide view page')
+			self.parseGuideViewPage(soup)
+
+	def parseListViewPage(self, soup):
+		elements = soup.findAll('tr', { 'class': 'episode' })
+
+		for element in elements:
+			tr = element.find('td', { 'class': 'number' })
+			totalepnum = int(tr.contents[0].strip())
+
+			tr = element.find('td', { 'class': 'prod_no' })
+			prodnum = tr.contents[0].strip()
+
+			reviews = element.find('td', { 'class': 'reviews' })
+			link = reviews.contents[0]
+			url = link['href']
+			parts = url.split('/')
+			id = int(parts[-2])
+
+			self.logger.debug("Found episode %d (%d)" %
+					(totalepnum, id))
+
+			if not id in self.episodes:
+				self.episodes[id] = {}
+
+			self.episodes[id]['prodnum'] = prodnum
+			self.episodes[id]['totalepnum'] = totalepnum
+
+	def parseGuideViewPage(self, soup):
+		h1 = soup.find('h1')
+		show_name = h1.contents[0]
+		self.logger.debug('Got show "%s"' % show_name)
+
+		elements = soup.findAll('li',
+				{ 'class': re.compile('episode.*')})
+
+		for element in elements:
+			meta = element.find('div', { 'class': 'meta' })
+			data = meta.contents[0].strip()
+			result = re.search('Season ([0-9]+), Episode ([0-9]+)' +
+				'.* Aired: (.*)$', data)
+
+			season = result.group(1)
+			episode_num = result.group(2)
+			airdate = result.group(3)
+
+			h3 = element.find('h3')
+			link = h3.find('a')
+			title = link.contents[0]
+			url = link['href']
+			parts = url.split('/')
+			id = int(parts[-2])
+
+			if not id in self.episodes:
+				self.episodes[id] = {}
+			self.episodes[id]['season'] = season
+			self.episodes[id]['episode'] = episode_num
+			self.episodes[id]['airdate'] = airdate
+			self.episodes[id]['title'] = title
+
+			self.logger.debug('Found episode %s (%d)' %
+					(title, id))
+
 class ConsoleRenderer(object):
 	DEFAULT='\033[30;0m'
 	RED='\033[31;1m'
@@ -174,37 +301,3 @@ class ConsoleRenderer(object):
 			else:
 				self._renderEpisode(episode,
 						ConsoleRenderer.DEFAULT)
-
-
-
-	"""
-
-	if [ ! -z "$NODATE" ] && [ ! -z "$SEARCH_TEXT" ]; then
-		echo -ne ${color_gray}
-		grep -i "$SEARCH_TEXT" $EPISODER_DATAFILE | while read line; do
-			DATE=${line:0:10}
-			output=`echo $line | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/\`date +\"$DATE_FORMAT\" -d $DATE\`/" | sed -e "s/$SEARCH_TEXT/\\\\\E${color_green}\0\\\\\E${color_gray}/ig"`
-			echo -e $output
-		done
-	else
-		YESTERDAY=`get_date_by_offset -1`
-		TODAY=`get_date_by_offset 0`
-		TOMORROW=`get_date_by_offset 1`
-
-		echo -ne ${color_red}
-		grep "^$YESTERDAY" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $YESTERDAY`/"
-
-		echo -ne ${color_yellow}
-		grep "^$TODAY" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed 's/.*/>\0</' | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TODAY`/"
-
-		echo -ne ${color_green}	
-		grep "^$TOMORROW" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $TOMORROW`/"
-
-		echo -ne ${color_lightblue}
-		for ((day=2; day <= $NUM_DAYS; day++)); do
-			DATE=`get_date_by_offset $day`
-			grep "^$DATE" $EPISODER_DATAFILE | grep -i "$SEARCH_TEXT" | sed s/^/\ / | sed -r "s/([0-9]{4}-[0-9]{2}-[0-9]{2})/`date +"$DATE_FORMAT" -d $DATE`/"
-		done
-
-	fi
-	echo -ne ${color_default}"""
