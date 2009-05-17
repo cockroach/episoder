@@ -19,7 +19,7 @@ CONFIGURATION
 See "man episoder"
 
 
-INSTALLATION (TODO: UPDATE)
+INSTALLATION
 ------------
 	* Run 'python setup.py install'
 	* Create a cron job to have your database rebuilt once a day
