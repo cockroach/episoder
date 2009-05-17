@@ -9,7 +9,7 @@ episoder is a tool to tell you about new episodes of your favourite TV shows.
 DEPENDENCIES
 ------------
 In order to use episoder, you will need python installed on your system. In
-addition to the default distribution, the 'beautifulsoup', 'yaml' and sqlite2
+addition to the default distribution, the 'beautifulsoup', 'yaml' and 'sqlite2'
 modules are required. On debian systems the corresponding packages are called
 python-beautifulsoup and python-yaml and python-pysqlite2.
 

@@ -4,7 +4,7 @@ TARGETDIR=__RELEASE
 
 rm -rf ${TARGETDIR}
 
-VERSION=$( sed 's/.*"\(.*\)"/\1/' <( grep version pyepisoder/episoder.py ) )
+VERSION=$( sed 's/.*"\(.*\)"/\1/' <( grep ^version= pyepisoder/episoder.py ) )
 echo Preparing release ${VERSION}
 
 mkdir -p ${TARGETDIR}/episoder-${VERSION}
