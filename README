@@ -21,12 +21,12 @@ See "man episoder"
 
 INSTALLATION (TODO: UPDATE)
 ------------
-	* Run ./install.sh install [base_dir] where base_dir is the directory you
-	  want episoder to be installed under (e.g. /usr or /usr/local).
+	* Run 'python setup.py install'
 	* Create a cron job to have your database rebuilt once a day
-	* Add "$base_dir/bin/episoder" (e.g. /usr/bin/episoder) to your
-	  ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc or /etc/profile.
-	  Consult the bash docs to find out which file you want to use.
+	* Add "episoder" to your ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc
+	  or /etc/profile if you want to see your upcoming shows every time
+	  you start a shell. Consult the bash docs to find out which file you
+	  want to use.
 
 
 CONTACT
