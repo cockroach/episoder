@@ -29,14 +29,7 @@ class DataStore(object):
 		self.conn = sqlite3.connect(path)
 
 	def clear(self):
-		try:
-			self._initdb()
-		except sqlite3.OperationalError, msg:
-			self.logger.error(msg)
-			self.logger.error('If you have an old episoder data ' +
-				'file, please move it away')
-			sys.stderr.write('ERROR\n')
-			sys.exit(10)
+		self._initdb()
 
 	def _initdb(self):
 		self.conn.execute('DROP TABLE IF EXISTS shows')

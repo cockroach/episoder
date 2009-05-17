@@ -223,8 +223,6 @@ def get_options():
 			nodate = True
 		elif option == '-s':
 			search = argument
-			print "Search is not implemented yet, sorry."
-			sys.exit(99)
 		elif option == '-b':
 			command = update_data
 		elif option == '-f':
