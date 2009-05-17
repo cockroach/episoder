@@ -6,7 +6,7 @@ episoder \- TV show episode reminder.
 [options]
 .SH DESCRIPTION
 episoder is a tool to tell you about new episodes of your favourite TV shows
-.SH OPTIONS
+.SH Global options
 .TP
 .B \-h
 Show help and quit.
@@ -15,28 +15,48 @@ Show help and quit.
 Use \fIFILE\fR for configuration values (default is ~/.episoder).
 .TP
 .B \-b
-(Re)build episoder's database
+Update episoder's database
 .TP
 .B \-v
-Enable verbose operation (only when building the db)
+Enable verbose operation
 .TP
 .B \-w
-Enable very verbose operation (only when building the db)
+Enable very verbose (debug) operation
 .TP
 .B \-V
 Show program version and quit
 .TP
-.B \-n [days]
-Specify the number of future days to be shown by showlist (default: 1)
+.B \-p
+Show available parsers
+.TP
+.B \-l \fIFILE\fR
+Log to \fIFILE\fR instead of stdout
+.SH Options for database update
 .TP
 .B -d [YYYY-MM-DD]
-The date to begin search or update from (default: today)
+Remove episodes prior to this date (default: yesterday)
 .TP
 .B -i
-Ignore default cut-off date set in the config file (when building) and ignore the date during search (when showing).
+Ignore date (don't remove old episodes), overrules -d
 .TP
-.B -s [string]
-String to search all future episodes for
+.B -f \fIFILE\fR
+Get data from \fIFILE\fR, ignore configured sources (needs -P)
+.TP
+.B -f \fIPARSER\fR
+Force \fIPARSER\fR to be used (only in combination with -f)
+.SH Options for console output
+.TP
+.B -d [YYYY-MM-DD]
+Only show episodes newer than date (default: yesterday)
+.TP
+.B -i
+Ignore date (overrules -d and -n)
+.TP
+.B \-n \fIDAYS\fR
+Number of future \fIDAYS\fR to show (default: 2). This value is relative to the date set with -d.
+.TP
+.B -s \fITEXT\fR
+Search the database for \fITEXT\fR
 .SH CONFIG FILE
 .LP
 The configuration file consists of a section with settings for the program
@@ -50,7 +70,10 @@ Specifies the file to be used to store the information about upcoming shows.
 .TP
 .B src=http://some.web.add/ress
 Each src entry specifies a URL with episode information. Make sure you have the
-appropriate plugin before adding random new URLs (check with -p)
+appropriate plugin before adding random new URLs (check with -p). Episoder currently understands the following types of source:
+.PP
+        src=http://www.epguides.com/CSI/
+        src=http://www.tv.com/CSI/show/19/
 .TP
 .B src=http://some.web.add/ress name=some name
 Optionally you can specify a name to use for your show instead of the one extracted from the website.
