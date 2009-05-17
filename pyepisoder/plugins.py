@@ -7,6 +7,7 @@ import tempfile
 import datetime
 
 from BeautifulSoup import BeautifulSoup
+from episoder import Episode
 
 def all():
 	return {
@@ -46,7 +47,7 @@ class DummyParser(object):
 class EpguidesParser(object):
 	def __init__(self):
 		self.logger = logging.getLogger('EpguidesParser')
-		self.awkfile = '/home/stefan/projects/episoder/trunk/episoder/plugins/episoder_helper_epguides.awk'
+		self.awkfile = '/home/stefan/projects/episoder/branches/0.5/extras/episoder_helper_epguides.awk'
 		self.awk = '/usr/bin/awk'
 
 	def __str__(self):
@@ -134,7 +135,14 @@ class EpguidesParser(object):
 
 		for episode in episodes:
 			self.logger.debug('Found episode %s' % episode['title'])
-			self.store.addEpisode(show_id, episode)
+			self.store.addEpisode(show_id, Episode(show_id,
+					episode['title'],
+					episode['season'],
+					episode['episode'],
+					episode['airdate'],
+					episode['prodnum'],
+					episode['totalepnum']
+				))
 
 class TVComDummyParser(object):
 	def __str__(self):
@@ -157,6 +165,11 @@ class TVComParser(object):
 		return re.match('http://(www.)?tv.com/\w+/show/\d+/?', url)
 
 	def parse(self, source, store):
+		self.store = store
+		self.episodes = {}
+		self.show = None
+		# need to get episode.html?season=All and
+		# episode.html?season=All&shv=guide
 		url = source['url']
 
 		if 'name' in source:
@@ -169,6 +182,7 @@ class TVComParser(object):
 	def parseFile(self, filename, store, name=None):
 		self.store = store
 		self.episodes = {}
+		self.show = None
 
 		file = open(filename)
 		data = file.read()
@@ -187,7 +201,18 @@ class TVComParser(object):
 			self.logger.debug('This is a guide view page')
 			self.parseGuideViewPage(soup)
 
+		show_id = self.store.addShow(self.show)
+		for key in self.episodes:
+			self.store.addEpisode(show_id, self.episodes[key])
+
+		self.store.commit()
+
 	def parseListViewPage(self, soup):
+		h1 = soup.find('h1')
+		show_name = h1.contents[0]
+		self.show = show_name
+		self.logger.debug('Got show "%s"' % show_name)
+
 		elements = soup.findAll('tr', { 'class': 'episode' })
 
 		for element in elements:
@@ -207,14 +232,17 @@ class TVComParser(object):
 					(totalepnum, id))
 
 			if not id in self.episodes:
-				self.episodes[id] = {}
+				#self.episodes[id] = {}
+				self.episodes[id] = Episode(None, None, 0,
+					0, datetime.date.today(), None, 0)
 
-			self.episodes[id]['prodnum'] = prodnum
-			self.episodes[id]['totalepnum'] = totalepnum
+			self.episodes[id].prodnum = prodnum
+			self.episodes[id].total = totalepnum
 
 	def parseGuideViewPage(self, soup):
 		h1 = soup.find('h1')
 		show_name = h1.contents[0]
+		self.show = show_name
 		self.logger.debug('Got show "%s"' % show_name)
 
 		elements = soup.findAll('li',
@@ -228,7 +256,8 @@ class TVComParser(object):
 
 			season = result.group(1)
 			episode_num = result.group(2)
-			airdate = result.group(3)
+			airdate = datetime.datetime.strptime(result.group(3),
+					"%m/%d/%Y").date()
 
 			h3 = element.find('h3')
 			link = h3.find('a')
@@ -238,14 +267,15 @@ class TVComParser(object):
 			id = int(parts[-2])
 
 			if not id in self.episodes:
-				self.episodes[id] = {}
-			self.episodes[id]['season'] = season
-			self.episodes[id]['episode'] = episode_num
-			self.episodes[id]['airdate'] = airdate
-			self.episodes[id]['title'] = title
+				self.episodes[id] = Episode(None, None, 0,
+					0, datetime.date.today(), None, 0)
 
-			self.logger.debug('Found episode %s (%d)' %
-					(title, id))
+			self.episodes[id].season = season
+			self.episodes[id].episode = episode_num
+			self.episodes[id].airdate = airdate
+			self.episodes[id].title = title
+
+			self.logger.debug('Found episode %s (%d)' % (title, id))
 
 class ConsoleRenderer(object):
 	DEFAULT='\033[30;0m'

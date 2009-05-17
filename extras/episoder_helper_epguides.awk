@@ -54,7 +54,8 @@ function set_show(showName) {
 /^ *[0-9]+\./ {
 	totalep = substr ($1, 0, index($1, "."))
 	gsub (/\.$/, "", totalep)
-	epnum = substr($0, 10, 2)
+	epnum = substr($0, index($0, "-")+1, 2)
+
 	if (epnum < 10) {
 		epnum = 0 substr(epnum, 2, 1)
 	}

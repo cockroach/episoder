@@ -66,12 +66,12 @@ class DataStore(object):
 		return episodes
 
 	def addEpisode(self, show, episode):
-		num = episode['episode']
-		airdate = episode['airdate']
-		season = episode['season']
-		title = episode['title']
-		totalnum = episode['totalepnum']
-		prodnum = episode['prodnum']
+		num = episode.episode
+		airdate = episode.airdate
+		season = episode.season
+		title = episode.title
+		totalnum = episode.total
+		prodnum = episode.prodnum
 
 		self.conn.execute('INSERT INTO episodes VALUES (?, ?, ?, ?,' +
 				'?, ?, ?)', [show, num, airdate, season, title,
@@ -91,17 +91,46 @@ class DataStore(object):
 class Episode(object):
 	def __init__(self, show, title, season, episode, airdate, prodnum,
 			total):
-		self.title = title
-		self.season = season
+		self.show = show
+		self.title = str(title)
+		self.season = int(season)
 		self.episode = int(episode)
 		self.airdate = airdate
 		self.prodnum = str(prodnum)
-		self.total = total
-		self.show = show
+		self.total = int(total)
+
+	def _setAirDate(self, airdate):
+		self._airdate = airdate.isoformat()
+
+	def _getAirDate(self):
+		return self._airdate
+
+	def _setSeason(self, season):
+		self._season = int(season)
+
+	def _getSeason(self):
+		return self._season
+
+	def _setEpisode(self, episode):
+		self._episode = int(episode)
+
+	def _getEpisode(self):
+		return self._episode
+
+	def _setTotal(self, total):
+		self._total = int(total)
+
+	def _getTotal(self):
+		return self._total
 
 	def __str__(self):
 		return "%s %dx%02d: %s" % (self.show.name, self.season,
 				self.episode, self.title)
+
+	airdate = property(_getAirDate, _setAirDate)
+	season = property(_getSeason, _setSeason)
+	episode = property(_getEpisode, _setEpisode)
+	total = property(_getTotal, _setTotal)
 
 class Show(object):
 	def __init__(self, name, id=-1):

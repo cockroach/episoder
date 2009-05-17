@@ -47,7 +47,7 @@ Options for console output:
   -i			ignore date
   -n <days>		number of future days to show (default: 2),
 			relative to the date set with -d
-  -s <string>		search database for string (NOT IMPLEMENTED YET)
+  -s <text>		search database for text (NOT IMPLEMENTED YET)
 
 Note that -i overrules -d and -n
 
