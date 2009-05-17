@@ -51,12 +51,39 @@ class DataStore(object):
 		return shows.fetchall()
 
 	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
+		result = self.conn.execute("""
+			SELECT show_id, show_name, title, season, num, airdate,
+			prodnum, totalnum FROM episodes NATURAL JOIN shows WHERE
+			airdate >= ? AND airdate <= ? ORDER BY airdate ASC
+			""", [basedate, basedate + datetime.timedelta(n_days)])
+
+		shows = []
 		episodes = []
-		result = self.conn.execute('SELECT show_id, show_name, title,' +
-			'season, num, airdate, prodnum, totalnum FROM ' +
-			'episodes NATURAL JOIN shows WHERE airdate >= ? AND ' +
-			'airdate <= ? ORDER BY airdate ASC', [basedate,
-				basedate + datetime.timedelta(n_days)])
+
+		for item in result.fetchall():
+			show = Show(item[1], item[0])
+			if show in shows:
+				show = shows[shows.index(show)]
+			else:
+				shows.append(show)
+
+			airdate = datetime.datetime.strptime(item[5],"%Y-%m-%d")
+
+			episode = Episode(show, item[2], item[3], item[4],
+				airdate.date(), item[6], item[7])
+			episodes.append(episode)
+
+		return episodes
+
+	def search(self, options):
+		search = options['search']
+
+		result = self.conn.execute("""
+			SELECT show_id, show_name, title, season, num, airdate,
+			prodnum, totalnum FROM episodes NATURAL JOIN shows WHERE
+			title LIKE "%%%s%%" OR show_name LIKE "%%%s%%" ORDER BY
+			airdate ASC
+			""" % (search, search))
 
 		shows = []
 		episodes = []
@@ -111,7 +138,9 @@ class Episode(object):
 		self.total = int(total)
 
 	def _setAirDate(self, airdate):
-		self._airdate = airdate.isoformat()
+		# meh, hack to make sure that we actually get a date object
+		airdate.isoformat()
+		self._airdate = airdate
 
 	def _getAirDate(self):
 		return self._airdate

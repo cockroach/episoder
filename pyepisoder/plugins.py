@@ -368,7 +368,10 @@ class ConsoleRenderer(object):
 			startdate = options['date']
 			n_days = options['days']
 
-		episodes = store.getEpisodes(startdate, n_days)
+		if options['search']:
+			episodes = store.search(options)
+		else:
+			episodes = store.getEpisodes(startdate, n_days)
 
 		for episode in episodes:
 			if episode.airdate == yesterday:
