@@ -48,12 +48,9 @@ Set the user-agent string to be used by wget (was required when tvtome blocked w
 .B data=/path/to/file
 Specifies the file to be used to store the information about upcoming shows.
 .TP
-.B output_plugin=unquoted_plugin_name
-Specifies the output plugin to be used, defaults to 'plain' for backwards compatibility.
-.TP
 .B src=http://some.web.add/ress
 Each src entry specifies a URL with episode information. Make sure you have the
-appropriate plugin before adding random new URLs (See \fBPLUGINS\fR).
+appropriate plugin before adding random new URLs (check with -p)
 .TP
 .B src=http://some.web.add/ress name=some name
 Optionally you can specify a name to use for your show instead of the one extracted from the website.
@@ -92,9 +89,6 @@ The easiest way to achieve this is with a simple cron job:
     echo "40 5 * * * episoder -b" >> crontab
     crontab crontab
 .br
-.SH PLUGINS
-.LP
-episoder uses a set of plugins to parse the source files and to generate its output. See README.plugins for details.
 .SH FILES
 .B ~/.episoder
 - default configuration file

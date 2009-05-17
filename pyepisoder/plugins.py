@@ -104,6 +104,7 @@ class EpguidesParser(object):
 		file = os.fdopen(fd, 'w')
 		file.write(result.read())
 		file.close()
+		self.logger.debug("Stored in %s" % name)
 		return name
 
 	def _runAwk(self, webdata):
@@ -184,20 +185,53 @@ class TVComParser(object):
 	def accept(self, url):
 		return re.match('http://(www.)?tv.com/\w+/show/\d+/?', url)
 
+	def _fetchPage(self, url):
+		self.logger.info('Fetching ' + url)
+		headers = { 'User-Agent': 'foo' }
+		request = urllib2.Request(url, None, headers)
+		result = urllib2.urlopen(request)
+		(fd, name) = tempfile.mkstemp()
+		file = os.fdopen(fd, 'w')
+		file.write(result.read())
+		file.close()
+		self.logger.debug("Stored in %s" % name)
+		return name
+
 	def parse(self, source, store):
 		self.store = store
 		self.episodes = {}
 		self.show = None
-		# need to get episode.html?season=All and
-		# episode.html?season=All&shv=guide
+
 		url = source['url']
+
+		guidepage = self._fetchPage(url +
+				'episode.html?season=All&shv=guide')
+		listpage = self._fetchPage(url +
+				'episode.html?season=All&shv=list')
 
 		if 'name' in source:
 			name = source['name']
 		else:
 			name = None
 
-		print url
+		file = open(listpage)
+		self.parseListViewPage(BeautifulSoup(file.read().decode(
+			'ISO-8859-1')))
+		file.close()
+
+		file = open(guidepage)
+		self.parseGuideViewPage(BeautifulSoup(file.read().decode(
+			'ISO-8859-1')))
+		file.close()
+
+		os.unlink(guidepage)
+		os.unlink(listpage)
+
+		show_id = self.store.addShow(self.show)
+		for key in self.episodes:
+			self.store.addEpisode(show_id, self.episodes[key])
+
+		self.store.commit()
 
 	def parseFile(self, filename, store, name=None):
 		self.store = store
@@ -252,7 +286,6 @@ class TVComParser(object):
 					(totalepnum, id))
 
 			if not id in self.episodes:
-				#self.episodes[id] = {}
 				self.episodes[id] = Episode(None, None, 0,
 					0, datetime.date.today(), None, 0)
 
@@ -271,13 +304,15 @@ class TVComParser(object):
 		for element in elements:
 			meta = element.find('div', { 'class': 'meta' })
 			data = meta.contents[0].strip()
-			result = re.search('Season ([0-9]+), Episode ([0-9]+)' +
-				'.* Aired: (.*)$', data)
 
+			result = re.search('Season ([0-9]+).*Episode ([0-9]+)',
+					data)
 			season = result.group(1)
 			episode_num = result.group(2)
-			airdate = datetime.datetime.strptime(result.group(3),
-					"%m/%d/%Y").date()
+
+			result = re.search('Aired: (.*)$', data)
+			airdate = datetime.datetime.strptime(
+				result.group(1), "%m/%d/%Y").date()
 
 			h3 = element.find('h3')
 			link = h3.find('a')

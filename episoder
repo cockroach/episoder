@@ -39,7 +39,9 @@ def show_parsers():
 	print '-----               ------------'
 
 	for parser in parsers:
-		print "%-20s%s" % (parser.__class__.__name__, parser)
+		description = str(parser)
+		if 'DO NOT USE' not in description:
+			print "%-20s%s" % (parser.__class__.__name__, parser)
 
 def show_help():
 	print """Usage: %s [options]
