@@ -1,7 +1,7 @@
 # Datafile
 data=/home/stefan/.episodes
 
-# User agent to be used by wget
+# User agent to be used for downloads
 agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 
 # Output format
@@ -23,8 +23,6 @@ agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 
 # List of shows with url and, optionally, a name, eg.
 # src=http://www.epguides.com/CSI/ name=CSI
-#
-# Be aware that any spaces in the name will be substituted by underscores...
 
 # Black Books
 src=http://www.epguides.com/BlackBooks/

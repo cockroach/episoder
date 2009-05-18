@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
-# $Id$
+# $Id: episoder_helper_epguides.awk 172 2008-11-05 03:55:34Z stefan_ott $
 
 /<html>.*<head>/ {
 	# Some files don't have proper linebreaks - they'll have <html> and
@@ -54,7 +54,8 @@ function set_show(showName) {
 /^ *[0-9]+\./ {
 	totalep = substr ($1, 0, index($1, "."))
 	gsub (/\.$/, "", totalep)
-	epnum = substr($0, 10, 2)
+	epnum = substr($0, index($0, "-")+1, 2)
+
 	if (epnum < 10) {
 		epnum = 0 substr(epnum, 2, 1)
 	}
