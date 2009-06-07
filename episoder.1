@@ -37,23 +37,23 @@ Log to \fIFILE\fR instead of stdout
 Remove episodes prior to this date (default: yesterday)
 .TP
 .B -i
-Ignore date (don't remove old episodes), overrules -d
+Ignore date (don't remove old episodes), overrules \-d
 .TP
 .B -f \fIFILE\fR
-Get data from \fIFILE\fR, ignore configured sources (needs -P)
+Get data from \fIFILE\fR, ignore configured sources (needs \-P)
 .TP
 .B -f \fIPARSER\fR
-Force \fIPARSER\fR to be used (only in combination with -f)
+Force \fIPARSER\fR to be used (only in combination with \-f)
 .SH Options for console output
 .TP
 .B -d [YYYY-MM-DD]
 Only show episodes newer than date (default: yesterday)
 .TP
 .B -i
-Ignore date (overrules -d and -n)
+Ignore date (overrules \-d and \-n)
 .TP
 .B \-n \fIDAYS\fR
-Number of future \fIDAYS\fR to show (default: 2). This value is relative to the date set with -d.
+Number of future \fIDAYS\fR to show (default: 2). This value is relative to the date set with \-d.
 .TP
 .B -s \fITEXT\fR
 Search the database for \fITEXT\fR
@@ -70,7 +70,7 @@ Specifies the file to be used to store the information about upcoming shows.
 .TP
 .B src=http://some.web.add/ress
 Each src entry specifies a URL with episode information. Make sure you have the
-appropriate plugin before adding random new URLs (check with -p). Episoder currently understands the following types of source:
+appropriate plugin before adding random new URLs (check with \-p). Episoder currently understands the following types of source:
 .PP
         src=http://www.epguides.com/CSI/
         src=http://www.tv.com/CSI/show/19/
@@ -108,8 +108,8 @@ The default is %a, %b %d, %Y
 You might want to have your episode db rebuilt on a regular basis (i.e. daily).
 The easiest way to achieve this is with a simple cron job:
 .PP
-    crontab -l > crontab
-    echo "40 5 * * * episoder -b" >> crontab
+    crontab \-l > crontab
+    echo "40 5 * * * episoder \-b" >> crontab
     crontab crontab
 .br
 .SH FILES

@@ -1,6 +1,10 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.5.1 (xx xxx 200x)
+====================
+ * Small fixes to the man page
+
 v0.5.0 (18 May 2009)
 ====================
  * Rewrote the whole thing in python
