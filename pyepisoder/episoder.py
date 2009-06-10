@@ -96,7 +96,6 @@ class DataStore(object):
 		episode.show_id = show_id
 		self.session.add(episode)
 		self.session.flush()
-		return
 
 	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
 		joined = join(self.episodes, self.shows)
