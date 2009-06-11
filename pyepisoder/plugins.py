@@ -26,7 +26,7 @@ import tempfile
 import datetime
 
 from BeautifulSoup import BeautifulSoup
-from episoder import Episode
+from episoder import Show, Episode
 
 def all():
 	return {
@@ -114,7 +114,8 @@ class EpguidesParser(object):
 		logfile = tempfile.mktemp()
 		cmd = '%s -f %s output=%s %s >%s 2>&1' % (self.awk,
 			self.awkfile, yamlfile, webdata, logfile)
-		os.system(cmd)
+		if os.system(cmd) != 0:
+			raise "Error running %s" % cmd
 
 		file = open(logfile)
 		self.logger.debug(file.read().strip())
@@ -156,7 +157,7 @@ class EpguidesParser(object):
 
 		for episode in episodes:
 			self.logger.debug('Found episode %s' % episode['title'])
-			self.store.addEpisode(show_id, Episode(show_id,
+			self.store.addEpisode(show_id, Episode(Show(show_id),
 					episode['title'],
 					episode['season'],
 					episode['episode'],

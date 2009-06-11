@@ -11,7 +11,6 @@ class TestDataStore(unittest.TestCase):
 	def setUp(self):
 		self.path = tempfile.mktemp()
 		self.store = episoder.DataStore(self.path)
-		self.store.clear()
 
 	def tearDown(self):
 		os.unlink(self.path)
@@ -179,6 +178,88 @@ class TestDataStore(unittest.TestCase):
 		self.assertFalse(episode2 in episodes)
 		self.assertTrue(episode3 in episodes)
 		self.assertTrue(episode4 in episodes)
+
+	def testDuplicateEpisodes(self):
+		today = datetime.date.today()
+
+		show = episoder.Show('some show')
+		show_id = self.store.addShow(show.name)
+		self.assertEqual(0, len(self.store.getEpisodes()))
+
+		episode1 = episoder.Episode(show, 'e', 1, 1, today, 'x', 1)
+		episode2 = episoder.Episode(show, 'f', 1, 1, today, 'x', 1)
+
+		self.store.addEpisode(show_id, episode1)
+		self.store.addEpisode(show_id, episode1)
+		episodes = self.store.getEpisodes()
+		self.assertEqual(1, len(episodes))
+		self.assertEquals('e', episodes[0].title)
+
+		self.store.addEpisode(show_id, episode2)
+		episodes = self.store.getEpisodes()
+		self.assertEqual(1, len(episodes))
+		self.assertEquals('f', episodes[0].title)
+
+	def testClear(self):
+		today = datetime.date.today()
+
+		show = episoder.Show('some show')
+		show_id = self.store.addShow(show.name)
+		self.assertEqual(0, len(self.store.getEpisodes()))
+
+		episode1 = episoder.Episode(show, 'e', 1, 1, today, 'x', 1)
+		episode2 = episoder.Episode(show, 'e', 1, 2, today, 'x', 1)
+		episode3 = episoder.Episode(show, 'e', 1, 3, today, 'x', 1)
+		episode4 = episoder.Episode(show, 'e', 1, 3, today, 'x', 1)
+		episode5 = episoder.Episode(show, 'e', 1, 4, today, 'x', 1)
+
+		self.store.addEpisode(show_id, episode1)
+		self.store.addEpisode(show_id, episode2)
+		self.store.addEpisode(show_id, episode3)
+		self.store.commit()
+
+		self.assertEqual(3, len(self.store.getEpisodes()))
+
+		self.store.clear()
+		self.assertEqual(0, len(self.store.getEpisodes()))
+
+		self.store.addEpisode(show_id, episode4)
+		self.store.addEpisode(show_id, episode5)
+		self.assertEqual(2, len(self.store.getEpisodes()))
+
+class testEpguidesParser(unittest.TestCase):
+	def setUp(self):
+		self.path = tempfile.mktemp()
+		self.store = episoder.DataStore(self.path)
+		self.parser = plugins.EpguidesParser()
+		self.parser.awkfile = 'extras/episoder_helper_epguides.awk'
+
+	def tearDown(self):
+		os.unlink(self.path)
+
+	def _accept(self, url):
+		return self.parser.accept(url)
+
+	def _parse(self, file):
+		self.parser.parseFile(file, self.store)
+
+	def testAccept(self):
+		self.assertTrue(self._accept('http://www.epguides.com/Lost'))
+		self.assertFalse(self._accept('http://epguides.com/Lost'))
+		self.assertFalse(self._accept('http://www.tv.com/Lost'))
+
+	def testParseFile(self):
+		then = datetime.date(1970, 1, 1)
+		self.assertEquals(0, len(self.store.getEpisodes()))
+		self._parse('test/testdata/epguides_lost.html')
+		self.store.commit()
+		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
+		self.store.clear()
+		self.assertEquals(0, len(self.store.getEpisodes()))
+
+		self._parse('test/testdata/epguides_bsg.html')
+		self.assertEquals(74, len(self.store.getEpisodes(then, 99999)))
+
 
 if __name__ == '__main__':
 	unittest.main()

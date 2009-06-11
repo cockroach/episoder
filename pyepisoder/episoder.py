@@ -27,32 +27,29 @@ version="0.5.0"
 
 class DataStore(object):
 	def __init__(self, path):
-		#self.engine = 'postgres'
-		#self.host = 'localhost'
-		#self.user = 'webisoder'
-		#self.pw = 'webisoder'
-		#self.name = 'webisoder'
-
-		#self.db = create_engine('%s://%s:%s@%s/%s' % (
-		#	self.engine, self.user, self.pw, self.host, self.name
-		#))
 		engine = create_engine('sqlite:///%s' % path)
 		self.conn = engine.connect()
 		self.metadata = MetaData()
 		self.metadata.bind = engine
 		self.session = create_session(bind=engine)
 		self.session.begin()
+		self._initdb()
 
 	def clear(self):
-		self._initdb()
+		episodes = self.session.query(Episode).all()
+
+		for episode in episodes:
+			self.session.delete(episode)
+
+		self.session.flush()
 
 	def _initdb(self):
 		clear_mappers()
 		self.shows = Table('shows', self.metadata,
 			Column('show_id', Integer,
 			Sequence('shows_show_id_seq'), primary_key=True),
-			Column('show_name', String))
-		self.shows.create()
+			Column('show_name', String),
+			useexisting=True)
 		showmapper = mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name,
 		})
@@ -64,8 +61,8 @@ class DataStore(object):
 			Column('season', Integer, primary_key=True),
 			Column('title', Text),
 			Column('totalnum', Integer),
-			Column('prodnum', Text))
-		self.episodes.create()
+			Column('prodnum', Text),
+			useexisting=True)
 		episodemapper = mapper(Episode, self.episodes, properties={
 			'title': self.episodes.c.title,
 			'season': self.episodes.c.season,
@@ -74,6 +71,8 @@ class DataStore(object):
 			'prodnum': self.episodes.c.prodnum,
 			'total': self.episodes.c.totalnum
 		})
+
+		self.metadata.create_all()
 
 	def addShow(self, showName):
 		show = Show(showName)
@@ -94,23 +93,22 @@ class DataStore(object):
 
 	def addEpisode(self, show_id, episode):
 		episode.show_id = show_id
-		self.session.add(episode)
+		self.session.merge(episode)
 		self.session.flush()
 
 	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
-		joined = join(self.episodes, self.shows)
-		select = joined.select(use_labels=True)
-		result = select.execute()
+		joined = join(Episode, Show)
 
 		shows = []
 		episodes = []
 
-		query = self.session.query(joined)
-		query = query.filter(Episode.airdate >= basedate)
-		query = query.filter(Episode.airdate <= basedate +
-				datetime.timedelta(n_days))
+		enddate = basedate + datetime.timedelta(n_days)
 
-		for row in query.all():
+		rows = self.session.query(joined).select_from(joined). \
+			filter(Episode.airdate >= basedate). \
+			filter(Episode.airdate <= enddate)
+
+		for row in rows:
 			show = Show(row.show_name, row.show_id)
 			if show in shows:
 				show = shows[shows.index(show)]
