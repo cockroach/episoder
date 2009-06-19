@@ -115,7 +115,7 @@ class DataStore(object):
 			else:
 				shows.append(show)
 			airdate = datetime.datetime.strptime(
-					row.airdate, "%Y-%m-%d")
+					row.airdate, "%Y-%m-%d").date()
 
 			episode = Episode(show, row.title, row.season, row.num,
 					airdate, row.prodnum, row.totalnum)
@@ -141,7 +141,7 @@ class DataStore(object):
 			else:
 				shows.append(show)
 			airdate = datetime.datetime.strptime(
-					row.airdate, "%Y-%m-%d")
+					row.airdate, "%Y-%m-%d").date()
 
 			episode = Episode(show, row.title, row.season, row.num,
 					airdate, row.prodnum, row.totalnum)

@@ -3,9 +3,10 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 
 v0.5.1 (xx xxx 200x)
 ====================
- * The epguides parser would not close open file handles, fixed (thanks to
-   Philip Douglass)
- * The tv.com parser would crash on missing production numbers, fixed
+ * Thanks to Philip Douglass for his bug reports and patches
+ * The epguides parser would not close open file handles
+ * The tv.com parser would crash on missing production/season/episode numbers
+ * Switched to using sqlalchemy to access the database
  * Small fixes to the man page
 
 v0.5.0 (18 May 2009)

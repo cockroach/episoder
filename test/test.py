@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import os
+import shutil
+import logging
 import unittest
 import tempfile
 import datetime
@@ -265,15 +267,60 @@ class testTVComParser(unittest.TestCase):
 		self.path = tempfile.mktemp()
 		self.store = episoder.DataStore(self.path)
 		self.parser = plugins.TVComParser()
+		self.parser.episodes = {}
 
 	def tearDown(self):
 		os.unlink(self.path)
 
-	def _parse(self, file):
-		self.parser.parseFile(file, self.store)
+	def _openfile(self, url):
+		(base, url) = url.split(' ')
+		if url.endswith('guide'):
+			file = base + '_guide.html'
+		else:
+			file = base + '_list.html'
 
-	def testParseFile(self):
-		self._parse('test/testdata/tvcom_tds_list.html')
+		tmp = tempfile.mktemp()
+		shutil.copyfile(file, tmp)
+		return tmp
+
+	def _parse(self, show):
+		self.parser._fetchPage = self._openfile
+		source = {'url': 'test/testdata/tvcom_%s ' % show }
+		self.parser.parse(source, self.store)
+
+	def testParseFile1(self):
+		then = datetime.date(1970, 1, 1)
+		self.assertEquals(0, len(self.store.getEpisodes()))
+		self._parse('csi')
+		self.assertEquals(206, len(self.store.getEpisodes(then, 99999)))
+
+		episodes = self.store.search({'search': 'Hammer'})
+		self.assertEqual(1, len(episodes))
+		episode = episodes[0]
+		self.assertEqual('If I Had A Hammer...', episode.title)
+		self.assertEqual(9, episode.season)
+		self.assertEqual(21, episode.episode)
+		self.assertEqual(datetime.date(2009, 4, 23), episode.airdate)
+		self.assertEqual('921', episode.prodnum)
+		self.assertEqual(203, episode.total)
+		self.assertEqual('CSI', episode.show.name)
+
+	def testParseFile2(self):
+		then = datetime.date(1970, 1, 1)
+		self.assertEquals(0, len(self.store.getEpisodes()))
+		self._parse('tds')
+		self.assertEquals(1697,len(self.store.getEpisodes(then, 99999)))
+
+		episodes = self.store.search({'search': 'James Spader'})
+		self.assertEqual(1, len(episodes))
+		episode = episodes[0]
+		self.assertEqual('James Spader', episode.title)
+		self.assertEqual(8, episode.season)
+		self.assertEqual(63, episode.episode)
+		self.assertEqual(datetime.date(2003, 11, 19), episode.airdate)
+		self.assertEqual('8063', episode.prodnum)
+		self.assertEqual(835, episode.total)
+		self.assertEqual('The Daily Show', episode.show.name)
 
 if __name__ == '__main__':
 	unittest.main()

@@ -84,6 +84,8 @@ class EpguidesParser(object):
 		else:
 			name = None
 
+		BeautifulSoup.CDATA_CONTENT_ELEMENTS = ()
+
 		webdata = self._fetchPage(url)
 		self.parseFile(webdata, store, name)
 		os.unlink(webdata)
@@ -264,7 +266,7 @@ class TVComParser(object):
 
 	def parseListViewPage(self, soup):
 		h1 = soup.find('h1')
-		show_name = h1.contents[0]
+		show_name = h1.contents[1].contents[0]
 		self.show = show_name
 		self.logger.debug('Got show "%s"' % show_name)
 
@@ -299,7 +301,7 @@ class TVComParser(object):
 
 	def parseGuideViewPage(self, soup):
 		h1 = soup.find('h1')
-		show_name = h1.contents[0]
+		show_name = h1.contents[1].contents[0]
 		self.show = show_name
 		self.logger.debug('Got show "%s"' % show_name)
 
@@ -310,14 +312,25 @@ class TVComParser(object):
 			meta = element.find('div', { 'class': 'meta' })
 			data = meta.contents[0].strip()
 
-			result = re.search('Season ([0-9]+).*Episode ([0-9]+)',
-					data)
-			season = result.group(1)
-			episode_num = result.group(2)
+			result = re.search('Season ([0-9]+)', data)
+			if result:
+				season = result.group(1)
+			else:
+				season = 0
+
+			result = re.search('Episode ([0-9]+)', data)
+			if result:
+				episode_num = result.group(1)
+			else:
+				episode_num = 0
 
 			result = re.search('Aired: (.*)$', data)
-			airdate = datetime.datetime.strptime(
-				result.group(1), "%m/%d/%Y").date()
+
+			if result:
+				airdate = datetime.datetime.strptime(
+					result.group(1), "%m/%d/%Y").date()
+			else:
+				airdate = datetime.date(1, 1, 1)
 
 			h3 = element.find('h3')
 			link = h3.find('a')
@@ -327,8 +340,9 @@ class TVComParser(object):
 			id = int(parts[-2])
 
 			if not id in self.episodes:
-				self.episodes[id] = Episode(None, None, 0,
-					0, datetime.date.today(), None, 0)
+				self.episodes[id] = Episode(Show(self.show),
+					None, 0, 0, datetime.date.today(),
+					None, 0)
 
 			self.episodes[id].season = season
 			self.episodes[id].episode = episode_num
