@@ -39,5 +39,5 @@ if __name__ == '__main__':
 		scripts			= [ 'episoder' ],
 		long_description	= LONG_DESCRIPTION,
 		data_files		= files,
-		requires		= [ 'beautifulsoup', 'pysqlite2', 'yaml' ]
+		requires		= [ 'beautifulsoup', 'pysqlite2', 'yaml', 'sqlalchemy' ]
 	)
