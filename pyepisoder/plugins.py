@@ -275,7 +275,10 @@ class TVComParser(object):
 			totalepnum = int(tr.contents[0].strip())
 
 			tr = element.find('td', { 'class': 'prod_no' })
-			prodnum = tr.contents[0].strip()
+			if len(tr.contents) > 0:
+				prodnum = tr.contents[0].strip()
+			else:
+				prodnum = ''
 
 			reviews = element.find('td', { 'class': 'reviews' })
 			link = reviews.contents[0]
@@ -287,8 +290,9 @@ class TVComParser(object):
 					(totalepnum, id))
 
 			if not id in self.episodes:
-				self.episodes[id] = Episode(None, None, 0,
-					0, datetime.date.today(), None, 0)
+				self.episodes[id] = Episode(Show(self.show),
+					None, 0, 0, datetime.date.today(),
+					None, 0)
 
 			self.episodes[id].prodnum = prodnum
 			self.episodes[id].total = totalepnum

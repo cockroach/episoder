@@ -5,6 +5,7 @@ v0.5.1 (xx xxx 200x)
 ====================
  * The epguides parser would not close open file handles, fixed (thanks to
    Philip Douglass)
+ * The tv.com parser would crash on missing production numbers, fixed
  * Small fixes to the man page
 
 v0.5.0 (18 May 2009)

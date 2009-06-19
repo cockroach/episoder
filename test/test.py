@@ -260,6 +260,20 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/testdata/epguides_bsg.html')
 		self.assertEquals(74, len(self.store.getEpisodes(then, 99999)))
 
+class testTVComParser(unittest.TestCase):
+	def setUp(self):
+		self.path = tempfile.mktemp()
+		self.store = episoder.DataStore(self.path)
+		self.parser = plugins.TVComParser()
+
+	def tearDown(self):
+		os.unlink(self.path)
+
+	def _parse(self, file):
+		self.parser.parseFile(file, self.store)
+
+	def testParseFile(self):
+		self._parse('test/testdata/tvcom_tds_list.html')
 
 if __name__ == '__main__':
 	unittest.main()
