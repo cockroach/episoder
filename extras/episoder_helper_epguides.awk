@@ -94,6 +94,7 @@ function show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle) {
 
 	command = "date +%Y-%m-%d -d '" epdate "'"
 	command | getline airdate
+	close(command)
 
 	gsub("'", "''", eptitle)
 
