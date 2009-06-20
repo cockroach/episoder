@@ -171,6 +171,8 @@ def update_data(options, config):
 				logging.warning('No parser found for %s' % url)
 				continue
 
+			if 'agent' in config:
+				parser.user_agent = config['agent']
 			parser.parse(source, store)
 
 	if not options['nodate']:

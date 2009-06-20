@@ -30,7 +30,7 @@ from episoder import Show, Episode
 
 def all():
 	return {
-		'parsing': [ EpguidesParser(), TVComParser(), 
+		'parsing': [ EpguidesParser(), TVComParser(),
 			TVComDummyParser() ],
 		'output': [ ConsoleRenderer() ]
 	}
@@ -69,6 +69,7 @@ class EpguidesParser(object):
 		self.awkfile = os.path.join(sys.prefix, "share", "episoder",
 				"episoder_helper_epguides.awk")
 		self.awk = '/usr/bin/awk'
+		self.user_agent = None
 
 	def __str__(self):
 		return 'epguides.com parser'
@@ -86,7 +87,12 @@ class EpguidesParser(object):
 
 		BeautifulSoup.CDATA_CONTENT_ELEMENTS = ()
 
-		webdata = self._fetchPage(url)
+		try:
+			webdata = self._fetchPage(url)
+		except urllib2.HTTPError, e:
+			self.logger.error("Error fetching %s: %s" % (url, e))
+			return
+
 		self.parseFile(webdata, store, name)
 		os.unlink(webdata)
 
@@ -99,7 +105,11 @@ class EpguidesParser(object):
 
 	def _fetchPage(self, url):
 		self.logger.info('Fetching ' + url)
-		headers = { 'User-Agent': 'foo' }
+		headers = {}
+
+		if (self.user_agent):
+			headers['User-Agent'] = self.user_agent
+
 		request = urllib2.Request(url, None, headers)
 		result = urllib2.urlopen(request)
 		(fd, name) = tempfile.mkstemp()
@@ -190,7 +200,11 @@ class TVComParser(object):
 
 	def _fetchPage(self, url):
 		self.logger.info('Fetching ' + url)
-		headers = { 'User-Agent': 'foo' }
+		headers = {}
+
+		if (self.user_agent):
+			headers['User-Agent'] = self.user_agent
+
 		request = urllib2.Request(url, None, headers)
 		result = urllib2.urlopen(request)
 		(fd, name) = tempfile.mkstemp()
@@ -207,10 +221,14 @@ class TVComParser(object):
 
 		url = source['url']
 
-		guidepage = self._fetchPage(url +
+		try:
+			guidepage = self._fetchPage(url +
 				'episode.html?season=All&shv=guide')
-		listpage = self._fetchPage(url +
+			listpage = self._fetchPage(url +
 				'episode.html?season=All&shv=list')
+		except urllib2.HTTPError, e:
+			self.logger.error("Error fetching %s: %s" % (url, e))
+			return
 
 		if 'name' in source:
 			name = source['name']
