@@ -11,7 +11,7 @@ DEPENDENCIES
 In order to use episoder, you will need python installed on your system. In
 addition to the default distribution, the 'beautifulsoup', 'yaml', 'sqlite2'
 and 'sqlalchemy' modules are required. On debian systems the corresponding
-packages are called python-beautifulsoup and python-yaml python-pysqlite2 and
+packages are called python-beautifulsoup, python-yaml, python-pysqlite2 and
 python-sqlalchemy.
 
 
