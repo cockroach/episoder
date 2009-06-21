@@ -30,8 +30,12 @@
 }
 
 /^<h1>/ {
-	match ($0, /<h1><a href=\".*\">(.*)<\/a><\/h1>/, res)
-	set_show(res[1])
+	sub(/<h1><a href=\".*\">/, "", $0)
+	sub(/<\/a><\/h1>/, "", $0)
+
+	# remove ^M
+	gsub(/\015/, "", $0)
+	set_show($0)
 }
 
 function set_show(showName) {
@@ -43,12 +47,12 @@ function set_show(showName) {
 }
 
 /^Season/ {
-	season = strtonum($2)
+	season = $2
 }
 
 /^<a href="guide.shtml#[0-9].*Series/ {
-	match ($0, /guide.shtml#([0-9]+)/, res);
-	season = res [1]
+	pos = match($0, /guide.shtml#([0-9]+)/);
+	season = substr($0, pos, RLENGTH)
 }
 
 /^ *[0-9]+\./ {
@@ -62,9 +66,10 @@ function set_show(showName) {
 
 	prodnum = substr($0, 16, 9)
 	gsub (/^ */, "", prodnum)
+	gsub (/ *$/, "", prodnum)
 
-	match ($0, /([1-3]?[0-9] [A-Z][a-z][a-z] [0-9][0-9]) /, res)
-	epdate = res [1]
+	pos = match($0, /([1-3]?[0-9] [A-Z][a-z][a-z] [0-9][0-9]) /)
+	epdate = substr($0, pos, RLENGTH)
 	gsub (/ *$/, "", epdate)
 
 	epnameHTML = substr($0, 40)
