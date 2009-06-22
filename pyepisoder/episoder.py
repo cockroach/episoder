@@ -89,7 +89,8 @@ class DataStore(object):
 			useexisting=True)
 
 		self.episodes = Table('episodes', self.metadata,
-			Column('show_id', ForeignKey("shows.show_id"), primary_key=True),
+			Column('show_id', ForeignKey("shows.show_id"),
+				primary_key=True),
 			Column('num', Integer, primary_key=True),
 			Column('airdate', Text),
 			Column('season', Integer, primary_key=True),
@@ -168,11 +169,12 @@ class DataStore(object):
 
 	def search(self, options):
 		search = options['search']
-		joined = join(self.episodes, self.shows)
+		joined = join(Episode, Show)
 
-		query = self.session.query(joined).filter(or_(
-			Episode.title.like('%%%s%%' % search),
-			Show.name.like('%%%s%%' % search))). \
+		query = self.session.query(joined).select_from(joined). \
+			filter(or_( \
+				Episode.title.like('%%%s%%' % search),
+				Show.name.like('%%%s%%' % search))). \
 			order_by(Episode.airdate)
 
 		shows = []
@@ -210,115 +212,12 @@ class DataStore(object):
 
 		self.commit()
 
-class DataStore2(object):
-	def __init__(self, path):
-		self.logger = logging.getLogger('DataStore')
-		self.conn = sqlite3.connect(path)
-
-	def clear(self):
-		self._initdb()
-
-	def _initdb(self):
-		self.conn.execute('DROP TABLE IF EXISTS shows')
-		self.conn.execute('CREATE TABLE shows (show_id INTEGER ' +
-			'PRIMARY KEY, show_name TEXT)')
-
-		self.conn.execute('DROP TABLE IF EXISTS episodes')
-		self.conn.execute('CREATE TABLE episodes (show_id INTEGER,' +
-				' num INTEGER, airdate TEXT, season INTEGER,' +
-				' title TEXT, totalnum INTEGER, prodnum TEXT)')
-
-	def addShow(self, show):
-		result = self.conn.execute('INSERT INTO shows VALUES (NULL, ?)',
-				[show])
-		return result.lastrowid
-
-	def getShows(self):
-		shows = self.conn.execute('SELECT * FROM shows')
-		return shows.fetchall()
-
-	def addEpisode(self, show, episode):
-		num = episode.episode
-		airdate = episode.airdate
-		season = episode.season
-		title = episode.title
-		totalnum = episode.total
-		prodnum = episode.prodnum
-
-		self.conn.execute('INSERT INTO episodes VALUES (?, ?, ?, ?,' +
-				'?, ?, ?)', [show, num, airdate, season, title,
-					totalnum, prodnum])
-
-	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
-		result = self.conn.execute("""
-			SELECT show_id, show_name, title, season, num, airdate,
-			prodnum, totalnum FROM episodes NATURAL JOIN shows WHERE
-			airdate >= ? AND airdate <= ? ORDER BY airdate ASC
-			""", [basedate, basedate + datetime.timedelta(n_days)])
-
-		shows = []
-		episodes = []
-
-		for item in result.fetchall():
-			show = Show(item[1], item[0])
-			if show in shows:
-				show = shows[shows.index(show)]
-			else:
-				shows.append(show)
-
-			airdate = datetime.datetime.strptime(item[5],"%Y-%m-%d")
-
-			episode = Episode(show, item[2], item[3], item[4],
-				airdate.date(), item[6], item[7])
-			episodes.append(episode)
-
-		return episodes
-
-	def search(self, options):
-		search = options['search']
-
-		result = self.conn.execute("""
-			SELECT show_id, show_name, title, season, num, airdate,
-			prodnum, totalnum FROM episodes NATURAL JOIN shows WHERE
-			title LIKE "%%%s%%" OR show_name LIKE "%%%s%%" ORDER BY
-			airdate ASC
-			""" % (search, search))
-
-		shows = []
-		episodes = []
-
-		for item in result.fetchall():
-			show = Show(item[1], item[0])
-			if show in shows:
-				show = shows[shows.index(show)]
-			else:
-				shows.append(show)
-
-			airdate = datetime.datetime.strptime(item[5],"%Y-%m-%d")
-
-			episode = Episode(show, item[2], item[3], item[4],
-				airdate.date(), item[6], item[7])
-			episodes.append(episode)
-
-		return episodes
-
-	def commit(self):
-		self.conn.commit()
-
-	def rollback(self):
-		self.conn.rollback()
-
-	def removeBefore(self, date):
-		self.conn.execute('DELETE FROM episodes WHERE airdate < ?',
-				[date.isoformat()])
-		self.commit()
-
 class Episode(object):
 	def __init__(self, show, title, season, episode, airdate, prodnum,
 			total):
 		assert isinstance(show, Show)
 		self.show = show
-		self.title = str(title)
+		self.title = title
 		self.season = int(season)
 		self.episode = int(episode)
 		self.airdate = airdate
