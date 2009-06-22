@@ -17,7 +17,7 @@ awkfile = os.path.join("extras", "episoder_helper_epguides.awk")
 files.append((os.path.join(sys.prefix, "share", "episoder"), [awkfile]))
 
 # documentation
-doc_files = ["AUTHORS", "CHANGELOG", "COPYING", "FAQ", "README", "README.tvcom" ]
+doc_files = ["AUTHORS", "CHANGELOG", "COPYING", "README", "README.tvcom" ]
 
 for file in doc_files:
 	files.append((os.path.join(sys.prefix, "share", "episoder"), [file]))
