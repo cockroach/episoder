@@ -300,6 +300,21 @@ class testTVComParser(unittest.TestCase):
 		source = {'url': 'test/testdata/tvcom_%s ' % show }
 		self.parser.parse(source, self.store)
 
+	def _accept(self, url):
+		return self.parser.accept(url)
+
+	def testAccept(self):
+		self.assertFalse(self._accept('http://epguides.com/Lost'))
+		self.assertFalse(self._accept('http://www.tv.com/Lost'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/monk/show/9130/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/black-books/show/5108/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/battlestar-galactica-2003/show/23557/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/south-park/show/344/'))
+
 	def testParseFile1(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))

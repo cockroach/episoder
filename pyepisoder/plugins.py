@@ -198,7 +198,8 @@ class TVComParser(object):
 		return 'tv.com parser'
 
 	def accept(self, url):
-		return re.match('http://(www.)?tv.com/\w+/show/\d+/?', url)
+		exp = 'http://(www.)?tv.com/[-a-zA-Z0-9_]+/show/\d+/?'
+		return re.match(exp, url)
 
 	def _fetchPage(self, url):
 		self.logger.info('Fetching ' + url)
