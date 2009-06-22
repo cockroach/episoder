@@ -155,6 +155,8 @@ def show_data(options, config):
 
 def update_data(options, config):
 	store = episoder.DataStore(config['datafile'])
+
+	store.update()
 	store.clear()
 
 	if options['inputfile']:

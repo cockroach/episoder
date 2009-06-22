@@ -4,8 +4,7 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 v0.5.1 (xx xxx 200x)
 ====================
  * Thanks to Philip Douglass for his bug reports and patches
- * The epguides parser would not close open file handles
- * The epguides parser now works with mawk too
+ * The epguides parser now properly closes all file handles and works with mawk
  * The tv.com parser would crash on missing production/season/episode numbers
  * Switched to using sqlalchemy to access the database
  * Properly implemented the user-agent configuration option

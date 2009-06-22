@@ -70,6 +70,7 @@ class EpguidesParser(object):
 				"episoder_helper_epguides.awk")
 		self.awk = '/usr/bin/awk'
 		self.user_agent = None
+		self.url = ''
 
 	def __str__(self):
 		return 'epguides.com parser'
@@ -79,6 +80,7 @@ class EpguidesParser(object):
 
 	def parse(self, source, store):
 		url = source['url']
+		self.url = url
 
 		if 'name' in source:
 			name = source['name']
@@ -157,7 +159,7 @@ class EpguidesParser(object):
 			title = show['title']
 
 		self.logger.debug('Got show "%s"', title)
-		show_id = self.store.addShow(title)
+		show_id = self.store.addShow(title, self.url)
 		self.logger.debug('Added with id %d', show_id)
 
 		if not 'episodes' in show or not show['episodes']:
@@ -248,7 +250,7 @@ class TVComParser(object):
 		os.unlink(guidepage)
 		os.unlink(listpage)
 
-		show_id = self.store.addShow(self.show)
+		show_id = self.store.addShow(self.show, url)
 		for key in self.episodes:
 			self.store.addEpisode(show_id, self.episodes[key])
 

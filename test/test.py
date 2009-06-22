@@ -33,6 +33,18 @@ class TestDataStore(unittest.TestCase):
 		self.assertEqual(2, len(shows))
 		self.assertTrue((id2, 'moo show') in shows)
 
+		self.store.addShow('showA', 'urlA')
+		self.assertEqual(3, len(self.store.getShows()))
+
+		self.store.addShow('showA', 'urlB')
+		self.assertEqual(4, len(self.store.getShows()))
+
+		self.store.addShow('showA', 'urlB')
+		self.assertEqual(4, len(self.store.getShows()))
+
+		self.store.addShow('showB', 'urlB')
+		self.assertEqual(5, len(self.store.getShows()))
+
 	def testAddEpisode(self):
 		show = episoder.Show('some show')
 		show_id = self.store.addShow(show.name)

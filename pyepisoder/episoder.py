@@ -27,6 +27,7 @@ version="0.5.1"
 
 class DataStore(object):
 	def __init__(self, path):
+		self.logger = logging.getLogger('DataStore')
 		engine = create_engine('sqlite:///%s' % path)
 		self.conn = engine.connect()
 		self.metadata = MetaData()
@@ -43,16 +44,49 @@ class DataStore(object):
 
 		self.session.flush()
 
+	def update(self):
+		result = self.meta.select().execute()
+		meta = {}
+
+		for key in result:
+			meta[key[0]] = key[1]
+
+		if not 'schema' in meta:
+			meta['schema'] = '1'
+
+		self.logger.debug("Found v%s schema" % meta['schema'])
+
+		if meta['schema'] == '1':
+			self.logger.info("Updating database schema")
+			self.shows.drop()
+			self.episodes.drop()
+			self._initdb()
+			self.session.commit()
+			self.session.begin()
+
+			meta['schema'] = '2'
+			insert = self.meta.insert().values(key='schema',
+					value=meta['schema'])
+			self.conn.execute(insert)
+
 	def _initdb(self):
 		clear_mappers()
 		self.shows = Table('shows', self.metadata,
 			Column('show_id', Integer,
-			Sequence('shows_show_id_seq'), primary_key=True),
-			Column('show_name', String),
+				Sequence('shows_show_id_seq'),
+				primary_key=True),
+			Column('show_name', Text),
+			Column('url', Text),
+			Column('updated', DateTime),
 			useexisting=True)
 		showmapper = mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name,
 		})
+
+		self.meta = Table('meta', self.metadata,
+			Column('key', Text),
+			Column('value', Text),
+			useexisting=True)
 
 		self.episodes = Table('episodes', self.metadata,
 			Column('show_id', ForeignKey("shows.show_id"), primary_key=True),
@@ -74,10 +108,18 @@ class DataStore(object):
 
 		self.metadata.create_all()
 
-	def addShow(self, showName):
-		show = Show(showName)
-		self.session.add(show)
-		self.session.flush()
+	def addShow(self, showName, url=''):
+		shows = self.session.query(Show) \
+				.filter(Show.name == showName) \
+				.filter(Show.url == url).all()
+
+		if len(shows) > 0:
+			show = shows[0]
+		else:
+			show = Show(showName, url=url)
+			self.session.add(show)
+			self.session.flush()
+
 		return show.show_id
 
 	def getShows(self):
@@ -106,7 +148,8 @@ class DataStore(object):
 
 		rows = self.session.query(joined).select_from(joined). \
 			filter(Episode.airdate >= basedate). \
-			filter(Episode.airdate <= enddate)
+			filter(Episode.airdate <= enddate). \
+			order_by(Episode.airdate)
 
 		for row in rows:
 			show = Show(row.show_name, row.show_id)
@@ -129,7 +172,8 @@ class DataStore(object):
 
 		query = self.session.query(joined).filter(or_(
 			Episode.title.like('%%%s%%' % search),
-			Show.name.like('%%%s%%' % search)))
+			Show.name.like('%%%s%%' % search))). \
+			order_by(Episode.airdate)
 
 		shows = []
 		episodes = []
@@ -322,8 +366,10 @@ class Episode(object):
 	total = property(_getTotal, _setTotal)
 
 class Show(object):
-	def __init__(self, name, id=-1):
+	def __init__(self, name, id=-1, url='',updated=datetime.datetime.now()):
 		self.name = name
+		self.url = url
+		self.updated = updated
 		self.episodes = []
 
 	def addEpisode(self, episode):
@@ -333,4 +379,5 @@ class Show(object):
 		return 'Show("%s")' % self.name
 
 	def __eq__(self, other):
-		return self.name == other.name
+		return (self.name == other.name and
+			self.url == other.url)
