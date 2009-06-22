@@ -9,6 +9,7 @@ v0.5.1 (xx Jun 2009)
  * The tv.com parser would reject urls that contain a dash
  * Switched to using sqlalchemy to access the database
  * Properly implemented the user-agent configuration option
+ * Removed old FAQ
  * Small fixes to the man page
 
 v0.5.0 (18 May 2009)
