@@ -1,15 +1,16 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
-v0.5.1 (xx Jun 2009)
+v0.5.1 (23 Jun 2009)
 ====================
  * Thanks to Philip Douglass for his bug reports and patches
  * The epguides parser now properly closes all file handles and works with mawk
  * The tv.com parser would crash on missing production/season/episode numbers
- * The tv.com parser would reject urls that contain a dash
+ * The tv.com parser now accepts urls that contain a dash
  * Switched to using sqlalchemy to access the database
  * Properly implemented the user-agent configuration option
  * Removed old FAQ
+ * Fixed some text encoding issues
  * Small fixes to the man page
 
 v0.5.0 (18 May 2009)
