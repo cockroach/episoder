@@ -141,7 +141,7 @@ class EpguidesParser(object):
 	def _readYaml(self, yamlfile, override_name=None):
 		self.logger.debug('Reading YAML')
 		file = open(yamlfile)
-		data = yaml.load(file.read())
+		data = yaml.load(file.read().decode('iso8859-1'))
 		file.close()
 
 		show = data[0]
@@ -403,7 +403,7 @@ class ConsoleRenderer(object):
 		tomorrow = today + datetime.timedelta(1)
 
 		if options['nodate']:
-			startdate = datetime.date(1873, 1, 1)
+			startdate = datetime.date(1900, 1, 1)
 			n_days = 109500 # should be fine until late 21xx :)
 		else:
 			startdate = options['date']

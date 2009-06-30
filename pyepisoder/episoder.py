@@ -21,7 +21,7 @@ import sqlite3
 import logging
 import datetime
 from sqlalchemy import *
-from sqlalchemy.orm import join, mapper, clear_mappers, sessionmaker, create_session
+from sqlalchemy.orm import *
 
 version="0.5.2"
 
@@ -35,6 +35,9 @@ class DataStore(object):
 		self.session = create_session(bind=engine)
 		self.session.begin()
 		self._initdb()
+
+	def __str__(self):
+		return "DataStore(%s)" % self.conn
 
 	def clear(self):
 		episodes = self.session.query(Episode).all()
@@ -80,7 +83,7 @@ class DataStore(object):
 			Column('updated', DateTime),
 			useexisting=True)
 		showmapper = mapper(Show, self.shows, properties={
-			'name': self.shows.c.show_name,
+			'name': self.shows.c.show_name
 		})
 
 		self.meta = Table('meta', self.metadata,
@@ -92,7 +95,7 @@ class DataStore(object):
 			Column('show_id', ForeignKey("shows.show_id"),
 				primary_key=True),
 			Column('num', Integer, primary_key=True),
-			Column('airdate', Text),
+			Column('airdate', Date),
 			Column('season', Integer, primary_key=True),
 			Column('title', Text),
 			Column('totalnum', Integer),
@@ -140,57 +143,56 @@ class DataStore(object):
 		self.session.flush()
 
 	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
-		joined = join(Episode, Show)
-
 		shows = []
 		episodes = []
 
 		enddate = basedate + datetime.timedelta(n_days)
 
-		rows = self.session.query(joined).select_from(joined). \
+		data = self.session.query(Episode).add_entity(Show). \
+			select_from(self.episodes.join(self.shows)). \
 			filter(Episode.airdate >= basedate). \
 			filter(Episode.airdate <= enddate). \
 			order_by(Episode.airdate)
 
-		for row in rows:
-			show = Show(row.show_name, row.show_id)
+		for row in data:
+			(episode, show) = row
+			episode.show = show
+
 			if show in shows:
 				show = shows[shows.index(show)]
 			else:
 				shows.append(show)
-			airdate = datetime.datetime.strptime(
-					row.airdate, "%Y-%m-%d").date()
 
-			episode = Episode(show, row.title, row.season, row.num,
-					airdate, row.prodnum, row.totalnum)
+			#episode.airdate = datetime.datetime.strptime(
+			#		episode.airdate, "%Y-%m-%d").date()
+#			episode = Episode(show, ep.title, ep.season, ep.episode,
+#					ep.airdate, ep.prodnum, ep.total)
 			episodes.append(episode)
 
 		return episodes
 
 	def search(self, options):
-		search = options['search']
-		joined = join(Episode, Show)
+		shows = []
+		episodes = []
 
-		query = self.session.query(joined).select_from(joined). \
+		search = options['search']
+
+		data = self.session.query(Episode).add_entity(Show). \
+			select_from(self.episodes.join(self.shows)). \
 			filter(or_( \
 				Episode.title.like('%%%s%%' % search),
 				Show.name.like('%%%s%%' % search))). \
 			order_by(Episode.airdate)
 
-		shows = []
-		episodes = []
+		for row in data:
+			(episode, show) = row
+			episode.show = show
 
-		for row in query.all():
-			show = Show(row.show_name, row.show_id)
 			if show in shows:
 				show = shows[shows.index(show)]
 			else:
 				shows.append(show)
-			airdate = datetime.datetime.strptime(
-					row.airdate, "%Y-%m-%d").date()
 
-			episode = Episode(show, row.title, row.season, row.num,
-					airdate, row.prodnum, row.totalnum)
 			episodes.append(episode)
 
 		return episodes
@@ -224,13 +226,13 @@ class Episode(object):
 		self.prodnum = str(prodnum)
 		self.total = int(total)
 
-	def _setAirDate(self, airdate):
+	def setAirDate(self, airdate):
 		# meh, hack to make sure that we actually get a date object
 		airdate.isoformat()
-		self._airdate = airdate
+		self.__airdate = airdate
 
-	def _getAirDate(self):
-		return self._airdate
+	def getAirDate(self):
+		return self.__airdate
 
 	def _setSeason(self, season):
 		self._season = int(season)
@@ -252,14 +254,14 @@ class Episode(object):
 
 	def __str__(self):
 		return "%s %dx%02d: %s" % (self.show.name, self.season,
-				self.episode, self.title)
+			self.episode, self.title)
 
 	def __eq__(self, other):
 		return (self.show == other.show and
 			self.season == other.season and
 			self.episode == other.episode)
 
-	airdate = property(_getAirDate, _setAirDate)
+	airdate = property(getAirDate, setAirDate)
 	season = property(_getSeason, _setSeason)
 	episode = property(_getEpisode, _setEpisode)
 	total = property(_getTotal, _setTotal)
