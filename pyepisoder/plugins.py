@@ -393,7 +393,8 @@ class ConsoleRenderer(object):
 		string = string.replace('%eptitle', episode.title)
 		string = string.replace('%totalep', str(episode.total))
 		string = string.replace('%prodnum', str(episode.prodnum))
-		print ("%s%s%s" % (color, string, ConsoleRenderer.DEFAULT))
+		print ("%s%s%s" % (color, string.encode('utf8'),
+			ConsoleRenderer.DEFAULT))
 
 	def render(self, store, options, config):
 		self.config = config
