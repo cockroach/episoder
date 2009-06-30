@@ -23,7 +23,7 @@ import datetime
 from sqlalchemy import *
 from sqlalchemy.orm import join, mapper, clear_mappers, sessionmaker, create_session
 
-version="0.5.1"
+version="0.5.2"
 
 class DataStore(object):
 	def __init__(self, path):

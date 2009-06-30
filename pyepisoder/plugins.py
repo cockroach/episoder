@@ -351,7 +351,7 @@ class TVComParser(object):
 				airdate = datetime.datetime.strptime(
 					result.group(1), "%m/%d/%Y").date()
 			else:
-				airdate = datetime.date(1, 1, 1)
+				airdate = datetime.date(1900, 1, 1)
 
 			h3 = element.find('h3')
 			link = h3.find('a')

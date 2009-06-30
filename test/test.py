@@ -19,7 +19,7 @@ class TestDataStore(unittest.TestCase):
 
 	def testAddShow(self):
 		id = self.store.addShow('test show')
-		self.assertTrue(id > 0)
+		self.assertTrue(id > 0, "id is %d, must be > 0" % id)
 		shows = self.store.getShows()
 
 		self.assertEqual(1, len(shows))

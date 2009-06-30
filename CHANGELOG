@@ -1,6 +1,10 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.5.2 (30 Jun 2009)
+====================
+ * Reworked parts of the code to improve compatibility with older libraries
+
 v0.5.1 (23 Jun 2009)
 ====================
  * Thanks to Philip Douglass for his bug reports and patches
