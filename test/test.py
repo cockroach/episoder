@@ -268,11 +268,16 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/testdata/epguides_lost.html')
 		self.store.commit()
 		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
+
 		self.store.clear()
 		self.assertEquals(0, len(self.store.getEpisodes()))
-
 		self._parse('test/testdata/epguides_bsg.html')
 		self.assertEquals(74, len(self.store.getEpisodes(then, 99999)))
+
+		self.store.clear()
+		self.assertEquals(0, len(self.store.getEpisodes()))
+		self._parse('test/testdata/epguides_eureka.html')
+		self.assertEquals(43, len(self.store.getEpisodes(then, 99999)))
 
 class testTVComParser(unittest.TestCase):
 	def setUp(self):

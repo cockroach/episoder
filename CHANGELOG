@@ -1,6 +1,10 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
+v0.5.3 (xx xxx 2009)
+====================
+ * Added support for another epguides formatting style (used eg. for "Eureka")
+
 v0.5.2 (30 Jun 2009)
 ====================
  * Reworked parts of the code to improve compatibility with older libraries

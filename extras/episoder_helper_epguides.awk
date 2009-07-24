@@ -46,13 +46,45 @@ function set_show(showName) {
 	printf "%s... ", showName
 }
 
+/^&bull; Season/ {
+	# Some files come with bullets before the season number
+	season = $3
+}
+
 /^Season/ {
+	# Most, however, don't
 	season = $2
 }
 
 /^<a href="guide.shtml#[0-9].*Series/ {
 	pos = match($0, /guide.shtml#([0-9]+)/);
 	season = substr($0, pos, RLENGTH)
+}
+
+/^[0-9]+/ {
+	# A data file format used for shows like Eureka
+	totalep = $1
+	epnum = substr($0, index($0, "-")+1, 2)
+
+	if (epnum < 10) {
+		epnum = 0 substr(epnum, 2, 1)
+	}
+
+	prodnum = substr($0, 16, 9)
+	gsub (/^ */, "", prodnum)
+	gsub (/ *$/, "", prodnum)
+
+	pos = match($0, /([1-3]?[0-9]\/[A-Z][a-z][a-z]\/[0-9][0-9]) /)
+	epdate = substr($0, pos, RLENGTH)
+	gsub (/ *$/, "", epdate)
+	gsub (/\//, " ", epdate)
+
+	epnameHTML = substr($0, 40)
+	pos = index(epnameHTML, ">")
+	eptitle = substr(epnameHTML, pos + 1, length(epnameHTML) - pos - 4)
+	gsub (/<$/, "", eptitle);
+
+	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
 
 /^ *[0-9]+\./ {
