@@ -20,6 +20,7 @@ import re
 import os
 import sys
 import yaml
+import time
 import logging
 import urllib2
 import tempfile
@@ -348,8 +349,11 @@ class TVComParser(object):
 			result = re.search('Aired: (.*)$', data)
 
 			if result:
-				airdate = datetime.datetime.strptime(
-					result.group(1), "%m/%d/%Y").date()
+				airtime = time.strptime(
+					result.group(1), "%m/%d/%Y")
+				airdate = datetime.datetime(
+					airtime.tm_year, airtime.tm_mon,
+					airtime.tm_mday).date()
 			else:
 				airdate = datetime.date(1900, 1, 1)
 

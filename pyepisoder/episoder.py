@@ -17,11 +17,10 @@
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import sys
-import sqlite3
-import logging
 import datetime
 from sqlalchemy import *
 from sqlalchemy.orm import *
+import logging
 
 version="0.5.2"
 
