@@ -418,6 +418,13 @@ class ConsoleRenderer(object):
 		else:
 			episodes = store.getEpisodes(startdate, n_days)
 
+		if not options['colors']:
+			ConsoleRenderer.DEFAULT = ''
+			ConsoleRenderer.RED = ''
+			ConsoleRenderer.YELLOW = ''
+			ConsoleRenderer.GREEN = ''
+			ConsoleRenderer.LIGHTBLUE = ''
+
 		for episode in episodes:
 			if episode.airdate == yesterday:
 				self._renderEpisode(episode,

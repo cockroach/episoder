@@ -67,6 +67,7 @@ Options for console output:
   -i			ignore date
   -n <days>		number of future days to show (default: 2),
 			relative to the date set with -d
+  -C			don't show any colors
   -s <text>		search database for text (NOT IMPLEMENTED YET)
 
 Note that -i overrules -d and -n
@@ -187,6 +188,7 @@ def get_options():
 	daysahead = 2
 	date = datetime.date.today() - datetime.timedelta(1)
 	nodate = False
+	colors = True
 	search = ''
 	command = show_data
 	inputfile = None
@@ -194,7 +196,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbpf:P:l:'
+		valid_options = 'c:d:hin:s:vVwbpf:P:l:C'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -235,6 +237,8 @@ def get_options():
 			parser = argument
 		elif option == '-l':
 			logfile=argument
+		elif option == '-C':
+			colors = False
 
 	return {
 		'rcfile': rcfile,
@@ -246,7 +250,8 @@ def get_options():
 		'command': command,
 		'inputfile': inputfile,
 		'parser': parser,
-		'logfile': logfile
+		'logfile': logfile,
+		'colors': colors
 	}
 
 def main():
