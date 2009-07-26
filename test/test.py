@@ -277,7 +277,10 @@ class testEpguidesParser(unittest.TestCase):
 		self.store.clear()
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('test/testdata/epguides_eureka.html')
-		self.assertEquals(43, len(self.store.getEpisodes(then, 99999)))
+		episodes = self.store.getEpisodes(then, 99999)
+		self.assertEquals(43, len(episodes))
+		self.assertEquals('Best in Faux', episodes[27].title)
+
 
 class testTVComParser(unittest.TestCase):
 	def setUp(self):

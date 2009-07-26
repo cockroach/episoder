@@ -41,12 +41,15 @@
 function set_show(showName) {
 	gsub("'", "''", showName)
 	print "- title: '" showName "'" >> output
-	print "  episodes: " >> output
+	print "  episodes:" >> output
 
 	printf "%s... ", showName
 }
 
 /^&bull; Season/ {
+	# remove ^M
+	gsub(/\015/, "", $3)
+
 	# Some files come with bullets before the season number
 	season = $3
 }
@@ -83,6 +86,7 @@ function set_show(showName) {
 	pos = index(epnameHTML, ">")
 	eptitle = substr(epnameHTML, pos + 1, length(epnameHTML) - pos - 4)
 	gsub (/<$/, "", eptitle);
+	gsub (/<img.*>/, "", eptitle);
 
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
@@ -108,6 +112,7 @@ function set_show(showName) {
 	pos = index(epnameHTML, ">")
 	eptitle = substr(epnameHTML, pos + 1, length(epnameHTML) - pos - 4)
 	gsub (/<$/, "", eptitle);
+	gsub (/<img.*>/, "", eptitle);
 
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
