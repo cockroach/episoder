@@ -132,7 +132,7 @@ class EpguidesParser(object):
 		cmd = 'iconv -c -f utf8 -t iso-8859-1 %s >%s' % (webdata,
 				cleanwebdata)
 		if os.system(cmd) != 0:
-			raise "Error running %s" % cmd
+			self.logger.debug('iconv failed, ignoring silently')
 
 		self.logger.debug('Calling AWK')
 		cmd = '%s -f %s output=%s %s >%s 2>&1' % (self.awk,
