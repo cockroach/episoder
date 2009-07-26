@@ -63,8 +63,14 @@ function set_show(showName) {
 }
 
 /^<a href="guide.shtml#[0-9].*Series/ {
-	pos = match($0, /guide.shtml#([0-9]+)/);
-	season = substr($0, pos, RLENGTH)
+	pos = match($0, /guide.shtml#([0-9]+.*">)/)
+	season = substr($0, pos + RLENGTH)
+
+	pos = match(season, /[^0-9]/)
+#	print pos
+
+	print substr(season, 0, pos - 1)
+	season = substr(season, 0, pos - 1)
 }
 
 /^[0-9]+/ {

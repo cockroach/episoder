@@ -288,6 +288,14 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals('Pride Goeth Before The Fro',
 				episodes[10].title)
 
+		self.store.clear()
+		self._parse('test/testdata/epguides_midsomer_murders.html')
+		episodes = self.store.getEpisodes(then, 99999)
+		episode = episodes[1]
+
+		self.assertEquals(1, episode.season)
+		self.assertEquals(1, episode.episode)
+
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
 		self.path = tempfile.mktemp()
