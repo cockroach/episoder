@@ -22,7 +22,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 import logging
 
-version="0.5.2"
+version="0.5.3"
 
 class DataStore(object):
 	def __init__(self, path):
