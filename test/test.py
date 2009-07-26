@@ -296,6 +296,10 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals(1, episode.season)
 		self.assertEquals(1, episode.episode)
 
+		# this one lacks a season number somewhere
+		self.store.clear()
+		self._parse('test/testdata/epguides_48_hours_mistery.html')
+
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
 		self.path = tempfile.mktemp()

@@ -52,6 +52,10 @@ function set_show(showName) {
 
 	# Some files come with bullets before the season number
 	season = $3
+
+	if (season == "") {
+		season = 0
+	}
 }
 
 /^Season/ {
@@ -60,6 +64,10 @@ function set_show(showName) {
 	# remove ^M
 	gsub(/\015/, "", $2)
 	season = $2
+
+	if (season == "") {
+		season = 0
+	}
 }
 
 /^<a href="guide.shtml#[0-9].*Series/ {
@@ -67,9 +75,6 @@ function set_show(showName) {
 	season = substr($0, pos + RLENGTH)
 
 	pos = match(season, /[^0-9]/)
-#	print pos
-
-	print substr(season, 0, pos - 1)
 	season = substr(season, 0, pos - 1)
 }
 
