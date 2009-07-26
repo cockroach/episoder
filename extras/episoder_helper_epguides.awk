@@ -56,6 +56,9 @@ function set_show(showName) {
 
 /^Season/ {
 	# Most, however, don't
+
+	# remove ^M
+	gsub(/\015/, "", $2)
 	season = $2
 }
 
@@ -113,6 +116,7 @@ function set_show(showName) {
 	eptitle = substr(epnameHTML, pos + 1, length(epnameHTML) - pos - 4)
 	gsub (/<$/, "", eptitle);
 	gsub (/<img.*>/, "", eptitle);
+
 
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }

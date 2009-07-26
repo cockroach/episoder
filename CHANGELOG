@@ -5,9 +5,9 @@ v0.5.3 (xx xxx 2009)
 ====================
  * Added support for another epguides formatting style (used eg. for "Eureka")
  * Added option to suppress colors in console output
- * Fixed some minor issues in the epguides parser
+ * Added a filter to remove invalid characters from epguides content
+ * Fixed some other parsing issues in the epguides parser
  * Improved compatibility with older python versions
-
 
 v0.5.2 (30 Jun 2009)
 ====================

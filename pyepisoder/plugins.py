@@ -123,12 +123,20 @@ class EpguidesParser(object):
 		return name
 
 	def _runAwk(self, webdata):
-		self.logger.info('Parsing data')
-		self.logger.debug('Calling AWK')
 		yamlfile = tempfile.mktemp()
 		logfile = tempfile.mktemp()
+		cleanwebdata = tempfile.mktemp()
+		self.logger.info('Parsing data')
+
+		self.logger.debug('Calling iconv')
+		cmd = 'iconv -c -f utf8 -t iso-8859-1 %s >%s' % (webdata,
+				cleanwebdata)
+		if os.system(cmd) != 0:
+			raise "Error running %s" % cmd
+
+		self.logger.debug('Calling AWK')
 		cmd = '%s -f %s output=%s %s >%s 2>&1' % (self.awk,
-			self.awkfile, yamlfile, webdata, logfile)
+			self.awkfile, yamlfile, cleanwebdata, logfile)
 		if os.system(cmd) != 0:
 			raise "Error running %s" % cmd
 
@@ -136,6 +144,7 @@ class EpguidesParser(object):
 		self.logger.debug(file.read().strip())
 		file.close()
 
+		os.unlink(cleanwebdata)
 		os.unlink(logfile)
 		return yamlfile
 

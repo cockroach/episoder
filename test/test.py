@@ -281,6 +281,12 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals(43, len(episodes))
 		self.assertEquals('Best in Faux', episodes[27].title)
 
+		self.store.clear()
+		self._parse('test/testdata/epguides_american_idol.html')
+		episodes = self.store.getEpisodes(then, 99999)
+
+		self.assertEquals('Pride Goeth Before The Fro',
+				episodes[10].title)
 
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
