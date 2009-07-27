@@ -93,12 +93,14 @@ class DataStore(object):
 				Sequence('shows_show_id_seq'),
 				primary_key=True),
 			Column('show_name', Text),
-			Column('url', Text),
+			Column('url', Text, unique=True),
 			Column('updated', DateTime),
 			Column('status', Integer, default=1),
 			useexisting=True)
 		showmapper = mapper(Show, self.shows, properties={
-			'name': self.shows.c.show_name
+			'name': self.shows.c.show_name,
+			'episodes': relation(Episode, backref='show',
+				cascade='all')
 		})
 
 		self.meta = Table('meta', self.metadata,
@@ -129,7 +131,6 @@ class DataStore(object):
 
 	def addShow(self, showName, url=''):
 		shows = self.session.query(Show) \
-				.filter(Show.name == showName) \
 				.filter(Show.url == url).all()
 
 		if len(shows) > 0:
@@ -140,6 +141,21 @@ class DataStore(object):
 			self.session.flush()
 
 		return show.show_id
+
+	def removeShow(self, id):
+		shows = self.session.query(Show)\
+				.filter(Show.show_id == id)\
+				.all()
+
+		assert len(shows) < 2
+
+		if len(shows) < 1:
+			self.logger.error("No such show")
+			return
+
+		self.session.delete(shows[0])
+		self.session.flush()
+
 
 	def getShows(self):
 		select = self.shows.select()
@@ -152,8 +168,7 @@ class DataStore(object):
 
 		return shows
 
-	def addEpisode(self, show_id, episode):
-		episode.show_id = show_id
+	def addEpisode(self, episode):
 		self.session.merge(episode)
 		self.session.flush()
 
@@ -233,13 +248,14 @@ class Episode(object):
 	def __init__(self, show, title, season, episode, airdate, prodnum,
 			total):
 		assert isinstance(show, Show)
-		self.show = show
+		self._show = show
 		self.title = title
 		self.season = int(season)
 		self.episode = int(episode)
 		self.airdate = airdate
 		self.prodnum = str(prodnum)
 		self.total = int(total)
+		self.show_id = self._show.show_id
 
 	def setAirDate(self, airdate):
 		# meh, hack to make sure that we actually get a date object
@@ -268,18 +284,27 @@ class Episode(object):
 		return self._total
 
 	def __str__(self):
-		return "%s %dx%02d: %s" % (self.show.name, self.season,
+		return "%s %dx%02d: %s" % (self._show.name, self.season,
 			self.episode, self.title)
 
 	def __eq__(self, other):
-		return (self.show == other.show and
+		return (self.show_id == other.show_id and
 			self.season == other.season and
 			self.episode == other.episode)
+
+	def _getShow(self):
+		return self._show
+
+	def _setShow(self, show):
+		self._show = show
+		show.show_id = show.show_id
+
 
 	airdate = property(getAirDate, setAirDate)
 	season = property(_getSeason, _setSeason)
 	episode = property(_getEpisode, _setEpisode)
 	total = property(_getTotal, _setTotal)
+	show = property(_getShow, _setShow)
 
 class Show(object):
 	ACTIVE = 1

@@ -50,6 +50,7 @@ Global options:
   -h			show this help
   -c <file>		use configuration from file (default: ~/.episoder)
   -b			update the database
+  -B			update shows in database, ignore sources in config file
   -v			verbose operation
   -w			very verbose (debug) operation
   -V			show version information
@@ -63,7 +64,7 @@ Options for database update:
   -P <parser>		force parser to be used (only in combination with -f)
   -L			list shows in database
   -a <url>		add show to database
-  -D			update shows in database, ignore sources in config file
+  -r <id>		remove show from database
 
 Options for console output:
   -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
@@ -172,6 +173,22 @@ def list_shows(options, config):
 		print "       %s, %s" % (show.show_name, statusStrings[status])
 		print "       Last update: %s" % (show.updated)
 
+def add_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+
+	url = options['search']
+	store.addShow('Unknown Show', url)
+	store.commit()
+
+def remove_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+
+	id = options['search']
+	store.removeShow(id)
+	store.commit()
+
 def update_data(options, config):
 	store = episoder.DataStore(config['datafile'])
 
@@ -214,7 +231,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbpf:P:l:CL'
+		valid_options = 'c:d:hin:s:vVwbpf:P:l:CLa:r:'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -254,11 +271,18 @@ def get_options():
 		elif option == '-P':
 			parser = argument
 		elif option == '-l':
-			logfile=argument
+			logfile = argument
 		elif option == '-C':
 			colors = False
 		elif option == '-L':
 			command = list_shows
+		elif option == '-a':
+			command = add_show
+			# yes, this *is* a terrible abuse of the 'search' field
+			search = argument
+		elif option == '-r':
+			command = remove_show
+			search = argument
 
 	return {
 		'rcfile': rcfile,
