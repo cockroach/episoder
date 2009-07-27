@@ -20,6 +20,7 @@ import sys
 import datetime
 from sqlalchemy import *
 from sqlalchemy.orm import *
+import migrate.changeset
 import logging
 
 version="0.5.3"
@@ -70,6 +71,21 @@ class DataStore(object):
 			insert = self.meta.insert().values(key='schema',
 					value=meta['schema'])
 			self.conn.execute(insert)
+		if meta['schema']== '2':
+			self.logger.info("Updating database schema")
+			self.shows.c.status.create()
+			shows = self.session.query(Show) \
+				.filter(Show.status == None).all()
+
+			for show in shows:
+				show.status = Show.ACTIVE
+
+			self.session.update(show)
+			self.session.commit()
+
+			update = self.meta.update().values(key='schema',
+					value=3)
+			self.conn.execute(update)
 
 	def _initdb(self):
 		clear_mappers()
@@ -80,6 +96,7 @@ class DataStore(object):
 			Column('show_name', Text),
 			Column('url', Text),
 			Column('updated', DateTime),
+			Column('status', Integer, default=1),
 			useexisting=True)
 		showmapper = mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name
@@ -132,7 +149,7 @@ class DataStore(object):
 		shows = []
 
 		for show in result:
-			shows.append((show.show_id, show.show_name))
+			shows.append(show)
 
 		return shows
 
@@ -266,10 +283,14 @@ class Episode(object):
 	total = property(_getTotal, _setTotal)
 
 class Show(object):
+	ACTIVE = 1
+	INACTIVE = 2
+
 	def __init__(self, name, id=-1, url='',updated=datetime.datetime.now()):
 		self.name = name
 		self.url = url
 		self.updated = updated
+		self.status = Show.ACTIVE
 		self.episodes = []
 
 	def addEpisode(self, episode):

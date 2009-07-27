@@ -61,6 +61,9 @@ Options for database update:
   -i			ignore date (don't remove old episodes)
   -f <file>		get data from file, ignore configured sources (needs -P)
   -P <parser>		force parser to be used (only in combination with -f)
+  -L			list shows in database
+  -a <url>		add show to database
+  -D			update shows in database, ignore sources in config file
 
 Options for console output:
   -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
@@ -154,6 +157,21 @@ def show_data(options, config):
 	renderer = plugins.all()['output'][0]
 	renderer.render(store, options, config)
 
+def list_shows(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+
+	shows = store.getShows()
+
+	statusStrings = ["?Invalid", "Active", "Inactive" ]
+
+	for show in shows:
+		status = show.status
+
+		print "[%4d] %s" % (show.show_id, show.url)
+		print "       %s, %s" % (show.show_name, statusStrings[status])
+		print "       Last update: %s" % (show.updated)
+
 def update_data(options, config):
 	store = episoder.DataStore(config['datafile'])
 
@@ -196,7 +214,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbpf:P:l:C'
+		valid_options = 'c:d:hin:s:vVwbpf:P:l:CL'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -239,6 +257,8 @@ def get_options():
 			logfile=argument
 		elif option == '-C':
 			colors = False
+		elif option == '-L':
+			command = list_shows
 
 	return {
 		'rcfile': rcfile,
