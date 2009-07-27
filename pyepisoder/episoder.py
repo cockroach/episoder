@@ -67,9 +67,8 @@ class DataStore(object):
 			self.session.commit()
 			self.session.begin()
 
-			meta['schema'] = '2'
 			insert = self.meta.insert().values(key='schema',
-					value=meta['schema'])
+					value=2)
 			self.conn.execute(insert)
 		if meta['schema']== '2':
 			self.logger.info("Updating database schema")
@@ -79,8 +78,8 @@ class DataStore(object):
 
 			for show in shows:
 				show.status = Show.ACTIVE
+				self.session.update(show)
 
-			self.session.update(show)
 			self.session.commit()
 
 			update = self.meta.update().values(key='schema',
