@@ -50,7 +50,7 @@ Global options:
   -h			show this help
   -c <file>		use configuration from file (default: ~/.episoder)
   -b			update the database
-  -B			update shows in database, ignore sources in config file
+  -B			force-update the database, disregard last update time
   -v			verbose operation
   -w			very verbose (debug) operation
   -V			show version information

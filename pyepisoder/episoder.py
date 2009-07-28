@@ -129,18 +129,20 @@ class DataStore(object):
 
 		self.metadata.create_all()
 
-	def addShow(self, showName, url=''):
+	def getShowByUrl(self, url):
 		shows = self.session.query(Show) \
-				.filter(Show.url == url).all()
+				.filter(Show.url == url)
 
-		if len(shows) > 0:
-			show = shows[0]
-		else:
-			show = Show(showName, url=url)
-			self.session.add(show)
-			self.session.flush()
+		if shows.count() < 1:
+			return None
 
-		return show.show_id
+		show = shows[0]
+		return show
+
+	def addShow(self, show):
+		show = self.session.merge(show)
+		self.session.flush()
+		return show
 
 	def removeShow(self, id):
 		shows = self.session.query(Show)\
@@ -155,7 +157,6 @@ class DataStore(object):
 
 		self.session.delete(shows[0])
 		self.session.flush()
-
 
 	def getShows(self):
 		select = self.shows.select()
