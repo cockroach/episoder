@@ -178,7 +178,15 @@ def add_show(options, config):
 	store.update()
 
 	url = options['search']
-	store.addShow('Unknown Show', url)
+	show = store.getShowByUrl(url)
+
+	if show:
+		sys.stderr.write('A show with that url already exists\n')
+		return
+
+	show = episoder.Show('Unknown Show', url=url)
+
+	store.addShow(show)
 	store.commit()
 
 def remove_show(options, config):
