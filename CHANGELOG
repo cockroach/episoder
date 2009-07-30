@@ -4,6 +4,9 @@ Get the latest version of this file at http://episoder.sourceforge.net/
 v0.5.4 (xx xxx 2009)
 ====================
  * No longer report an error when no sources are defined, just log a warning
+ * Show names can no longer be overridden in the configuration file
+ * Shows are only updated every two days (unless an update is forced)
+ * Documentation updated
 
 v0.5.3 (26 Jul 2009)
 ====================

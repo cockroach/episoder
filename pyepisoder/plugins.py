@@ -79,30 +79,25 @@ class EpguidesParser(object):
 	def accept(self, url):
 		return url.startswith('http://www.epguides.com/')
 
-	def parse(self, source, store):
-		url = source['url']
-		self.url = url
-
-		if 'name' in source:
-			name = source['name']
-		else:
-			name = None
+	def parse(self, show, store):
+		self.show = show
 
 		BeautifulSoup.CDATA_CONTENT_ELEMENTS = ()
 
 		try:
-			webdata = self._fetchPage(url)
+			webdata = self._fetchPage(self.show.url)
 		except urllib2.HTTPError, e:
-			self.logger.error("Error fetching %s: %s" % (url, e))
+			self.logger.error("Error fetching %s: %s" %
+					(self.show.url, e))
 			return
 
-		self.parseFile(webdata, store, name)
+		self.parseFile(webdata, store)
 		os.unlink(webdata)
 
-	def parseFile(self, file, store, name=None):
+	def parseFile(self, file, store):
 		self.store = store
 		yamlfile = self._runAwk(file)
-		data = self._readYaml(yamlfile, name)
+		data = self._readYaml(yamlfile)
 		self.store.commit()
 		os.unlink(yamlfile)
 
@@ -148,7 +143,7 @@ class EpguidesParser(object):
 		os.unlink(logfile)
 		return yamlfile
 
-	def _readYaml(self, yamlfile, override_name=None):
+	def _readYaml(self, yamlfile):
 		self.logger.debug('Reading YAML')
 		file = open(yamlfile)
 		data = yaml.load(file.read().decode('iso8859-1'))
@@ -161,22 +156,11 @@ class EpguidesParser(object):
 			self.store.rollback()
 			return
 
-		if override_name:
-			self.logger.debug('Overriding show name with %s',
-					override_name)
-			title = override_name
-		else:
-			title = show_data['title']
+		title = show_data['title']
+		self.show.name = title
+		self.show.updated = datetime.datetime.now()
 
 		self.logger.debug('Got show "%s"', title)
-
-		show = self.store.getShowByUrl(self.url)
-
-		if not show:
-			show = Show(title, url=self.url)
-			show = self.store.addShow(show)
-
-		self.logger.debug('Added with id %d', show.show_id)
 
 		if not 'episodes' in show_data or not show_data['episodes']:
 			self.logger.warning('Show has no episodes, aborting')
@@ -187,7 +171,7 @@ class EpguidesParser(object):
 
 		for episode in episodes:
 			self.logger.debug('Found episode %s' % episode['title'])
-			self.store.addEpisode(Episode(show,
+			self.store.addEpisode(Episode(self.show,
 					episode['title'],
 					episode['season'],
 					episode['episode'],
@@ -233,31 +217,20 @@ class TVComParser(object):
 		self.logger.debug("Stored in %s" % name)
 		return name
 
-	def parse(self, source, store):
+	def parse(self, show, store):
 		self.store = store
+		self.show = show
 		self.episodes = {}
 
-		url = source['url']
-
 		try:
-			guidepage = self._fetchPage(url +
+			guidepage = self._fetchPage(self.show.url +
 				'episode.html?season=All&shv=guide')
-			listpage = self._fetchPage(url +
+			listpage = self._fetchPage(self.show.url +
 				'episode.html?season=All&shv=list')
 		except urllib2.HTTPError, e:
-			self.logger.error("Error fetching %s: %s" % (url, e))
+			self.logger.error("Error fetching %s: %s" %
+					(self.show.url, e))
 			return
-
-		if 'name' in source:
-			name = source['name']
-		else:
-			name = None
-
-		self.show = self.store.getShowByUrl(url)
-
-		if not self.show:
-			show = Show(name, url=url)
-			self.show = self.store.addShow(show)
 
 		file = open(listpage)
 		self.parseListViewPage(BeautifulSoup(file.read().decode(
@@ -272,9 +245,10 @@ class TVComParser(object):
 		os.unlink(guidepage)
 		os.unlink(listpage)
 
+		self.show.updated = datetime.datetime.now()
+
 		for key in self.episodes:
 			episode = self.episodes[key]
-
 			self.store.addEpisode(episode)
 
 		self.store.commit()

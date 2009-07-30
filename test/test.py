@@ -313,6 +313,13 @@ class testEpguidesParser(unittest.TestCase):
 		return self.parser.accept(url)
 
 	def _parse(self, file):
+		show = self.store.getShowByUrl(file)
+
+		if not show:
+			show = episoder.Show(name='', url=file)
+			show = self.store.addShow(show)
+
+		self.parser.show = show
 		self.parser.parseFile(file, self.store)
 
 	def testAccept(self):
@@ -323,6 +330,14 @@ class testEpguidesParser(unittest.TestCase):
 	def testParseFile(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
+		self._parse('test/testdata/epguides_lost.html')
+		self.store.commit()
+		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
+
+		show = self.store.getShowByUrl(
+				'test/testdata/epguides_lost.html')
+		self.assertEquals('Lost', show.name)
+
 		self._parse('test/testdata/epguides_lost.html')
 		self.store.commit()
 		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
@@ -379,9 +394,15 @@ class testTVComParser(unittest.TestCase):
 		return tmp
 
 	def _parse(self, show):
+		url = 'test/testdata/tvcom_%s ' % show
+		show = self.store.getShowByUrl(url)
+
+		if not show:
+			show = episoder.Show('Unnamed', url=url)
+			show = self.store.addShow(show)
+
 		self.parser._fetchPage = self._openfile
-		source = {'url': 'test/testdata/tvcom_%s ' % show }
-		self.parser.parse(source, self.store)
+		self.parser.parse(show, self.store)
 
 	def _accept(self, url):
 		return self.parser.accept(url)

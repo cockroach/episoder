@@ -20,10 +20,9 @@ import sys
 import datetime
 from sqlalchemy import *
 from sqlalchemy.orm import *
-import migrate.changeset
 import logging
 
-version="0.5.3"
+version="0.5.4"
 
 class DataStore(object):
 	def __init__(self, path):
@@ -130,6 +129,32 @@ class DataStore(object):
 
 		self.metadata.create_all()
 
+	def getExpiredShows(self):
+		today = datetime.date.today()
+		deltaRunning = datetime.timedelta(2)	# 2 days
+		deltaSuspended = datetime.timedelta(7)	# 1 week
+		deltaNotRunning = datetime.timedelta(14)# 2 weeks
+
+		shows = self.session.query(Show).filter(or_(
+				and_(
+					Show.enabled == True,
+					Show.status == Show.RUNNING,
+					Show.updated < today - deltaRunning
+				),
+				and_(
+					Show.enabled == True,
+					Show.status == Show.SUSPENDED,
+					Show.updated < today - deltaSuspended
+				),
+				and_(
+					Show.enabled == True,
+					Show.status == Show.NOT_RUNNING,
+					Show.updated < today - deltaNotRunning
+				)
+		))
+
+		return shows
+
 	def getShowByUrl(self, url):
 		shows = self.session.query(Show) \
 				.filter(Show.url == url)
@@ -204,10 +229,6 @@ class DataStore(object):
 			else:
 				shows.append(show)
 
-			#episode.airdate = datetime.datetime.strptime(
-			#		episode.airdate, "%Y-%m-%d").date()
-#			episode = Episode(show, ep.title, ep.season, ep.episode,
-#					ep.airdate, ep.prodnum, ep.total)
 			episodes.append(episode)
 
 		return episodes
