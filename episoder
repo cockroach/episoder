@@ -62,9 +62,13 @@ Options for database update:
   -i			ignore date (don't remove old episodes)
   -f <file>		get data from file, ignore configured sources (needs -P)
   -P <parser>		force parser to be used (only in combination with -f)
+
+Managing shows:
   -L			list shows in database
   -a <url>		add show to database
   -r <id>		remove show from database
+  -E <id>		enable updates for show
+  -D <id>		disable updates for show
 
 Options for console output:
   -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
@@ -165,12 +169,14 @@ def list_shows(options, config):
 	shows = store.getShows()
 
 	statusStrings = ["?Invalid", "Active", "Inactive" ]
+	enabledStrings = ['Disabled', 'Enabled']
 
 	for show in shows:
 		status = show.status
 
 		print "[%4d] %s" % (show.show_id, show.url)
-		print "       %s, %s" % (show.show_name, statusStrings[status])
+		print "       %s, %s, %s" % (show.show_name,
+			statusStrings[status], enabledStrings[show.enabled])
 		print "       Last update: %s" % (show.updated)
 
 def add_show(options, config):
@@ -196,6 +202,26 @@ def remove_show(options, config):
 	id = options['search']
 	store.removeShow(id)
 	store.commit()
+
+def set_show_enabled(store, id, enabled):
+	show = store.getShowById(id)
+
+	if not show:
+		sys.stderr.write("There is no show with that ID\n")
+		return
+
+	show.enabled = enabled
+	store.commit()
+
+def enable_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+	set_show_enabled(store, options['search'], True)
+
+def disable_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+	set_show_enabled(store, options['search'], False)
 
 def update_data(options, config):
 	store = episoder.DataStore(config['datafile'])
@@ -239,7 +265,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbpf:P:l:CLa:r:'
+		valid_options = 'c:d:hin:s:vVwbpf:P:l:CLa:r:E:D:'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -290,6 +316,12 @@ def get_options():
 			search = argument
 		elif option == '-r':
 			command = remove_show
+			search = argument
+		elif option == '-E':
+			command = enable_show
+			search = argument
+		elif option == '-D':
+			command = disable_show
 			search = argument
 
 	return {

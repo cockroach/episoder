@@ -59,7 +59,7 @@ class DataStore(object):
 
 		self.logger.debug("Found v%s schema" % meta['schema'])
 
-		if meta['schema'] == '1':
+		if meta['schema'] < '3':
 			self.logger.info("Updating database schema")
 			self.shows.drop()
 			self.episodes.drop()
@@ -68,23 +68,23 @@ class DataStore(object):
 			self.session.begin()
 
 			insert = self.meta.insert().values(key='schema',
-					value=2)
-			self.conn.execute(insert)
-		if meta['schema']== '2':
-			self.logger.info("Updating database schema")
-			self.shows.c.status.create()
-			shows = self.session.query(Show) \
-				.filter(Show.status == None).all()
-
-			for show in shows:
-				show.status = Show.ACTIVE
-				self.session.update(show)
-
-			self.session.commit()
-
-			update = self.meta.update().values(key='schema',
 					value=3)
-			self.conn.execute(update)
+			self.conn.execute(insert)
+#		if meta['schema']== '2':
+#			self.logger.info("Updating database schema")
+#			self.shows.c.status.create()
+#			shows = self.session.query(Show) \
+#				.filter(Show.status == None).all()
+#
+#			for show in shows:
+#				show.status = Show.ACTIVE
+#				self.session.update(show)
+#
+#			self.session.commit()
+#
+#			update = self.meta.update().values(key='schema',
+#					value=3)
+#			self.conn.execute(update)
 
 	def _initdb(self):
 		clear_mappers()
@@ -95,7 +95,8 @@ class DataStore(object):
 			Column('show_name', Text),
 			Column('url', Text, unique=True),
 			Column('updated', DateTime),
-			Column('status', Integer, default=1),
+			Column('enabled', Boolean),
+			Column('status', Integer, default=Show.RUNNING),
 			useexisting=True)
 		showmapper = mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name,
@@ -132,6 +133,15 @@ class DataStore(object):
 	def getShowByUrl(self, url):
 		shows = self.session.query(Show) \
 				.filter(Show.url == url)
+
+		if shows.count() < 1:
+			return None
+
+		show = shows[0]
+		return show
+
+	def getShowById(self, id):
+		shows = self.session.query(Show).filter(Show.show_id == id)
 
 		if shows.count() < 1:
 			return None
@@ -308,15 +318,18 @@ class Episode(object):
 	show = property(_getShow, _setShow)
 
 class Show(object):
-	ACTIVE = 1
-	INACTIVE = 2
+	RUNNING = 1
+	SUSPENDED = 2
+	NOT_RUNNING = 3
 
-	def __init__(self, name, id=-1, url='',updated=datetime.datetime.now()):
+	def __init__(self, name, id=-1, url='',
+			updated=datetime.date(1970, 1, 1)):
 		self.name = name
 		self.url = url
 		self.updated = updated
-		self.status = Show.ACTIVE
+		self.status = Show.RUNNING
 		self.episodes = []
+		self.enabled = True
 
 	def addEpisode(self, episode):
 		self.episodes.append(episode)
