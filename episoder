@@ -223,11 +223,9 @@ def disable_show(options, config):
 	store.update()
 	set_show_enabled(store, options['search'], False)
 
-def update_data(options, config):
+def do_update_data(options, config, force):
 	store = episoder.DataStore(config['datafile'])
-
 	store.update()
-	store.clear()
 
 	if options['inputfile']:
 		file = options['inputfile']
@@ -246,7 +244,10 @@ def update_data(options, config):
 				store.commit()
 
 		# then, update all shows that need updating
-		shows = store.getExpiredShows()
+		if force:
+			shows = store.getEnabledShows()
+		else:
+			shows = store.getExpiredShows()
 
 		for show in shows:
 			parser = plugins.parser_for(show.url)
@@ -260,9 +261,18 @@ def update_data(options, config):
 
 			parser.parse(show, store)
 
+		if not shows:
+			logging.info('None of your shows need to be updated')
+
 	if not options['nodate']:
 		basedate = options['date']
 		store.removeBefore(basedate)
+
+def update_data(options, config):
+	do_update_data(options, config, False)
+
+def force_update_data(options, config):
+	do_update_data(options, config, True)
 
 def get_options():
 	rcfile = os.path.join(os.environ["HOME"], '.episoder')
@@ -278,7 +288,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbpf:P:l:CLa:r:E:D:'
+		valid_options = 'c:d:hin:s:vVwbBpf:P:l:CLa:r:E:D:'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -313,6 +323,8 @@ def get_options():
 			search = argument
 		elif option == '-b':
 			command = update_data
+		elif option == '-B':
+			command = force_update_data
 		elif option == '-f':
 			inputfile = argument
 		elif option == '-P':

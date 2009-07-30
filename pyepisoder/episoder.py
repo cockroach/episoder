@@ -153,7 +153,11 @@ class DataStore(object):
 				)
 		))
 
-		return shows
+		return shows.all()
+
+	def getEnabledShows(self):
+		shows = self.session.query(Show).filter(Show.enabled == True)
+		return shows.all()
 
 	def getShowByUrl(self, url):
 		shows = self.session.query(Show) \
