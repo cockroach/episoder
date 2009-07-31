@@ -148,7 +148,7 @@ class DataStore(object):
 				),
 				and_(
 					Show.enabled == True,
-					Show.status == Show.NOT_RUNNING,
+					Show.status == Show.ENDED,
 					Show.updated < today - deltaNotRunning
 				)
 		))
@@ -345,7 +345,7 @@ class Episode(object):
 class Show(object):
 	RUNNING = 1
 	SUSPENDED = 2
-	NOT_RUNNING = 3
+	ENDED = 3
 
 	def __init__(self, name, id=-1, url='',
 			updated=datetime.date(1970, 1, 1)):

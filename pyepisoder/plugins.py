@@ -158,6 +158,12 @@ class EpguidesParser(object):
 
 		title = show_data['title']
 		self.show.name = title
+
+		if show_data['running']:
+			self.show.status = Show.RUNNING
+		else:
+			self.show.status = Show.ENDED
+
 		self.show.updated = datetime.datetime.now()
 
 		self.logger.debug('Got show "%s"', title)
@@ -325,6 +331,12 @@ class TVComParser(object):
 		show_name = h1.contents[1].contents[0]
 		self.show.name = show_name
 		self.logger.debug('Got show "%s"' % show_name)
+
+		span = soup.find('span', { 'class': 'tagline' })
+		tagline = span.contents[0]
+
+		if tagline.find('Ended') > -1:
+			self.show.status = Show.ENDED;
 
 		elements = soup.findAll('li',
 				{ 'class': re.compile('episode.*')})

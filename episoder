@@ -168,7 +168,7 @@ def list_shows(options, config):
 
 	shows = store.getShows()
 
-	statusStrings = ["?Invalid", "Active", "Inactive" ]
+	statusStrings = ["?Invalid", "Running", "Suspended", "Ended" ]
 	enabledStrings = ['Disabled', 'Enabled']
 
 	for show in shows:
@@ -253,7 +253,8 @@ def do_update_data(options, config, force):
 			parser = plugins.parser_for(show.url)
 
 			if not parser:
-				logging.warning('No parser found for %s' % url)
+				logging.warning('No parser found for %s' %
+						show.url)
 				continue
 
 			if 'agent' in config:

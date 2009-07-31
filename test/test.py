@@ -337,6 +337,7 @@ class testEpguidesParser(unittest.TestCase):
 		show = self.store.getShowByUrl(
 				'test/testdata/epguides_lost.html')
 		self.assertEquals('Lost', show.name)
+		self.assertEquals(episoder.Show.RUNNING, show.status)
 
 		self._parse('test/testdata/epguides_lost.html')
 		self.store.commit()
@@ -372,6 +373,11 @@ class testEpguidesParser(unittest.TestCase):
 		# this one lacks a season number somewhere
 		self.store.clear()
 		self._parse('test/testdata/epguides_48_hours_mistery.html')
+
+		self._parse('test/testdata/epguides_kr2008.html')
+		show = self.store.getShowByUrl(
+				'test/testdata/epguides_kr2008.html')
+		self.assertEquals(episoder.Show.ENDED, show.status)
 
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
@@ -438,6 +444,7 @@ class testTVComParser(unittest.TestCase):
 
 		show = self.store.getShowByUrl('test/testdata/tvcom_csi ')
 		self.assertEqual('CSI', show.name)
+		self.assertEqual(episoder.Show.RUNNING, show.status)
 
 	def testParseFile2(self):
 		then = datetime.date(1970, 1, 1)
@@ -455,6 +462,13 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual('8063', episode.prodnum)
 		self.assertEqual(835, episode.total)
 		self.assertEqual('The Daily Show', episode.show.name)
+
+	def testParseFile3(self):
+		then = datetime.date(1970, 1, 1)
+		self._parse('kr2008')
+		show = self.store.getShowByUrl('test/testdata/tvcom_kr2008 ')
+
+		self.assertEqual(episoder.Show.ENDED, show.status)
 
 if __name__ == '__main__':
 	unittest.main()

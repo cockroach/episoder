@@ -38,6 +38,13 @@
 	set_show($0)
 }
 
+/aired from:/ {
+	pos = match($0, /___/)
+	if (pos == 0) {
+		running="No"
+	}
+}
+
 function set_show(showName) {
 	gsub("'", "''", showName)
 	print "- title: '" showName "'" >> output
@@ -135,9 +142,11 @@ function set_show(showName) {
 BEGIN {
 	IGNORECASE = 1
 	season = 0
+	running = "Yes"
 }
 
 END {
+	print "  running: " running >> output
 	if (dropped == 0) { dropped="0" }
 	if (kept == 0) { kept="0" }
 	printf "Kept %s, dropped %s.\n", kept, dropped
