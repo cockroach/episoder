@@ -125,7 +125,7 @@ def parse_rc(path):
 			data['url'] = url
 
 			sources.append(data)
-			logging.debug('new source: %s (%s)' % (url, name))
+			logging.debug('source entry: %s (%s)' % (url, name))
 
 	rc.close()
 
