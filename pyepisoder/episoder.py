@@ -69,21 +69,6 @@ class DataStore(object):
 			insert = self.meta.insert().values(key='schema',
 					value=3)
 			self.conn.execute(insert)
-#		if meta['schema']== '2':
-#			self.logger.info("Updating database schema")
-#			self.shows.c.status.create()
-#			shows = self.session.query(Show) \
-#				.filter(Show.status == None).all()
-#
-#			for show in shows:
-#				show.status = Show.ACTIVE
-#				self.session.update(show)
-#
-#			self.session.commit()
-#
-#			update = self.meta.update().values(key='schema',
-#					value=3)
-#			self.conn.execute(update)
 
 	def _initdb(self):
 		clear_mappers()

@@ -424,6 +424,8 @@ class testTVComParser(unittest.TestCase):
 				('http://www.tv.com/battlestar-galactica-2003/show/23557/'))
 		self.assertTrue(self._accept
 				('http://www.tv.com/south-park/show/344/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/penn-and-teller-bullsh!/show/17579/'))
 
 	def testParseFile1(self):
 		then = datetime.date(1970, 1, 1)
