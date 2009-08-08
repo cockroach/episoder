@@ -204,7 +204,7 @@ class TVComParser(object):
 		return 'tv.com parser'
 
 	def accept(self, url):
-		exp = 'http://(www.)?tv.com/[-a-zA-Z0-9_!]+/show/\d+/?'
+		exp = 'http://(www.)?tv.com/[-a-zA-Z0-9_!+%]+/show/\d+/?'
 		return re.match(exp, url)
 
 	def _fetchPage(self, url):

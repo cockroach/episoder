@@ -426,8 +426,12 @@ class testTVComParser(unittest.TestCase):
 				('http://www.tv.com/south-park/show/344/'))
 		self.assertTrue(self._accept
 				('http://www.tv.com/penn-and-teller-bullsh!/show/17579/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/True+Blood/show/74645/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/Eastbound+%26+Down/show/75067/'))
 
-	def testParseFile1(self):
+	def _testParseFile1(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('csi')
@@ -448,7 +452,7 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual('CSI', show.name)
 		self.assertEqual(episoder.Show.RUNNING, show.status)
 
-	def testParseFile2(self):
+	def _testParseFile2(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('tds')
