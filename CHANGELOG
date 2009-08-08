@@ -1,35 +1,31 @@
-Get the latest version of this file at http://episoder.sourceforge.net/
-===============================================================================
+#summary ChangeLog for episoder
+#labels Featured,Phase-Deploy
 
-v0.6.0 (08 Aug 2009)
-====================
- * Episoder now keeps a persistant database of shows and episodes
+== v0.6.0 (8 Aug 2009) ==
+ * Episoder now keeps a persistent database of shows and episodes
  * Added new options (-L, -a, -r, -E, -D) to manage the database
- * The parsers now konw whether a show is still running or not
- * Active (currently running) shows are updated every two days (unless an
-   update is forced with the new -B command), updates for inactive (ended)
-   shows occur once every two weeks.
+ * The parsers now know whether a show is still running or not
+   * Active (currently running) shows are updated every two days
+   * Inactive (ended) shows are updated every two weeks
+   * The new -B command overrides those intervals and forces an update
  * Show names can no longer be overridden in the configuration file
  * Don't report an error when no sources are defined in the config file
  * The tv.com parser now also accepts urls containing '!', '+' or '%'
  * The -d option now also accepts the number of days instead of a fixed date
  * Documentation updated
 
-v0.5.3 (26 Jul 2009)
-====================
+== v0.5.3 (26 Jul 2009) ==
  * Added support for another epguides formatting style (used eg. for "Eureka")
  * Added option to suppress colors in console output
  * Added a filter to remove invalid characters from epguides content
  * Fixed some other parsing issues in the epguides parser
  * Improved compatibility with older python versions
 
-v0.5.2 (30 Jun 2009)
-====================
+== v0.5.2 (30 Jun 2009) ==
  * Reworked parts of the code to improve compatibility with older libraries
  * Fixed some encoding issues in the console renderer
 
-v0.5.1 (23 Jun 2009)
-====================
+== v0.5.1 (23 Jun 2009) ==
  * Thanks to Philip Douglass for his bug reports and patches
  * The epguides parser now properly closes all file handles and works with mawk
  * The tv.com parser would crash on missing production/season/episode numbers
@@ -40,64 +36,49 @@ v0.5.1 (23 Jun 2009)
  * Fixed some text encoding issues
  * Small fixes to the man page
 
-v0.5.0 (18 May 2009)
-====================
+== v0.5.0 (18 May 2009) ==
  * Rewrote the whole thing in python
  * Wrote a brand new tv.com parser
  * Small fixes in the epguides.com parser
  * Parsed data is now stored in an sqlite3 database
 
-v0.4.7 (24 Feb 2007)
-====================
+== v0.4.7 (24 Feb 2007) ==
  * Fixed a parsing issue introduced with 0.4.6
 
-v0.4.6 (24 Feb 2007)
-====================
+== v0.4.6 (24 Feb 2007) ==
  * Discovered yet another formatting possibility on epguides.com (used for
    instance for the show "Midsomer Murders") and adapted the parser accordingly
  * Slightly updated the man page
 
-v0.4.5 (23 Jan 2007)
-====================
+== v0.4.5 (23 Jan 2007) ==
  * Fixed some epguides parser issues
 
-v0.4.4 (19 Nov 2006)
-====================
+== v0.4.4 (19 Nov 2006) ==
  * Fixed the -i option when building the database (did the exact opposite of
    what it was supposed to do)
 
-v0.4.3 (24 Oct 2006)
-====================
- * We now actually honor the -i option when building the database
- * Added the possibility to override a show's name in the config file. This was
-   needed for the new webisoder, a web-based episoder. Find out more about it
-   at http://www.webisoder.net/
- * Oops, forgot to update episoder's version number in the last release...
- * Fixed a bug in the new epguides.com parser which would not drop episodes
-   without a date
+== v0.4.3 (24 Oct 2006) ==
+ * We now actually honor the -i option when building the database               
+ * Added the possibility to override a show's name in the config file. This was needed for the new webisoder, a web-based episoder. Find out more about it at http://www.webisoder.net/                                                 
+ * Oops, forgot to update episoder's version number in the last release...      
+ * Fixed a bug in the new epguides.com parser which would not drop episodes without a date
 
-v0.4.2 (21 Oct 2006)
-====================
+== v0.4.2 (21 Oct 2006) ==
  * Don't ignore the config file passed with -c anymore when building the db
  * Added parser for epguides.com (closes #38)
 
-v0.4.1 (20 Apr 2006)
-====================
- * Did some minor internal changes to get episoder to work on non-linux systems
- * Removed long options
+== v0.4.1 (20 Apr 2006) ==
+ * Did some minor internal changes to get episoder to work on non-linux systems 
+ * Removed long options                                                         
  * Hotfix for the tv.com website changes
 
-v0.4.0 (3 Dec 2005)
-===================
- * Re-organized options: -vv is now -w, -rc is now -c (or --rc), -nd is gone
-   (use --nodate), -sa is gone (use -s and --nodate instead), -i is gone (see
-   below)
- * Search is now alway case-insensitive
+== v0.4.0 (3 Dec 2005) ==
+ * Re-organized options: -vv is now -w, -rc is now -c (or --rc), -nd is gone (use --nodate), -sa is gone (use -s and --nodate instead), -i is gone (see below)                                                                       
+ * Search is now alway case-insensitive                                         
  * If no action is specified, episoder now defaults to showlist
  * Removed the tvtome dummy plugin
 
-v0.3.0 (9 Aug 2005)
-===================
+== v0.3.0 (9 Aug 2005) ==
  * Majeed Goldrick joined the project
  * Moved parts of the website to sourceforge
  * Removed a 1024-episodes-limit in sortlist
@@ -107,15 +88,13 @@ v0.3.0 (9 Aug 2005)
  * Removed the debian files from the main distribution
  * Added a couple of tests
 
-v0.2.5 (19 Jul 2005)
-====================
+== v0.2.5 (19 Jul 2005) ==
  * Fixed an alignment problem in showlist (closes #25)
  * Fixed a date-calculation issue in showlist (closes #23)
  * Fixed a documentation mistake about the format string (closes #21)
  * Added support for nun-numeric episode numbers (closes #24)
 
-v0.2.4 (19 Jul 2005)
-====================
+== v0.2.4 (19 Jul 2005) ==
  * Re-arranged the code to remove a 3-episodes-limit in showlist (closes #19)
  * Added command line option to specify the number of days to show (closes #20)
  * Brought back season-episode information in the tvcom plugin (closes #15)
@@ -124,13 +103,11 @@ v0.2.4 (19 Jul 2005)
  * Thanks to Majeed Goldrick for all the bug reports and feature suggestions
  * Cosmetic changes
 
-v0.2.3 (23 Jun 2005)
-====================
+== v0.2.3 (23 Jun 2005) ==
  * The tvcom plugin now uses the new "All Seasons" link
  * Cosmetic changes
 
-v0.2.2 (17 Jun 2005)
-====================
+== v0.2.2 (17 Jun 2005) ==
  * Added LICENSE file
  * install.sh now correctly changes the EPISODER_HOME value
  * Small fixes in the verbose output
@@ -139,13 +116,11 @@ v0.2.2 (17 Jun 2005)
  * Now all the available modules are actually loaded
  * Some minor changes in the man page
 
-v0.2.1 (4 Jan 2005)
-===================
+== v0.2.1 (4 Jan 2005) ==
  * The tvtome plugin now understands UNAIRED episodes
  * Improved the builddb script's debug output
  * Fixed an issue that would print errors for shows with no upcoming episodes
  * The debian files are now part of the main distribution
 
-v0.2.0 (13 Sep 2004)
-====================
+== v0.2.0 (13 Sep 2004) ==
  * Initial public release
