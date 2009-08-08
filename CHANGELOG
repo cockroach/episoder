@@ -1,12 +1,18 @@
 Get the latest version of this file at http://episoder.sourceforge.net/
 ===============================================================================
 
-v0.5.4 (xx xxx 2009)
+v0.6.0 (xx xxx 2009)
 ====================
- * No longer report an error when no sources are defined, just log a warning
+ * Episoder now keeps a persistant database of shows and episodes
+ * Added new options (-L, -a, -r, -E, -D) to manage the database
+ * The parsers now konw whether a show is still running or not
+ * Active (currently running) shows are updated every two days (unless an
+   update is forced with the new -B command), updates for inactive (ended)
+   shows occur once every two weeks.
  * Show names can no longer be overridden in the configuration file
- * Shows are only updated every two days (unless an update is forced)
+ * Don't report an error when no sources are defined, just log a warning
  * The tv.com parser now also accepts urls containing exclamation marks
+ * The -d option now also accepts the number of days instead of a fixed date
  * Documentation updated
 
 v0.5.3 (26 Jul 2009)

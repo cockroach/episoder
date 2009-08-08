@@ -22,7 +22,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 import logging
 
-version="0.5.4"
+version="0.6.0"
 
 class DataStore(object):
 	def __init__(self, path):
@@ -57,6 +57,10 @@ class DataStore(object):
 			meta['schema'] = '1'
 
 		self.logger.debug("Found v%s schema" % meta['schema'])
+
+		if meta['schema'] == -1:
+			self.logger.debug('Automatic schema updates disabled')
+			return
 
 		if meta['schema'] < '3':
 			self.logger.info("Updating database schema")

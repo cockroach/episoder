@@ -59,6 +59,7 @@ Global options:
 
 Options for database update:
   -d <YYYY-MM-DD>	remove episodes prior to this date (default: yesterday)
+  -d <num>		remove episodes more than <num> days old (default: 1)
   -i			ignore date (don't remove old episodes)
   -f <file>		get data from file, ignore configured sources (needs -P)
   -P <parser>		force parser to be used (only in combination with -f)
@@ -72,6 +73,7 @@ Managing shows:
 
 Options for console output:
   -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
+  -d <num>		only show episodes less than num days old (default: 1)
   -i			ignore date
   -n <days>		number of future days to show (default: 2),
 			relative to the date set with -d
@@ -267,6 +269,7 @@ def do_update_data(options, config, force):
 
 	if not options['nodate']:
 		basedate = options['date']
+		logging.debug('Removing episodes from before %s' % basedate)
 		store.removeBefore(basedate)
 
 def update_data(options, config):
@@ -315,9 +318,13 @@ def get_options():
 			show_parsers()
 			sys.exit(0)
 		elif option == '-d':
-			parts = argument.split('-')
-			date = datetime.date(int(parts[0]), int(parts[1]),
-					int(parts[2]))
+			if argument.isdigit():
+				date = (datetime.date.today() -
+					datetime.timedelta(int(argument)))
+			else:
+				parts = argument.split('-')
+				date = datetime.date(int(parts[0]),
+					int(parts[1]), int(parts[2]))
 		elif option == '-i':
 			nodate = True
 		elif option == '-s':
