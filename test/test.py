@@ -431,7 +431,7 @@ class testTVComParser(unittest.TestCase):
 		self.assertTrue(self._accept
 				('http://www.tv.com/Eastbound+%26+Down/show/75067/'))
 
-	def _testParseFile1(self):
+	def testParseFile1(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('csi')
@@ -452,7 +452,7 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual('CSI', show.name)
 		self.assertEqual(episoder.Show.RUNNING, show.status)
 
-	def _testParseFile2(self):
+	def testParseFile2(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('tds')
