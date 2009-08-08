@@ -10,7 +10,7 @@ v0.6.0 (xx xxx 2009)
    update is forced with the new -B command), updates for inactive (ended)
    shows occur once every two weeks.
  * Show names can no longer be overridden in the configuration file
- * Don't report an error when no sources are defined, just log a warning
+ * Don't report an error when no sources are defined in the config file
  * The tv.com parser now also accepts urls containing exclamation marks
  * The -d option now also accepts the number of days instead of a fixed date
  * Documentation updated

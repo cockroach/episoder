@@ -135,8 +135,7 @@ def parse_rc(path):
 		sys.stderr.write('No data file defined in configuration\n')
 		sys.exit(3)
 	if len(sources) < 1:
-		logging.warn('No sources defined in configuration\n')
-		sys.exit(3)
+		logging.info('No sources defined in configuration\n')
 
 	logging.debug('datafile=' + datafile)
 	logging.debug('format=' + format)
