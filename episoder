@@ -231,7 +231,17 @@ def do_update_data(options, config, force):
 	if options['inputfile']:
 		file = options['inputfile']
 		logging.debug('Only parsing %s' % file)
+
+		show = store.getShowByUrl(file)
+
+		if not show:
+			show = episoder.Show(None, url=file)
+			show = store.addShow(show)
+
+		show.enabled = False
+
 		parser = plugins.parser_named(options['parser'])
+		parser.show = show
 		parser.parseFile(file, store)
 	else:
 		# first, add all shows from the config file to our database

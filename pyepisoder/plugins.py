@@ -259,37 +259,31 @@ class TVComParser(object):
 
 		self.store.commit()
 
-	def parseFile(self, filename, store, name=None):
-		# TODO
-		raise Exception("This feature is currently broken")
-#		self.store = store
-#		self.episodes = {}
-#		self.show = None
-#
-#		file = open(filename)
-#		data = file.read()
-#		soup = BeautifulSoup(data.decode('ISO-8859-1'))
-#		file.close()
-#
-#		elements = soup.findAll('li',
-#				{ 'class': re.compile('episode.*')})
-#
-#		switch = soup.find('a', { 'class': 'switch_to_guide'})
-#
-#		if (switch):
-#			self.logger.debug('This is a list view page')
-#			self.parseListViewPage(soup)
-#		else:
-#			self.logger.debug('This is a guide view page')
-#			self.parseGuideViewPage(soup)
-#
-#		show = Show(self.show, url=filename)
-#		show = self.store.addShow(show)
-#		for key in self.episodes:
-#			self.episodes[key].show = show
-#			self.store.addEpisode(self.episodes[key])
-#
-#		self.store.commit()
+	def parseFile(self, filename, store):
+		self.store = store
+		self.episodes = {}
+
+		file = open(filename)
+		data = file.read()
+		soup = BeautifulSoup(data.decode('ISO-8859-1'))
+		file.close()
+
+		elements = soup.findAll('li',
+				{ 'class': re.compile('episode.*')})
+
+		switch = soup.find('a', { 'class': 'switch_to_guide'})
+
+		if (switch):
+			self.logger.debug('This is a list view page')
+			self.parseListViewPage(soup)
+		else:
+			self.logger.debug('This is a guide view page')
+			self.parseGuideViewPage(soup)
+
+		for key in self.episodes:
+			self.store.addEpisode(self.episodes[key])
+
+		self.store.commit()
 
 	def parseListViewPage(self, soup):
 		h1 = soup.find('h1')
