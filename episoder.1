@@ -1,4 +1,4 @@
-.TH EPISODER 1 
+.TH EPISODER 1
 .SH NAME
 episoder \- TV show episode reminder.
 .SH SYNOPSIS
@@ -16,6 +16,9 @@ Use \fIFILE\fR for configuration values (default is ~/.episoder).
 .TP
 .B \-b
 Update episoder's database
+.TP
+.B \-B
+Force-update the database, disregard information on when shows were last updated
 .TP
 .B \-v
 Enable verbose operation
@@ -36,18 +39,41 @@ Log to \fIFILE\fR instead of stdout
 .B -d [YYYY-MM-DD]
 Remove episodes prior to this date (default: yesterday)
 .TP
+.B -d \fINUM\fR
+Remove episodes that aired more than \fINUM\fR days ago (default: 1)
+.TP
 .B -i
 Ignore date (don't remove old episodes), overrules \-d
 .TP
 .B -f \fIFILE\fR
 Get data from \fIFILE\fR, ignore configured sources (needs \-P)
 .TP
-.B -f \fIPARSER\fR
+.B -P \fIPARSER\fR
 Force \fIPARSER\fR to be used (only in combination with \-f)
+.SH Managing shows
+.TP
+.B -L
+Display a list of all shows in episoder's database
+.TP
+.B -a \fIURL\fR
+Add the show located at \fIURL\fR to the database
+.TP
+.B -r \fIID\fR
+Remove the show with the number \fIID\fR from the database
+.TP
+.B -E \fIID\fR
+Enable updates for the show with the number \fIID\fR
+.TP
+.B -D \fIID\fR
+Disable updates for the show with the number \fIID\fR
+
 .SH Options for console output
 .TP
 .B -d [YYYY-MM-DD]
 Only show episodes newer than date (default: yesterday)
+.TP
+.B -d \fINUM\fR
+Only show episodes that are less then \fINUM\fR days old (default: 1)
 .TP
 .B -i
 Ignore date (overrules \-d and \-n)
@@ -78,9 +104,7 @@ appropriate plugin before adding random new URLs (check with \-p). Episoder curr
         src=http://www.epguides.com/CSI/
         src=http://www.tv.com/CSI/show/19/
 .TP
-.B src=http://some.web.add/ress name=some name
-Optionally you can specify a name to use for your show instead of the one extracted from the website.
-Be aware, however, that currently all spaces in the name you supply will be substituted by underscores.
+While this in no longer episoder's way of knowing which shows to parse (see ``Managing shows''), for compatibility reasons all shows listed in the config file will automatically be added to episoder's show database (as if specified with \-a).
 .TP
 .B format=unquoted format string
 This allows you to customize episoder's output. Available fields are:
@@ -97,9 +121,6 @@ This allows you to customize episoder's output. Available fields are:
 If undefined, the default value of
 .B %airdate %show %seasonx%epnum
 (eg. "2005-07-29 Monk 4x04") is used.
-.br
-
-Whether this option is honored or not is up to the chosen output plugin.
 .TP
 .B dateformat=unquoted string describing the format
 Here you can define the date format you'd like to be used for the output. To get a list of all possible fields, see

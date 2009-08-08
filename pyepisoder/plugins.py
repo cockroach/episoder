@@ -79,30 +79,25 @@ class EpguidesParser(object):
 	def accept(self, url):
 		return url.startswith('http://www.epguides.com/')
 
-	def parse(self, source, store):
-		url = source['url']
-		self.url = url
-
-		if 'name' in source:
-			name = source['name']
-		else:
-			name = None
+	def parse(self, show, store):
+		self.show = show
 
 		BeautifulSoup.CDATA_CONTENT_ELEMENTS = ()
 
 		try:
-			webdata = self._fetchPage(url)
+			webdata = self._fetchPage(self.show.url)
 		except urllib2.HTTPError, e:
-			self.logger.error("Error fetching %s: %s" % (url, e))
+			self.logger.error("Error fetching %s: %s" %
+					(self.show.url, e))
 			return
 
-		self.parseFile(webdata, store, name)
+		self.parseFile(webdata, store)
 		os.unlink(webdata)
 
-	def parseFile(self, file, store, name=None):
+	def parseFile(self, file, store):
 		self.store = store
 		yamlfile = self._runAwk(file)
-		data = self._readYaml(yamlfile, name)
+		data = self._readYaml(yamlfile)
 		self.store.commit()
 		os.unlink(yamlfile)
 
@@ -148,40 +143,41 @@ class EpguidesParser(object):
 		os.unlink(logfile)
 		return yamlfile
 
-	def _readYaml(self, yamlfile, override_name=None):
+	def _readYaml(self, yamlfile):
 		self.logger.debug('Reading YAML')
 		file = open(yamlfile)
 		data = yaml.load(file.read().decode('iso8859-1'))
 		file.close()
 
-		show = data[0]
+		show_data = data[0]
 
-		if not 'title' in show or not show['title']:
+		if not 'title' in show_data or not show_data['title']:
 			self.logger.warning('Show has no title, aborting')
 			self.store.rollback()
 			return
 
-		if override_name:
-			self.logger.debug('Overriding show name with %s',
-					override_name)
-			title = override_name
+		title = show_data['title']
+		self.show.name = title
+
+		if show_data['running']:
+			self.show.status = Show.RUNNING
 		else:
-			title = show['title']
+			self.show.status = Show.ENDED
+
+		self.show.updated = datetime.datetime.now()
 
 		self.logger.debug('Got show "%s"', title)
-		show_id = self.store.addShow(title, self.url)
-		self.logger.debug('Added with id %d', show_id)
 
-		if not 'episodes' in show or not show['episodes']:
+		if not 'episodes' in show_data or not show_data['episodes']:
 			self.logger.warning('Show has no episodes, aborting')
 			self.store.rollback()
 			return
 
-		episodes = show['episodes']
+		episodes = show_data['episodes']
 
 		for episode in episodes:
 			self.logger.debug('Found episode %s' % episode['title'])
-			self.store.addEpisode(show_id, Episode(Show(show_id),
+			self.store.addEpisode(Episode(self.show,
 					episode['title'],
 					episode['season'],
 					episode['episode'],
@@ -208,7 +204,7 @@ class TVComParser(object):
 		return 'tv.com parser'
 
 	def accept(self, url):
-		exp = 'http://(www.)?tv.com/[-a-zA-Z0-9_]+/show/\d+/?'
+		exp = 'http://(www.)?tv.com/[-a-zA-Z0-9_!]+/show/\d+/?'
 		return re.match(exp, url)
 
 	def _fetchPage(self, url):
@@ -227,26 +223,20 @@ class TVComParser(object):
 		self.logger.debug("Stored in %s" % name)
 		return name
 
-	def parse(self, source, store):
+	def parse(self, show, store):
 		self.store = store
+		self.show = show
 		self.episodes = {}
-		self.show = None
-
-		url = source['url']
 
 		try:
-			guidepage = self._fetchPage(url +
+			guidepage = self._fetchPage(self.show.url +
 				'episode.html?season=All&shv=guide')
-			listpage = self._fetchPage(url +
+			listpage = self._fetchPage(self.show.url +
 				'episode.html?season=All&shv=list')
 		except urllib2.HTTPError, e:
-			self.logger.error("Error fetching %s: %s" % (url, e))
+			self.logger.error("Error fetching %s: %s" %
+					(self.show.url, e))
 			return
-
-		if 'name' in source:
-			name = source['name']
-		else:
-			name = None
 
 		file = open(listpage)
 		self.parseListViewPage(BeautifulSoup(file.read().decode(
@@ -261,44 +251,50 @@ class TVComParser(object):
 		os.unlink(guidepage)
 		os.unlink(listpage)
 
-		show_id = self.store.addShow(self.show, url)
+		self.show.updated = datetime.datetime.now()
+
 		for key in self.episodes:
-			self.store.addEpisode(show_id, self.episodes[key])
+			episode = self.episodes[key]
+			self.store.addEpisode(episode)
 
 		self.store.commit()
 
 	def parseFile(self, filename, store, name=None):
-		self.store = store
-		self.episodes = {}
-		self.show = None
-
-		file = open(filename)
-		data = file.read()
-		soup = BeautifulSoup(data.decode('ISO-8859-1'))
-		file.close()
-
-		elements = soup.findAll('li',
-				{ 'class': re.compile('episode.*')})
-
-		switch = soup.find('a', { 'class': 'switch_to_guide'})
-
-		if (switch):
-			self.logger.debug('This is a list view page')
-			self.parseListViewPage(soup)
-		else:
-			self.logger.debug('This is a guide view page')
-			self.parseGuideViewPage(soup)
-
-		show_id = self.store.addShow(self.show)
-		for key in self.episodes:
-			self.store.addEpisode(show_id, self.episodes[key])
-
-		self.store.commit()
+		# TODO
+		raise Exception("This feature is currently broken")
+#		self.store = store
+#		self.episodes = {}
+#		self.show = None
+#
+#		file = open(filename)
+#		data = file.read()
+#		soup = BeautifulSoup(data.decode('ISO-8859-1'))
+#		file.close()
+#
+#		elements = soup.findAll('li',
+#				{ 'class': re.compile('episode.*')})
+#
+#		switch = soup.find('a', { 'class': 'switch_to_guide'})
+#
+#		if (switch):
+#			self.logger.debug('This is a list view page')
+#			self.parseListViewPage(soup)
+#		else:
+#			self.logger.debug('This is a guide view page')
+#			self.parseGuideViewPage(soup)
+#
+#		show = Show(self.show, url=filename)
+#		show = self.store.addShow(show)
+#		for key in self.episodes:
+#			self.episodes[key].show = show
+#			self.store.addEpisode(self.episodes[key])
+#
+#		self.store.commit()
 
 	def parseListViewPage(self, soup):
 		h1 = soup.find('h1')
 		show_name = h1.contents[1].contents[0]
-		self.show = show_name
+		self.show.name = show_name
 		self.logger.debug('Got show "%s"' % show_name)
 
 		elements = soup.findAll('tr', { 'class': 'episode' })
@@ -323,7 +319,7 @@ class TVComParser(object):
 					(totalepnum, id))
 
 			if not id in self.episodes:
-				self.episodes[id] = Episode(Show(self.show),
+				self.episodes[id] = Episode(self.show,
 					None, 0, 0, datetime.date.today(),
 					None, 0)
 
@@ -333,8 +329,14 @@ class TVComParser(object):
 	def parseGuideViewPage(self, soup):
 		h1 = soup.find('h1')
 		show_name = h1.contents[1].contents[0]
-		self.show = show_name
+		self.show.name = show_name
 		self.logger.debug('Got show "%s"' % show_name)
+
+		span = soup.find('span', { 'class': 'tagline' })
+		tagline = span.contents[0]
+
+		if tagline.find('Ended') > -1:
+			self.show.status = Show.ENDED;
 
 		elements = soup.findAll('li',
 				{ 'class': re.compile('episode.*')})
@@ -374,12 +376,12 @@ class TVComParser(object):
 			id = int(parts[-2])
 
 			if not id in self.episodes:
-				self.episodes[id] = Episode(Show(self.show),
+				self.episodes[id] = Episode(self.show,
 					None, 0, 0, datetime.date.today(),
 					None, 0)
 
-			self.episodes[id].season = season
-			self.episodes[id].episode = episode_num
+			self.episodes[id].season = int(season)
+			self.episodes[id].episode = int(episode_num)
 			self.episodes[id].airdate = airdate
 			self.episodes[id].title = title
 

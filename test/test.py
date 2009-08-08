@@ -17,44 +17,74 @@ class TestDataStore(unittest.TestCase):
 	def tearDown(self):
 		os.unlink(self.path)
 
+	def testGetShowByUrl(self):
+		show1 = episoder.Show('test show', url='a')
+		show2 = episoder.Show('test show 2', url='b')
+
+		self.store.addShow(show1)
+		self.store.addShow(show2)
+
+		self.assertEqual(show1, self.store.getShowByUrl('a'))
+		self.assertEqual(show2, self.store.getShowByUrl('b'))
+
+		self.assertEqual(None, self.store.getShowByUrl('c'))
+
 	def testAddShow(self):
-		id = self.store.addShow('test show')
+		show = episoder.Show('test show', url='http://test.show')
+		show = self.store.addShow(show)
+
+		id = show.show_id
+
 		self.assertTrue(id > 0, "id is %d, must be > 0" % id)
 		shows = self.store.getShows()
 
 		self.assertEqual(1, len(shows))
-		self.assertEqual((id, 'test show'), shows[0])
+		self.assertEqual(id, shows[0].show_id)
+		self.assertEqual('test show', shows[0].show_name)
 
-		id2 = self.store.addShow('moo show')
+		show2 = episoder.Show('moo show', url='http://test.show.2')
+		show2 = self.store.addShow(show2)
+		id2 = show2.show_id
 		shows = self.store.getShows()
 
 		self.assertNotEqual(id, id2)
 
 		self.assertEqual(2, len(shows))
-		self.assertTrue((id2, 'moo show') in shows)
 
-		self.store.addShow('showA', 'urlA')
+		ids = []
+		for show in shows:
+			ids.append(show.show_id)
+
+		self.assertTrue(id2 in ids)
+
+		showA = episoder.Show('showA', url='urlA')
+		showB = episoder.Show('showA', url='urlB')
+		showC = episoder.Show('showB', url='urlB')
+
+		self.store.addShow(showA)
 		self.assertEqual(3, len(self.store.getShows()))
 
-		self.store.addShow('showA', 'urlB')
+		self.store.addShow(showB)
 		self.assertEqual(4, len(self.store.getShows()))
 
-		self.store.addShow('showA', 'urlB')
-		self.assertEqual(4, len(self.store.getShows()))
-
-		self.store.addShow('showB', 'urlB')
-		self.assertEqual(5, len(self.store.getShows()))
+		try:
+			self.store.addShow(showC)
+			self.assertTrue(false)
+		except Exception:
+			pass
 
 	def testAddEpisode(self):
-		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = episoder.Show('some show', url='foo')
+		show = self.store.addShow(show)
+		self.store.commit()
+
 		episode1 = episoder.Episode(show, 'Some episode', 3,
 				10, datetime.date.today(), 'FOO', 30)
 		episode2 = episoder.Episode(show, 'No episode', 3,
 				12, datetime.date.today(), 'FOO', 32)
 
-		self.store.addEpisode(show_id, episode1)
-		self.store.addEpisode(show_id, episode2)
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
 		self.store.commit()
 
 		episodes = self.store.getEpisodes()
@@ -64,14 +94,14 @@ class TestDataStore(unittest.TestCase):
 
 	def testSearch(self):
 		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = self.store.addShow(show)
 		episode1 = episoder.Episode(show, 'first episode', 3,
 				10, datetime.date.today(), 'FOO', 30)
 		episode2 = episoder.Episode(show, 'Second episode', 3,
 				12, datetime.date.today(), 'FOO', 32)
 
-		self.store.addEpisode(show_id, episode1)
-		self.store.addEpisode(show_id, episode2)
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
 		self.store.commit()
 
 		episodes = self.store.search({'search': 'first'})
@@ -90,9 +120,37 @@ class TestDataStore(unittest.TestCase):
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
+	def testRemoveShow(self):
+		show1 = episoder.Show('random show', url='z')
+		show2 = episoder.Show('other show', url='x')
+
+		show1 = self.store.addShow(show1)
+		show2 = self.store.addShow(show2)
+		self.store.commit()
+
+		now = datetime.date.today()
+		episode1 = episoder.Episode(show1, 'first', 1, 1, now, 'x', 1)
+		episode2 = episoder.Episode(show1, 'second', 1, 2, now, 'x', 1)
+		episode3 = episoder.Episode(show2, 'first', 1, 1, now, 'x', 1)
+
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
+		self.store.addEpisode(episode3)
+		self.store.commit()
+
+		episodes = self.store.getEpisodes()
+		self.assertEquals(3, len(episodes))
+
+		self.store.removeShow(show1.show_id)
+		self.store.commit()
+
+		episodes = self.store.getEpisodes()
+		self.assertEquals(1, len(episodes))
+		self.assertEquals(episode3, episodes[0])
+
 	def testRollback(self):
 		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = self.store.addShow(show)
 		self.store.commit()
 
 		episode1 = episoder.Episode(show, 'first episode', 3,
@@ -100,9 +158,9 @@ class TestDataStore(unittest.TestCase):
 		episode2 = episoder.Episode(show, 'Second episode', 3,
 				12, datetime.date.today(), 'FOO', 32)
 
-		self.store.addEpisode(show_id, episode1)
+		self.store.addEpisode(episode1)
 		self.store.rollback()
-		self.store.addEpisode(show_id, episode2)
+		self.store.addEpisode(episode2)
 		self.store.commit()
 
 		episodes = self.store.getEpisodes()
@@ -112,7 +170,7 @@ class TestDataStore(unittest.TestCase):
 
 	def testGetEpisodes(self):
 		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = self.store.addShow(show)
 
 		today = datetime.date.today()
 		yesterday = today - datetime.timedelta(1)
@@ -128,10 +186,10 @@ class TestDataStore(unittest.TestCase):
 		episode4 = episoder.Episode(show, 'episode4', 1, 4,
 				tomorrow, 'x', 4)
 
-		self.store.addEpisode(show_id, episode1)
-		self.store.addEpisode(show_id, episode2)
-		self.store.addEpisode(show_id, episode3)
-		self.store.addEpisode(show_id, episode4)
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
+		self.store.addEpisode(episode3)
+		self.store.addEpisode(episode4)
 
 		episodes = self.store.getEpisodes(basedate = before, n_days=1)
 		self.assertTrue(episode1 in episodes)
@@ -159,7 +217,7 @@ class TestDataStore(unittest.TestCase):
 
 	def testRemoveBefore(self):
 		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = self.store.addShow(show)
 
 		today = datetime.date.today()
 		yesterday = today - datetime.timedelta(1)
@@ -175,10 +233,10 @@ class TestDataStore(unittest.TestCase):
 		episode4 = episoder.Episode(show, 'episode4', 1, 4,
 				tomorrow, 'x', 4)
 
-		self.store.addEpisode(show_id, episode1)
-		self.store.addEpisode(show_id, episode2)
-		self.store.addEpisode(show_id, episode3)
-		self.store.addEpisode(show_id, episode4)
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
+		self.store.addEpisode(episode3)
+		self.store.addEpisode(episode4)
 
 		episodes = self.store.getEpisodes(basedate = before, n_days=10)
 		self.assertTrue(episode1 in episodes)
@@ -197,19 +255,19 @@ class TestDataStore(unittest.TestCase):
 		today = datetime.date.today()
 
 		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = self.store.addShow(show)
 		self.assertEqual(0, len(self.store.getEpisodes()))
 
 		episode1 = episoder.Episode(show, 'e', 1, 1, today, 'x', 1)
 		episode2 = episoder.Episode(show, 'f', 1, 1, today, 'x', 1)
 
-		self.store.addEpisode(show_id, episode1)
-		self.store.addEpisode(show_id, episode1)
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode1)
 		episodes = self.store.getEpisodes()
 		self.assertEqual(1, len(episodes))
 		self.assertEquals('e', episodes[0].title)
 
-		self.store.addEpisode(show_id, episode2)
+		self.store.addEpisode(episode2)
 		episodes = self.store.getEpisodes()
 		self.assertEqual(1, len(episodes))
 		self.assertEquals('f', episodes[0].title)
@@ -217,8 +275,8 @@ class TestDataStore(unittest.TestCase):
 	def testClear(self):
 		today = datetime.date.today()
 
-		show = episoder.Show('some show')
-		show_id = self.store.addShow(show.name)
+		show = episoder.Show('some show', url='urlX')
+		show = self.store.addShow(show)
 		self.assertEqual(0, len(self.store.getEpisodes()))
 
 		episode1 = episoder.Episode(show, 'e', 1, 1, today, 'x', 1)
@@ -227,9 +285,9 @@ class TestDataStore(unittest.TestCase):
 		episode4 = episoder.Episode(show, 'e', 1, 3, today, 'x', 1)
 		episode5 = episoder.Episode(show, 'e', 1, 4, today, 'x', 1)
 
-		self.store.addEpisode(show_id, episode1)
-		self.store.addEpisode(show_id, episode2)
-		self.store.addEpisode(show_id, episode3)
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
+		self.store.addEpisode(episode3)
 		self.store.commit()
 
 		self.assertEqual(3, len(self.store.getEpisodes()))
@@ -237,8 +295,8 @@ class TestDataStore(unittest.TestCase):
 		self.store.clear()
 		self.assertEqual(0, len(self.store.getEpisodes()))
 
-		self.store.addEpisode(show_id, episode4)
-		self.store.addEpisode(show_id, episode5)
+		self.store.addEpisode(episode4)
+		self.store.addEpisode(episode5)
 		self.assertEqual(2, len(self.store.getEpisodes()))
 
 class testEpguidesParser(unittest.TestCase):
@@ -255,6 +313,13 @@ class testEpguidesParser(unittest.TestCase):
 		return self.parser.accept(url)
 
 	def _parse(self, file):
+		show = self.store.getShowByUrl(file)
+
+		if not show:
+			show = episoder.Show(name='', url=file)
+			show = self.store.addShow(show)
+
+		self.parser.show = show
 		self.parser.parseFile(file, self.store)
 
 	def testAccept(self):
@@ -265,6 +330,15 @@ class testEpguidesParser(unittest.TestCase):
 	def testParseFile(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
+		self._parse('test/testdata/epguides_lost.html')
+		self.store.commit()
+		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
+
+		show = self.store.getShowByUrl(
+				'test/testdata/epguides_lost.html')
+		self.assertEquals('Lost', show.name)
+		self.assertEquals(episoder.Show.RUNNING, show.status)
+
 		self._parse('test/testdata/epguides_lost.html')
 		self.store.commit()
 		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
@@ -300,12 +374,16 @@ class testEpguidesParser(unittest.TestCase):
 		self.store.clear()
 		self._parse('test/testdata/epguides_48_hours_mistery.html')
 
+		self._parse('test/testdata/epguides_kr2008.html')
+		show = self.store.getShowByUrl(
+				'test/testdata/epguides_kr2008.html')
+		self.assertEquals(episoder.Show.ENDED, show.status)
+
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
 		self.path = tempfile.mktemp()
 		self.store = episoder.DataStore(self.path)
 		self.parser = plugins.TVComParser()
-		self.parser.episodes = {}
 
 	def tearDown(self):
 		os.unlink(self.path)
@@ -322,9 +400,15 @@ class testTVComParser(unittest.TestCase):
 		return tmp
 
 	def _parse(self, show):
+		url = 'test/testdata/tvcom_%s ' % show
+		show = self.store.getShowByUrl(url)
+
+		if not show:
+			show = episoder.Show('Unnamed', url=url)
+			show = self.store.addShow(show)
+
 		self.parser._fetchPage = self._openfile
-		source = {'url': 'test/testdata/tvcom_%s ' % show }
-		self.parser.parse(source, self.store)
+		self.parser.parse(show, self.store)
 
 	def _accept(self, url):
 		return self.parser.accept(url)
@@ -340,6 +424,8 @@ class testTVComParser(unittest.TestCase):
 				('http://www.tv.com/battlestar-galactica-2003/show/23557/'))
 		self.assertTrue(self._accept
 				('http://www.tv.com/south-park/show/344/'))
+		self.assertTrue(self._accept
+				('http://www.tv.com/penn-and-teller-bullsh!/show/17579/'))
 
 	def testParseFile1(self):
 		then = datetime.date(1970, 1, 1)
@@ -358,6 +444,10 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual(203, episode.total)
 		self.assertEqual('CSI', episode.show.name)
 
+		show = self.store.getShowByUrl('test/testdata/tvcom_csi ')
+		self.assertEqual('CSI', show.name)
+		self.assertEqual(episoder.Show.RUNNING, show.status)
+
 	def testParseFile2(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
@@ -374,6 +464,13 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual('8063', episode.prodnum)
 		self.assertEqual(835, episode.total)
 		self.assertEqual('The Daily Show', episode.show.name)
+
+	def testParseFile3(self):
+		then = datetime.date(1970, 1, 1)
+		self._parse('kr2008')
+		show = self.store.getShowByUrl('test/testdata/tvcom_kr2008 ')
+
+		self.assertEqual(episoder.Show.ENDED, show.status)
 
 if __name__ == '__main__':
 	unittest.main()

@@ -50,6 +50,7 @@ Global options:
   -h			show this help
   -c <file>		use configuration from file (default: ~/.episoder)
   -b			update the database
+  -B			force-update the database, disregard last update time
   -v			verbose operation
   -w			very verbose (debug) operation
   -V			show version information
@@ -58,17 +59,26 @@ Global options:
 
 Options for database update:
   -d <YYYY-MM-DD>	remove episodes prior to this date (default: yesterday)
+  -d <num>		remove episodes more than <num> days old (default: 1)
   -i			ignore date (don't remove old episodes)
   -f <file>		get data from file, ignore configured sources (needs -P)
   -P <parser>		force parser to be used (only in combination with -f)
 
+Managing shows:
+  -L			list shows in database
+  -a <url>		add show to database
+  -r <id>		remove show from database
+  -E <id>		enable updates for show
+  -D <id>		disable updates for show
+
 Options for console output:
   -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
+  -d <num>		only show episodes less than num days old (default: 1)
   -i			ignore date
   -n <days>		number of future days to show (default: 2),
 			relative to the date set with -d
   -C			don't show any colors
-  -s <text>		search database for text (NOT IMPLEMENTED YET)
+  -s <text>		search database for text
 
 Note that -i overrules -d and -n
 
@@ -117,7 +127,7 @@ def parse_rc(path):
 			data['url'] = url
 
 			sources.append(data)
-			logging.debug('new source: %s (%s)' % (url, name))
+			logging.debug('source entry: %s (%s)' % (url, name))
 
 	rc.close()
 
@@ -154,11 +164,70 @@ def show_data(options, config):
 	renderer = plugins.all()['output'][0]
 	renderer.render(store, options, config)
 
-def update_data(options, config):
+def list_shows(options, config):
 	store = episoder.DataStore(config['datafile'])
-
 	store.update()
-	store.clear()
+
+	shows = store.getShows()
+
+	statusStrings = ["?Invalid", "Running", "Suspended", "Ended" ]
+	enabledStrings = ['Disabled', 'Enabled']
+
+	for show in shows:
+		status = show.status
+
+		print "[%4d] %s" % (show.show_id, show.url)
+		print "       %s, %s, %s" % (show.show_name,
+			statusStrings[status], enabledStrings[show.enabled])
+		print "       Last update: %s" % (show.updated)
+
+def add_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+
+	url = options['search']
+	show = store.getShowByUrl(url)
+
+	if show:
+		sys.stderr.write('A show with that url already exists\n')
+		return
+
+	show = episoder.Show('Unknown Show', url=url)
+
+	store.addShow(show)
+	store.commit()
+
+def remove_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+
+	id = options['search']
+	store.removeShow(id)
+	store.commit()
+
+def set_show_enabled(store, id, enabled):
+	show = store.getShowById(id)
+
+	if not show:
+		sys.stderr.write("There is no show with that ID\n")
+		return
+
+	show.enabled = enabled
+	store.commit()
+
+def enable_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+	set_show_enabled(store, options['search'], True)
+
+def disable_show(options, config):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
+	set_show_enabled(store, options['search'], False)
+
+def do_update_data(options, config, force):
+	store = episoder.DataStore(config['datafile'])
+	store.update()
 
 	if options['inputfile']:
 		file = options['inputfile']
@@ -166,21 +235,48 @@ def update_data(options, config):
 		parser = plugins.parser_named(options['parser'])
 		parser.parseFile(file, store)
 	else:
+		# first, add all shows from the config file to our database
 		for source in config['sources']:
 			url = source['url']
-			parser = plugins.parser_for(url)
+			show = store.getShowByUrl(url)
+
+			if not show:
+				show = episoder.Show(None, url=url)
+				show = store.addShow(show)
+				store.commit()
+
+		# then, update all shows that need updating
+		if force:
+			shows = store.getEnabledShows()
+		else:
+			shows = store.getExpiredShows()
+
+		for show in shows:
+			parser = plugins.parser_for(show.url)
 
 			if not parser:
-				logging.warning('No parser found for %s' % url)
+				logging.warning('No parser found for %s' %
+						show.url)
 				continue
 
 			if 'agent' in config:
 				parser.user_agent = config['agent']
-			parser.parse(source, store)
+
+			parser.parse(show, store)
+
+		if not shows:
+			logging.info('None of your shows need to be updated')
 
 	if not options['nodate']:
 		basedate = options['date']
+		logging.debug('Removing episodes from before %s' % basedate)
 		store.removeBefore(basedate)
+
+def update_data(options, config):
+	do_update_data(options, config, False)
+
+def force_update_data(options, config):
+	do_update_data(options, config, True)
 
 def get_options():
 	rcfile = os.path.join(os.environ["HOME"], '.episoder')
@@ -196,7 +292,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbpf:P:l:C'
+		valid_options = 'c:d:hin:s:vVwbBpf:P:l:CLa:r:E:D:'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -222,23 +318,44 @@ def get_options():
 			show_parsers()
 			sys.exit(0)
 		elif option == '-d':
-			parts = argument.split('-')
-			date = datetime.date(int(parts[0]), int(parts[1]),
-					int(parts[2]))
+			if argument.isdigit():
+				date = (datetime.date.today() -
+					datetime.timedelta(int(argument)))
+			else:
+				parts = argument.split('-')
+				date = datetime.date(int(parts[0]),
+					int(parts[1]), int(parts[2]))
 		elif option == '-i':
 			nodate = True
 		elif option == '-s':
 			search = argument
 		elif option == '-b':
 			command = update_data
+		elif option == '-B':
+			command = force_update_data
 		elif option == '-f':
 			inputfile = argument
 		elif option == '-P':
 			parser = argument
 		elif option == '-l':
-			logfile=argument
+			logfile = argument
 		elif option == '-C':
 			colors = False
+		elif option == '-L':
+			command = list_shows
+		elif option == '-a':
+			command = add_show
+			# yes, this *is* a terrible abuse of the 'search' field
+			search = argument
+		elif option == '-r':
+			command = remove_show
+			search = argument
+		elif option == '-E':
+			command = enable_show
+			search = argument
+		elif option == '-D':
+			command = disable_show
+			search = argument
 
 	return {
 		'rcfile': rcfile,
