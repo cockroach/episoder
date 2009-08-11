@@ -22,12 +22,16 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 import logging
 
-version="0.6.0"
+version="0.6.1"
 
 class DataStore(object):
 	def __init__(self, path):
 		self.logger = logging.getLogger('DataStore')
-		engine = create_engine('sqlite:///%s' % path)
+		if path.find('://') > -1:
+			engine = create_engine(path)
+		else:
+			engine = create_engine('sqlite:///%s' % path)
+
 		self.conn = engine.connect()
 		self.metadata = MetaData()
 		self.metadata.bind = engine
@@ -58,7 +62,7 @@ class DataStore(object):
 
 		self.logger.debug("Found v%s schema" % meta['schema'])
 
-		if meta['schema'] == -1:
+		if meta['schema'] == '-1':
 			self.logger.debug('Automatic schema updates disabled')
 			return
 
@@ -93,7 +97,7 @@ class DataStore(object):
 		})
 
 		self.meta = Table('meta', self.metadata,
-			Column('key', Text),
+			Column('key', Text, primary_key=True),
 			Column('value', Text),
 			useexisting=True)
 

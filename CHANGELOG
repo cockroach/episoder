@@ -1,6 +1,9 @@
 #summary ChangeLog for episoder
 #labels Featured,Phase-Deploy
 
+== v0.6.1 (x Aug 2009) ==
+ * Episoder can now talk to any database supported by sqlalchemy (see README)
+
 == v0.6.0 (8 Aug 2009) ==
  * Episoder now keeps a persistent database of shows and episodes
  * Added new options (-L, -a, -r, -E, -D) to manage the database

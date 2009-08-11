@@ -155,10 +155,6 @@ def parse_rc(path):
 	return config
 
 def show_data(options, config):
-	if not os.path.exists(config['datafile']):
-		sys.stderr.write('%s not found\n' % config['datafile'])
-		sys.exit(4)
-
 	store = episoder.DataStore(config['datafile'])
 	renderer = plugins.all()['output'][0]
 	renderer.render(store, options, config)
