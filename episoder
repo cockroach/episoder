@@ -267,7 +267,12 @@ def do_update_data(options, config, force):
 			if 'agent' in config:
 				parser.user_agent = config['agent']
 
-			parser.parse(show, store)
+			try:
+				parser.parse(show, store)
+			except Exception, e:
+				logging.error("Error parsing %s" % show)
+				logging.error(e)
+				store.rollback()
 
 		if not shows:
 			logging.info('None of your shows need to be updated')
