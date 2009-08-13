@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf8 -*-
 import os
 import shutil
 import logging
@@ -378,6 +379,14 @@ class testEpguidesParser(unittest.TestCase):
 		show = self.store.getShowByUrl(
 				'test/testdata/epguides_kr2008.html')
 		self.assertEquals(episoder.Show.ENDED, show.status)
+
+		self.store.clear()
+		self._parse('test/testdata/epguides_buzzcocks.html')
+		episodes = self.store.getEpisodes(then, 99999)
+		episode = episodes[20]
+		self.assertEquals(
+			'Zoë Ball, Louis Eliot, Graham Norton, Keith Duffy',
+			episodes[20].title.encode('utf8'))
 
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
