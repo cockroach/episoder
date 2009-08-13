@@ -28,7 +28,7 @@ class DataStore(object):
 	def __init__(self, path):
 		self.logger = logging.getLogger('DataStore')
 		if path.find('://') > -1:
-			engine = create_engine(path)
+			engine = create_engine(path, convert_unicode=True)
 		else:
 			engine = create_engine('sqlite:///%s' % path)
 
