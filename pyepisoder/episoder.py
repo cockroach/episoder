@@ -68,8 +68,8 @@ class DataStore(object):
 
 		if meta['schema'] < '3':
 			self.logger.info("Updating database schema")
-			self.shows.drop()
 			self.episodes.drop()
+			self.shows.drop()
 			self._initdb()
 			self.session.commit()
 			self.session.begin()
