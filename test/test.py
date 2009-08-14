@@ -252,6 +252,32 @@ class TestDataStore(unittest.TestCase):
 		self.assertTrue(episode3 in episodes)
 		self.assertTrue(episode4 in episodes)
 
+	def testRemoveBeforeWithShow(self):
+		show1 = episoder.Show('some show', url='a')
+		show1 = self.store.addShow(show1)
+
+		show2 = episoder.Show('some other show', url='b')
+		show2 = self.store.addShow(show2)
+
+		today = datetime.date.today()
+		yesterday = today - datetime.timedelta(1)
+
+		episode1 = episoder.Episode(show1, 'episode1', 1, 1,
+				yesterday, 'x', 1)
+		episode2 = episoder.Episode(show1, 'episode1', 1, 2,
+				yesterday, 'x', 1)
+		episode3 = episoder.Episode(show2, 'episode1', 1, 2,
+				yesterday, 'x', 1)
+
+		self.store.addEpisode(episode1)
+		self.store.addEpisode(episode2)
+		self.store.addEpisode(episode3)
+
+		self.store.removeBefore(today, show=show1)
+		episodes = self.store.getEpisodes(basedate = yesterday, n_days=10)
+		self.assertEquals(1, len(episodes))
+
+
 	def testDuplicateEpisodes(self):
 		today = datetime.date.today()
 

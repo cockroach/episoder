@@ -264,9 +264,14 @@ class DataStore(object):
 		self.session.rollback()
 		self.session.begin()
 
-	def removeBefore(self, date):
+	def removeBefore(self, date, show=None):
 		episodes = self.session.query(Episode).filter(
-				Episode.airdate < date).all()
+				Episode.airdate < date)
+
+		if show:
+			episodes = episodes.filter(
+					Episode.show_id == show.show_id)
+
 
 		for episode in episodes:
 			self.session.delete(episode)
@@ -351,6 +356,21 @@ class Show(object):
 
 	def addEpisode(self, episode):
 		self.episodes.append(episode)
+
+	def update(self, store, parser, userAgent=None):
+		parser = plugins.parser_for(self.url)
+		if not parser:
+			logging.warning('No parser found for %s' % self.url)
+			return
+
+		if userAgent:
+			parser.user_agent = userAgent
+
+		parser.parse(self, store)
+
+	def removeEpisodesBefore(self, store, date):
+		logging.debug('Removing episodes from before %s' % date)
+		store.removeBefore(date, show=self)
 
 	def __str__(self):
 		return 'Show("%s")' % self.name
