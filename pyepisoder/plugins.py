@@ -27,7 +27,8 @@ import tempfile
 import datetime
 
 from BeautifulSoup import BeautifulSoup
-from episoder import Show, Episode
+#from episoder import Show, Episode
+from episode import Episode
 
 def all():
 	return {
@@ -161,9 +162,9 @@ class EpguidesParser(object):
 		self.show.name = title
 
 		if show_data['running']:
-			self.show.status = Show.RUNNING
+			self.show.setRunning()
 		else:
-			self.show.status = Show.ENDED
+			self.show.setEnded()
 
 		self.show.updated = datetime.datetime.now()
 
@@ -331,7 +332,7 @@ class TVComParser(object):
 		tagline = span.contents[0]
 
 		if tagline.find('Ended') > -1:
-			self.show.status = Show.ENDED;
+			self.show.setEnded()
 
 		elements = soup.findAll('li',
 				{ 'class': re.compile('episode.*')})

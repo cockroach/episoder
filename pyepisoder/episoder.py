@@ -21,6 +21,8 @@ import datetime
 from sqlalchemy import *
 from sqlalchemy.orm import *
 import logging
+import plugins
+from episode import Episode
 
 version="0.6.1"
 
@@ -278,6 +280,7 @@ class DataStore(object):
 
 		self.commit()
 
+"""
 class Episode(object):
 	def __init__(self, show, title, season, episode, airdate, prodnum,
 			total):
@@ -339,6 +342,7 @@ class Episode(object):
 	episode = property(_getEpisode, _setEpisode)
 	total = property(_getTotal, _setTotal)
 	show = property(_getShow, _setShow)
+"""
 
 class Show(object):
 	RUNNING = 1
@@ -357,11 +361,16 @@ class Show(object):
 	def addEpisode(self, episode):
 		self.episodes.append(episode)
 
-	def update(self, store, parser, userAgent=None):
+	def setRunning(self):
+		self.status = Show.RUNNING
+
+	def setEnded(self):
+		self.status = Show.ENDED
+
+	def update(self, store, userAgent=None):
 		parser = plugins.parser_for(self.url)
 		if not parser:
-			logging.warning('No parser found for %s' % self.url)
-			return
+			raise RuntimeError('No parser found for %s' % self.url)
 
 		if userAgent:
 			parser.user_agent = userAgent
