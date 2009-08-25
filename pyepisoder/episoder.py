@@ -1,4 +1,4 @@
-# episoder, http://episoder.sourceforge.net/
+# episoder, http://episoder.googlecode.com/
 #
 # Copyright (C) 2004-2009 Stefan Ott. All rights reserved.
 #

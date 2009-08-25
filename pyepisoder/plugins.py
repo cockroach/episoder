@@ -1,4 +1,4 @@
-# episoder, http://episoder.sourceforge.net/
+# episoder, http://episoder.googlecode.com/
 #
 # Copyright (C) 2004-2009 Stefan Ott. All rights reserved.
 #
@@ -27,7 +27,6 @@ import tempfile
 import datetime
 
 from BeautifulSoup import BeautifulSoup
-#from episoder import Show, Episode
 from episode import Episode
 
 def all():
