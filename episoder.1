@@ -95,7 +95,7 @@ and a list of sources to be used to build the database.
 Set the user-agent string to be used by wget (was required when tvtome blocked wget, might not be needed nowadays)
 .TP
 .B data=/path/to/file
-Specifies the file to be used to store the information about upcoming shows.
+Specifies the file to be used to store the information about upcoming shows. If, instead of a file, you supply a database url (as expected by sqlalchemy, eg. 'mysql://localhost/episoder'), episoder is going to use that database for storage instead.
 .TP
 .B src=http://some.web.add/ress
 Each src entry specifies a URL with episode information. Make sure you have the

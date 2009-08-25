@@ -23,6 +23,7 @@ import sys
 import getopt
 import logging
 import datetime
+import traceback
 import pyepisoder.episoder as episoder
 import pyepisoder.plugins as plugins
 
@@ -260,28 +261,21 @@ def do_update_data(options, config, force):
 			shows = store.getExpiredShows()
 
 		for show in shows:
-			parser = plugins.parser_for(show.url)
-
-			if not parser:
-				logging.warning('No parser found for %s' %
-						show.url)
-				continue
-
 			if 'agent' in config:
-				parser.user_agent = config['agent']
+				agent = config['agent']
+				show.update(store, agent)
+			else:
+				show.update(store)
 
-			try:
-				parser.parse(show, store)
-
-				if not options['nodate']:
-					basedate = options['date']
-					show.removeEpisodesBefore(store, basedate)
-
-			except Exception, e:
+			if not options['nodate']:
+				basedate = options['date']
+				show.removeEpisodesBefore(store, basedate)
+			"""
+			except:
 				logging.error("Error parsing %s" % show)
-				logging.error(e)
+				traceback.print_exc()
 				store.rollback()
-
+			"""
 		if not shows:
 			logging.info('None of your shows need to be updated')
 

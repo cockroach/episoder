@@ -87,7 +87,7 @@ class EpguidesParser(object):
 
 		try:
 			webdata = self._fetchPage(self.show.url)
-		except urllib2.HTTPError, e:
+		except Exception, e:
 			self.logger.error("Error fetching %s: %s" %
 					(self.show.url, e))
 			return
@@ -196,7 +196,7 @@ class TVComDummyParser(object):
 		return url.startswith('http://www.tv.com')
 
 	def parse(self, source, _):
-		logging.error("The url %s needs to be updated" % source['url'])
+		logging.error("The url %s needs to be updated" % source.url)
 
 class TVComParser(object):
 	def __init__(self):
@@ -235,7 +235,7 @@ class TVComParser(object):
 				'episode.html?season=All&shv=guide')
 			listpage = self._fetchPage(self.show.url +
 				'episode.html?season=All&shv=list')
-		except urllib2.HTTPError, e:
+		except Exception, e:
 			self.logger.error("Error fetching %s: %s" %
 					(self.show.url, e))
 			return

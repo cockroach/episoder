@@ -4,6 +4,7 @@
 == v0.6.1 (x Aug 2009) ==
  * Episoder can now talk to any database supported by sqlalchemy (see README)
  * Tell awk to process utf8 (for epguides parser)
+ * Catch (and properly log) some more HTTP exceptions
 
 == v0.6.0 (8 Aug 2009) ==
  * Episoder now keeps a persistent database of shows and episodes
