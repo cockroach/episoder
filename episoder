@@ -243,46 +243,42 @@ def do_update_data(options, config, force):
 		file = options['inputfile']
 		parser = plugins.parser_named(options['parser'])
 		update_data_from_file(file, parser, store)
+		return
+
+	# first, add all shows from the config file to our database
+	for source in config['sources']:
+		url = source['url']
+		show = store.getShowByUrl(url)
+
+		if not show:
+			show = episoder.Show(None, url=url)
+			show = store.addShow(show)
+			store.commit()
+
+	# then, update all shows that need updating
+	if force:
+		shows = store.getEnabledShows()
 	else:
-		# first, add all shows from the config file to our database
-		for source in config['sources']:
-			url = source['url']
-			show = store.getShowByUrl(url)
+		shows = store.getExpiredShows()
 
-			if not show:
-				show = episoder.Show(None, url=url)
-				show = store.addShow(show)
-				store.commit()
-
-		# then, update all shows that need updating
-		if force:
-			shows = store.getEnabledShows()
-		else:
-			shows = store.getExpiredShows()
-
-		for show in shows:
+	for show in shows:
+		try:
 			if 'agent' in config:
 				agent = config['agent']
 				show.update(store, agent)
 			else:
 				show.update(store)
+		except:
+			logging.error("Error parsing %s" % show)
+			traceback.print_exc()
+			store.rollback()
 
-			if not options['nodate']:
-				basedate = options['date']
-				show.removeEpisodesBefore(store, basedate)
-			"""
-			except:
-				logging.error("Error parsing %s" % show)
-				traceback.print_exc()
-				store.rollback()
-			"""
-		if not shows:
-			logging.info('None of your shows need to be updated')
+		if not options['nodate']:
+			basedate = options['date']
+			show.removeEpisodesBefore(store, basedate)
 
-	#if not options['nodate']:
-	#	basedate = options['date']
-	#	logging.debug('Removing episodes from before %s' % basedate)
-	#	store.removeBefore(basedate)
+	if not shows:
+		logging.info('None of your shows need to be updated')
 
 def update_data(options, config):
 	do_update_data(options, config, False)
