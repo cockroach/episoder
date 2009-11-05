@@ -1,6 +1,9 @@
 #summary ChangeLog for episoder
 #labels Featured,Phase-Deploy
 
+== v0.6.2 (xx Nov 2009) ==
+ * Updated tv.com parser (show names need to be lower-case now!)
+
 == v0.6.1 (26 Aug 2009) ==
  * Episoder can now talk to any database supported by sqlalchemy (see README)
  * Tell awk to process utf8 (for epguides parser)

@@ -290,7 +290,7 @@ class TVComParser(object):
 		h1 = soup.find('h1')
 		show_name = h1.contents[1].contents[0]
 		self.show.name = show_name
-		self.logger.debug('Got show "%s"' % show_name)
+		self.logger.debug('Got show "%s" (list)' % show_name)
 
 		elements = soup.findAll('tr', { 'class': 'episode' })
 
@@ -325,7 +325,7 @@ class TVComParser(object):
 		h1 = soup.find('h1')
 		show_name = h1.contents[1].contents[0]
 		self.show.name = show_name
-		self.logger.debug('Got show "%s"' % show_name)
+		self.logger.debug('Got show "%s" (guide)' % show_name)
 
 		span = soup.find('span', { 'class': 'tagline' })
 		tagline = span.contents[0]
@@ -352,11 +352,11 @@ class TVComParser(object):
 			else:
 				episode_num = 0
 
-			result = re.search('Aired: (.*)$', data)
+			result = re.search('Air(s|ed): (.*)$', data)
 
 			if result:
 				airtime = time.strptime(
-					result.group(1), "%m/%d/%Y")
+					result.group(2), "%m/%d/%Y")
 				airdate = datetime.datetime(
 					airtime.tm_year, airtime.tm_mon,
 					airtime.tm_mday).date()

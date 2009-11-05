@@ -529,6 +529,7 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual(episoder.Show.RUNNING, show.status)
 
 	def testParseFile2(self):
+		# http://www.tv.com/the-daily-show/show/1293/
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('tds')
@@ -546,11 +547,19 @@ class testTVComParser(unittest.TestCase):
 		self.assertEqual('The Daily Show', episode.show.name)
 
 	def testParseFile3(self):
+		# http://www.tv.com/knight-rider/show/74986/
 		then = datetime.date(1970, 1, 1)
 		self._parse('kr2008')
 		show = self.store.getShowByUrl('test/testdata/tvcom_kr2008 ')
 
 		self.assertEqual(episoder.Show.ENDED, show.status)
+
+	def testParseFile4(self):
+		# http://www.tv.com/fringe/show/75146
+		then = datetime.date(1970, 1, 1)
+		self._parse('fringe')
+		show = self.store.getShowByUrl('test/testdata/tvcom_fringe ')
+		self.assertEquals(28, len(self.store.getEpisodes(then, 99999)))
 
 if __name__ == '__main__':
 	unittest.main()
