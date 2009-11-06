@@ -503,9 +503,11 @@ class testTVComParser(unittest.TestCase):
 		self.assertTrue(self._accept
 				('http://www.tv.com/penn-and-teller-bullsh!/show/17579/'))
 		self.assertTrue(self._accept
-				('http://www.tv.com/True+Blood/show/74645/'))
+				('http://www.tv.com/true+blood/show/74645/'))
 		self.assertTrue(self._accept
-				('http://www.tv.com/Eastbound+%26+Down/show/75067/'))
+				('http://www.tv.com/eastbound+%26+down/show/75067/'))
+		self.assertFalse(self._accept
+				('http://www.tv.com/Monk/show/9130/'))
 
 	def testParseFile1(self):
 		then = datetime.date(1970, 1, 1)
