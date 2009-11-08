@@ -3,6 +3,7 @@
 
 == v0.6.2 (xx Nov 2009) ==
  * Updated tv.com parser (show names need to be lower-case now!)
+ * Added -S option to specify a show id for (forced) updates
 
 == v0.6.1 (26 Aug 2009) ==
  * Episoder can now talk to any database supported by sqlalchemy (see README)
