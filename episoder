@@ -64,6 +64,7 @@ Options for database update:
   -i			ignore date (don't remove old episodes)
   -f <file>		get data from file, ignore configured sources (needs -P)
   -P <parser>		force parser to be used (only in combination with -f)
+  -S <id>		limit (force-)update to this show
 
 Managing shows:
   -L			list shows in database
@@ -256,7 +257,10 @@ def do_update_data(options, config, force):
 			store.commit()
 
 	# then, update all shows that need updating
-	if force:
+	if options['search']:
+		show_id = int(options['search'])
+		shows = [store.getShowById(show_id)]
+	elif force:
 		shows = store.getEnabledShows()
 	else:
 		shows = store.getExpiredShows()
@@ -300,7 +304,7 @@ def get_options():
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbBpf:P:l:CLa:r:E:D:'
+		valid_options = 'c:d:hin:s:vVwbBpf:P:l:CLa:r:E:D:S:'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
@@ -363,6 +367,8 @@ def get_options():
 			search = argument
 		elif option == '-D':
 			command = disable_show
+			search = argument
+		elif option == '-S':
 			search = argument
 
 	return {
