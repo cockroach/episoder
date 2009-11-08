@@ -24,7 +24,7 @@ import logging
 import plugins
 from episode import Episode
 
-version="0.6.1"
+version="0.6.2"
 
 class DataStore(object):
 	def __init__(self, path):
