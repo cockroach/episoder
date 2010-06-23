@@ -65,6 +65,19 @@ function set_show(showName) {
 	}
 }
 
+/^<a name='latest' id='latest' \/>&bull; Season/ {
+	# remove ^M
+	gsub(/\015/, "", $6)
+
+	# Some files come with bullets before the season number and an anchor
+	# before the bullet
+	season = $6
+
+	if (season == "") {
+		season = 0
+	}
+}
+
 /^Season/ {
 	# Most, however, don't
 

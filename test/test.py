@@ -455,6 +455,13 @@ class testEpguidesParser(unittest.TestCase):
 			'Zoë Ball, Louis Eliot, Graham Norton, Keith Duffy',
 			episodes[20].title.encode('utf8'))
 
+		# This one has an anchor tag before the bullet for season 6
+		self.store.clear()
+		self._parse('test/testdata/epguides_futurama.html')
+		episodes = self.store.getEpisodes(then, 99999)
+		episode = episodes.pop()
+		self.assertEquals(6, episode.season)
+
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
 		self.path = tempfile.mktemp()

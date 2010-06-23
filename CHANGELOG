@@ -1,6 +1,9 @@
 #summary ChangeLog for episoder
 #labels Featured,Phase-Deploy
 
+== v0.6.3 (23 Jun 2009) ==
+ * The epguides parser now properly reads the season number for more shows
+
 == v0.6.2 (08 Nov 2009) ==
  * Updated tv.com parser (show names need to be lower-case now!)
  * Added -S option to specify a show id for (forced) updates
