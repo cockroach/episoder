@@ -1,6 +1,6 @@
 # episoder, http://episoder.googlecode.com/
 #
-# Copyright (C) 2004-2009 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2010 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
