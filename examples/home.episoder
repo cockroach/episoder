@@ -21,8 +21,8 @@ agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 # Your favourite dateformat as used by the date command (see `man date`)
 #dateformat=%a, %b %d, %Y
 
-# List of shows with url and, optionally, a name, eg.
-# src=http://www.epguides.com/CSI/ name=CSI
+# List of shows with url, eg.
+# src=http://www.epguides.com/CSI/
 
 # Black Books
 src=http://www.tv.com/black-books/show/5108/
@@ -37,7 +37,7 @@ src=http://www.tv.com/monk/show/9130/
 src=http://www.tv.com/battlestar-galactica-2003/show/23557/
 
 # CSI
-src=http://www.tv.com/CSI/show/19/
+src=http://www.tv.com/csi/show/19/
 
 # 24
 src=http://www.tv.com/24/show/3866/
