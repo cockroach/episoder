@@ -240,14 +240,22 @@ class TVComParser(object):
 			return
 
 		file = open(listpage)
-		self.parseListViewPage(BeautifulSoup(file.read().decode(
-			'ISO-8859-1')))
+		data = file.read()
 		file.close()
 
-		file = open(guidepage)
-		self.parseGuideViewPage(BeautifulSoup(file.read().decode(
+		cleanData = re.sub('<script.*?</script>', '',
+				data.replace('\n', ' '))
+		self.parseListViewPage(BeautifulSoup(cleanData.decode(
 			'ISO-8859-1')))
+
+		file = open(guidepage)
+		data = file.read()
 		file.close()
+		cleanData = re.sub('<script.*?</script>', '',
+				data.replace('\n', ' '))
+
+		self.parseGuideViewPage(BeautifulSoup(cleanData.decode(
+			'ISO-8859-1')))
 
 		os.unlink(guidepage)
 		os.unlink(listpage)
@@ -266,13 +274,17 @@ class TVComParser(object):
 
 		file = open(filename)
 		data = file.read()
-		soup = BeautifulSoup(data.decode('ISO-8859-1'))
 		file.close()
+
+		cleanData = re.sub('<script.*?</script>', '',
+				data.replace('\n', ' '))
+		soup = BeautifulSoup(cleanData.decode('ISO-8859-1'))
 
 		elements = soup.findAll('li',
 				{ 'class': re.compile('episode.*')})
 
 		switch = soup.find('a', { 'class': 'switch_to_guide'})
+		print switch
 
 		if (switch):
 			self.logger.debug('This is a list view page')
@@ -287,8 +299,8 @@ class TVComParser(object):
 		self.store.commit()
 
 	def parseListViewPage(self, soup):
-		h1 = soup.find('h1')
-		show_name = h1.contents[1].contents[0]
+		div = soup.find('div', { 'class': 'title'})
+		show_name = div.a.contents[0]
 		self.show.name = show_name
 		self.logger.debug('Got show "%s" (list)' % show_name)
 
@@ -304,9 +316,8 @@ class TVComParser(object):
 			else:
 				prodnum = ''
 
-			reviews = element.find('td', { 'class': 'reviews' })
-			link = reviews.contents[0]
-			url = link['href']
+			td = element.find('td', { 'class': 'title' })
+			url = td.a['href']
 			parts = url.split('/')
 			id = int(parts[-2])
 
@@ -322,8 +333,8 @@ class TVComParser(object):
 			self.episodes[id].total = totalepnum
 
 	def parseGuideViewPage(self, soup):
-		h1 = soup.find('h1')
-		show_name = h1.contents[1].contents[0]
+		div = soup.find('div', { 'class': 'title'})
+		show_name = div.a.contents[0]
 		self.show.name = show_name
 		self.logger.debug('Got show "%s" (guide)' % show_name)
 
