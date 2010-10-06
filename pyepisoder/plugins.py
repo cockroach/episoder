@@ -284,7 +284,6 @@ class TVComParser(object):
 				{ 'class': re.compile('episode.*')})
 
 		switch = soup.find('a', { 'class': 'switch_to_guide'})
-		print switch
 
 		if (switch):
 			self.logger.debug('This is a list view page')

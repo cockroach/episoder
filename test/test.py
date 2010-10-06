@@ -416,21 +416,18 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/testdata/epguides_bsg.html')
 		self.assertEquals(74, len(self.store.getEpisodes(then, 99999)))
 
-		self.store.clear()
+	def testEpguidesFormat2(self):
+		# Another format
+		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('test/testdata/epguides_eureka.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		self.assertEquals(43, len(episodes))
 		self.assertEquals('Best in Faux', episodes[27].title)
 
-		self.store.clear()
-		self._parse('test/testdata/epguides_american_idol.html')
-		episodes = self.store.getEpisodes(then, 99999)
-
-		self.assertEquals('Pride Goeth Before The Fro',
-				episodes[10].title)
-
-		self.store.clear()
+	def testEpguidesFormat3(self):
+		# Yet another format
+		then = datetime.date(1970, 1, 1)
 		self._parse('test/testdata/epguides_midsomer_murders.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes[1]
@@ -438,16 +435,33 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals(1, episode.season)
 		self.assertEquals(1, episode.episode)
 
-		# this one lacks a season number somewhere
-		self.store.clear()
-		self._parse('test/testdata/epguides_48_hours_mistery.html')
+	def testEpguidesRemoveIllegalChars(self):
+		# This one contains an illegal character somewhere
+		then = datetime.date(1970, 1, 1)
+		self._parse('test/testdata/epguides_american_idol.html')
+		episodes = self.store.getEpisodes(then, 99999)
 
+		self.assertEquals('Pride Goeth Before The Fro',
+				episodes[10].title)
+
+	def testEpguidesMissingSeasonNumber(self):
+		# This one lacks a season number somewhere
+		then = datetime.date(1970, 1, 1)
+		self._parse('test/testdata/epguides_48_hours_mistery.html')
+		episodes = self.store.getEpisodes(then, 99999)
+		self.assertEquals(31, len(episodes))
+
+	def testEpguidesEndedShow(self):
+		# This one is no longer on the air
+		then = datetime.date(1970, 1, 1)
 		self._parse('test/testdata/epguides_kr2008.html')
 		show = self.store.getShowByUrl(
 				'test/testdata/epguides_kr2008.html')
 		self.assertEquals(episoder.Show.ENDED, show.status)
 
-		self.store.clear()
+	def testEpguidesEncoding(self):
+		# This one has funny characters
+		then = datetime.date(1970, 1, 1)
 		self._parse('test/testdata/epguides_buzzcocks.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes[20]
@@ -455,12 +469,25 @@ class testEpguidesParser(unittest.TestCase):
 			'Zoë Ball, Louis Eliot, Graham Norton, Keith Duffy',
 			episodes[20].title.encode('utf8'))
 
+	def testEpguidesWithAnchor(self):
 		# This one has an anchor tag before the bullet for season 6
-		self.store.clear()
+		then = datetime.date(1970, 1, 1)
 		self._parse('test/testdata/epguides_futurama.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes.pop()
 		self.assertEquals(6, episode.season)
+
+	def testEpguidesWithTrailerAndRecap(self):
+		# This one has [Trailer] and [Recap] in episode titles
+		then = datetime.date(1970, 1, 1)
+		self._parse('test/testdata/epguides_house.html')
+		episodes = self.store.getEpisodes(then, 99999)
+		episode = episodes[len(episodes) - 3]
+		self.assertEquals('Unwritten', episode.title)
+
+		episode = episodes[len(episodes) - 2]
+		self.assertEquals('Massage Therapy', episode.title)
+
 
 class testTVComParser(unittest.TestCase):
 	def setUp(self):
@@ -517,10 +544,11 @@ class testTVComParser(unittest.TestCase):
 				('http://www.tv.com/Monk/show/9130/'))
 
 	def testParseFile1(self):
+		# http://www.tv.com/csi/show/19/
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('csi')
-		self.assertEquals(206, len(self.store.getEpisodes(then, 99999)))
+		self.assertEquals(237, len(self.store.getEpisodes(then, 99999)))
 
 		episodes = self.store.search({'search': 'Hammer'})
 		self.assertEqual(1, len(episodes))
@@ -542,7 +570,7 @@ class testTVComParser(unittest.TestCase):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('tds')
-		self.assertEquals(1697,len(self.store.getEpisodes(then, 99999)))
+		self.assertEquals(1910,len(self.store.getEpisodes(then, 99999)))
 
 		episodes = self.store.search({'search': 'James Spader'})
 		self.assertEqual(1, len(episodes))
@@ -568,7 +596,7 @@ class testTVComParser(unittest.TestCase):
 		then = datetime.date(1970, 1, 1)
 		self._parse('fringe')
 		show = self.store.getShowByUrl('test/testdata/tvcom_fringe ')
-		self.assertEquals(28, len(self.store.getEpisodes(then, 99999)))
+		self.assertEquals(47, len(self.store.getEpisodes(then, 99999)))
 
 if __name__ == '__main__':
 	unittest.main()

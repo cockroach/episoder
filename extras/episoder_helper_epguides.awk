@@ -108,19 +108,27 @@ function set_show(showName) {
 	}
 
 	prodnum = substr($0, 16, 9)
-	gsub (/^ */, "", prodnum)
-	gsub (/ *$/, "", prodnum)
+	gsub(/^ */, "", prodnum)
+	gsub(/ *$/, "", prodnum)
 
 	pos = match($0, /([1-3]?[0-9]\/[A-Z][a-z][a-z]\/[0-9][0-9]) /)
 	epdate = substr($0, pos, RLENGTH)
-	gsub (/ *$/, "", epdate)
-	gsub (/\//, " ", epdate)
+	gsub(/ *$/, "", epdate)
+	gsub(/\//, " ", epdate)
 
-	epnameHTML = substr($0, 40)
-	pos = index(epnameHTML, ">")
-	eptitle = substr(epnameHTML, pos + 1, length(epnameHTML) - pos - 4)
-	gsub (/<$/, "", eptitle);
-	gsub (/<img.*>/, "", eptitle);
+	eptitle = substr($0, 40)
+	pos = index(eptitle, ">")
+
+	# remove recap and trailer links from html
+	sub(/<span class='recap'.*<\/span>/, "", eptitle)
+	sub(/<span class='Trailers'.*<\/span>/, "", eptitle)
+
+	# remove href and trailing </a>
+	sub(/<a.*href=['"].*['"]>/, "", eptitle)
+	sub(/<\/a>/, "", eptitle)
+
+	# remove trailing white spaces
+	gsub(/[ \t\f\n\r\v]*$/, "", eptitle)
 
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
@@ -135,19 +143,26 @@ function set_show(showName) {
 	}
 
 	prodnum = substr($0, 16, 9)
-	gsub (/^ */, "", prodnum)
-	gsub (/ *$/, "", prodnum)
+	gsub(/^ */, "", prodnum)
+	gsub(/ *$/, "", prodnum)
 
 	pos = match($0, /([1-3]?[0-9] [A-Z][a-z][a-z] [0-9][0-9]) /)
 	epdate = substr($0, pos, RLENGTH)
-	gsub (/ *$/, "", epdate)
+	gsub(/ *$/, "", epdate)
 
-	epnameHTML = substr($0, 40)
-	pos = index(epnameHTML, ">")
-	eptitle = substr(epnameHTML, pos + 1, length(epnameHTML) - pos - 4)
-	gsub (/<$/, "", eptitle);
-	gsub (/<img.*>/, "", eptitle);
+	eptitle = substr($0, 40)
+	pos = index(eptitle, ">")
 
+	# remove recap and trailer links from html
+	sub(/<span class='recap'.*<\/span>/, "", eptitle)
+	sub(/<span class='Trailers'.*<\/span>/, "", eptitle)
+
+	# remove href and trailing </a>
+	sub(/<a.*href=['"].*['"]>/, "", eptitle)
+	sub(/<\/a>/, "", eptitle)
+
+	# remove trailing white spaces
+	gsub(/[ \t\f\n\r\v]*$/, "", eptitle)
 
 	show_episode(show, totalep, season, epnum, prodnum, epdate, eptitle)
 }
