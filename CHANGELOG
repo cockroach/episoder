@@ -2,7 +2,7 @@
 #labels Featured,Phase-Deploy
 
 == v0.6.5 (6 Oct 2010) ==
- * Updated the epguides.com parser to ignore trailer links in episode names
+ * Updated the epguides.com parser to ignore links to trailers in episode names
 
 == v0.6.4 (25 Jun 2010) ==
  * Filter javascript from tv.com pages because it confuses beautifulsoup 3.1
