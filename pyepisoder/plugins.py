@@ -134,7 +134,7 @@ class EpguidesParser(object):
 				self.awk, self.awkfile, yamlfile,
 				cleanwebdata, logfile)
 		if os.system(cmd) != 0:
-			raise "Error running %s" % cmd
+			raise Exception("Error running %s" % cmd)
 
 		file = open(logfile)
 		self.logger.debug(file.read().strip())
