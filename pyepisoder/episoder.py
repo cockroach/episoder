@@ -91,7 +91,7 @@ class DataStore(object):
 			Column('updated', DateTime),
 			Column('enabled', Boolean),
 			Column('status', Integer, default=Show.RUNNING),
-			useexisting=True)
+			extend_existing=True)
 		showmapper = mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name,
 			'episodes': relation(Episode, backref='show',
@@ -101,7 +101,7 @@ class DataStore(object):
 		self.meta = Table('meta', self.metadata,
 			Column('key', Text, primary_key=True),
 			Column('value', Text),
-			useexisting=True)
+			extend_existing=True)
 
 		self.episodes = Table('episodes', self.metadata,
 			Column('show_id', ForeignKey("shows.show_id"),
@@ -112,7 +112,7 @@ class DataStore(object):
 			Column('title', Text),
 			Column('totalnum', Integer),
 			Column('prodnum', Text),
-			useexisting=True)
+			extend_existing=True)
 		episodemapper = mapper(Episode, self.episodes, properties={
 			'title': self.episodes.c.title,
 			'season': self.episodes.c.season,

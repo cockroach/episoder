@@ -1,8 +1,10 @@
 #summary ChangeLog for episoder
 #labels Featured,Phase-Deploy
 
-== v0.6.6 (UNRELEASED ==
+== v0.7.0 (UNRELEASED) ==
+ * Added support for TVDB
  * Minor code cleanup
+ * Fixed some more encoding issues in the console renderer
 
 == v0.6.5 (6 Oct 2010) ==
  * Updated the epguides.com parser to ignore links to trailers in episode names

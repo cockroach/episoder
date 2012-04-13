@@ -116,20 +116,13 @@ def parse_rc(path):
 			(_, agent) = line.split('=')
 		elif line.startswith('src='):
 			data = {}
-			name = None
-			if ' ' in line:
-				(src, opts) = line.split(' ')
-				if opts.startswith('name='):
-					(_, name) = opts.split('=')
-				data['name'] = name
-			else:
-				src = line
+			src = line
 
 			(_, url) = src.split('=')
 			data['url'] = url
 
 			sources.append(data)
-			logging.debug('source entry: %s (%s)' % (url, name))
+			logging.debug('source entry: "%s"' % url)
 
 	rc.close()
 

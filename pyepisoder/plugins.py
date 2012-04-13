@@ -1,6 +1,6 @@
 # episoder, http://episoder.googlecode.com/
 #
-# Copyright (C) 2004-2010 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2012 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -25,13 +25,14 @@ import logging
 import urllib2
 import tempfile
 import datetime
+import tvdb_api
 
 from BeautifulSoup import BeautifulSoup
 from episode import Episode
 
 def all():
 	return {
-		'parsing': [ EpguidesParser(), TVComParser(),
+		'parsing': [ EpguidesParser(), TVComParser(), TVDB(),
 			TVComDummyParser() ],
 		'output': [ ConsoleRenderer() ]
 	}
@@ -63,6 +64,61 @@ class DummyParser(object):
 
 	def accept(self, url):
 		return False
+
+class TVDB(object):
+	def __init__(self):
+		self.logger = logging.getLogger('TVDB')
+
+	def accept(self, url):
+		return url.startswith('tvdb::')
+
+	def parse(self, show, store):
+		self.show = show
+		self.store = store
+
+		name = show.url[6:]
+
+		tv = tvdb_api.Tvdb()
+		data = tv[name]
+
+		self.show.name = data.data.get('seriesname')
+		self.show.updated = datetime.datetime.now()
+
+		for (idx, season) in data.items():
+			for (epidx, episode) in season.items():
+				self.__addEpisode(episode)
+
+		self.store.commit()
+
+	def __addEpisode(self, episode):
+		name = episode.get('episodename')
+		season = episode.get('seasonnumber', 0)
+		num = episode.get('episodenumber', 0)
+
+		date = episode.get('firstaired')
+
+		if not date:
+			self.logger.debug('Throwing away episode %s' % num)
+			return
+
+		date = time.strptime(date, '%Y-%m-%d')
+		date = datetime.datetime(date.tm_year, date.tm_mon,
+						date.tm_mday).date()
+
+		prodcode = episode.get('productioncode')
+		abs_number = episode.get('absolute_number', 0)
+
+		# can be None which is bad
+		if not abs_number:
+			abs_number = 0
+
+		self.logger.debug('Found episode %s' % name)
+
+		e = Episode(self.show, name, season, num, date, prodcode,
+			abs_number)
+
+		self.store.addEpisode(e)
+
 
 class EpguidesParser(object):
 	def __init__(self):
@@ -410,7 +466,7 @@ class ConsoleRenderer(object):
 		string = string.replace('%show', episode.show.name)
 		string = string.replace('%season', str(episode.season))
 		string = string.replace('%epnum', "%02d" % episode.episode)
-		string = string.replace('%eptitle', str(episode.title))
+		string = string.replace('%eptitle', episode.title)
 		string = string.replace('%totalep', str(episode.total))
 		string = string.replace('%prodnum', str(episode.prodnum))
 		print ("%s%s%s" % (color, string.encode('utf8'),
