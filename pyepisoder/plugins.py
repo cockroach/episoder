@@ -27,6 +27,8 @@ import tempfile
 import datetime
 import tvdb_api
 
+from tvdb_api import tvdb_shownotfound
+
 from BeautifulSoup import BeautifulSoup
 from episode import Episode
 
@@ -79,7 +81,12 @@ class TVDB(object):
 		name = show.url[6:]
 
 		tv = tvdb_api.Tvdb()
-		data = tv[name]
+
+		try:
+			data = tv[name]
+		except tvdb_shownotfound:
+			self.logger.error('Show %s not found' % name)
+			return
 
 		self.show.name = data.data.get('seriesname')
 		self.show.updated = datetime.datetime.now()
