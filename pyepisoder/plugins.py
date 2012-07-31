@@ -80,6 +80,13 @@ class TVDB(object):
 
 		name = show.url[6:]
 
+		if name.isdigit():
+			name = int(name)
+		else:
+			self.logger.error('%s is not a valid TVDB show id'
+									% name)
+			return
+
 		tv = tvdb_api.Tvdb()
 
 		try:
