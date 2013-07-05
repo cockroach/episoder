@@ -45,13 +45,20 @@ def show_parsers():
 			print "%-20s%s" % (parser.__class__.__name__, parser)
 
 def show_help():
-	print """Usage: %s [options]
+	print """Usage: %s [options] command
+
+Commands:
+  add <id|url>		add a show
+  disable <id>		disable updates for show
+  enable <id>		enable updates for show
+  list			show upcoming episodes (default)
+  remove <id>		remove show from database
+  shows			list shows in the database
+  update		update the database
 
 Global options:
   -h			show this help
   -c <file>		use configuration from file (default: ~/.episoder)
-  -b			update the database
-  -B			force-update the database, disregard last update time
   -v			verbose operation
   -w			very verbose (debug) operation
   -V			show version information
@@ -63,15 +70,9 @@ Options for database update:
   -d <num>		remove episodes more than <num> days old (default: 1)
   -i			ignore date (don't remove old episodes)
   -f <file>		get data from file, ignore configured sources (needs -P)
+  -F			force-update the database, disregard last update time
   -P <parser>		force parser to be used (only in combination with -f)
   -S <id>		limit (force-)update to this show
-
-Managing shows:
-  -L			list shows in database
-  -a <url>		add show to database
-  -r <id>		remove show from database
-  -E <id>		enable updates for show
-  -D <id>		disable updates for show
 
 Options for console output:
   -d <YYYY-MM-DD>	only show episodes newer than date (default: yesterday)
@@ -84,7 +85,7 @@ Options for console output:
 
 Note that -i overrules -d and -n
 
-Report episoder bugs on http://episoder.sf.net/""" % sys.argv[0]
+Report episoder bugs on http://code.ott.net/projects/episoder/""" % sys.argv[0]
 
 def parse_rc(path):
 	datafile = None
@@ -291,18 +292,46 @@ def get_options():
 	nodate = False
 	colors = True
 	search = ''
-	command = show_data
 	inputfile = None
 	parser = None
 	logfile = None
 
 	try:
-		valid_options = 'c:d:hin:s:vVwbBpf:P:l:CLa:r:E:D:S:'
+		valid_options = 'c:d:hin:s:vVwbBpf:FP:l:CLa:r:E:D:S:'
 		options, args = getopt.getopt(sys.argv[1:], valid_options)
 	except getopt.error, msg:
 		print msg
 		print "for help use -h"
 		sys.exit(1)
+
+	commands = {
+		'add': add_show,
+		'disable': disable_show,
+		'enable': enable_show,
+		'list': show_data,
+		'remove': remove_show,
+		'shows': list_shows,
+		'update': update_data
+	}
+
+	if len(args) < 1:
+		command = show_data
+	elif args[0] not in commands:
+		sys.stderr.write("ERROR: Unknown command: %s\n" % args[0])
+		show_help()
+		sys.exit(1)
+	else:
+		command = commands[args[0]]
+
+	if command in [add_show, remove_show, enable_show, disable_show]:
+		if len(args) < 2:
+			sys.stderr.write("ERROR: Argument missing for '%s'\n" %
+					args[0])
+			show_help()
+			sys.exit(1)
+
+		# yes, this *is* a terrible abuse of the 'search' field
+		search = args[1]
 
 	for option, argument in options:
 		if option == '-h':
@@ -334,33 +363,16 @@ def get_options():
 			nodate = True
 		elif option == '-s':
 			search = argument
-		elif option == '-b':
-			command = update_data
-		elif option == '-B':
-			command = force_update_data
 		elif option == '-f':
 			inputfile = argument
+		elif option == '-F' and command == update_data:
+			command = force_update_data
 		elif option == '-P':
 			parser = argument
 		elif option == '-l':
 			logfile = argument
 		elif option == '-C':
 			colors = False
-		elif option == '-L':
-			command = list_shows
-		elif option == '-a':
-			command = add_show
-			# yes, this *is* a terrible abuse of the 'search' field
-			search = argument
-		elif option == '-r':
-			command = remove_show
-			search = argument
-		elif option == '-E':
-			command = enable_show
-			search = argument
-		elif option == '-D':
-			command = disable_show
-			search = argument
 		elif option == '-S':
 			search = argument
 
