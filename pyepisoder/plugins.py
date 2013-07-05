@@ -71,6 +71,9 @@ class TVDB(object):
 	def __init__(self):
 		self.logger = logging.getLogger('TVDB')
 
+	def __str__(self):
+		return 'TheTVDB.com parser'
+
 	def accept(self, url):
 		return url.startswith('tvdb::')
 
