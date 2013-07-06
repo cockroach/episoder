@@ -27,7 +27,7 @@ import tempfile
 import datetime
 import tvdb_api
 
-from tvdb_api import tvdb_shownotfound
+from tvdb_api import BaseUI, Tvdb, tvdb_shownotfound
 
 from BeautifulSoup import BeautifulSoup
 from episode import Episode
@@ -75,27 +75,25 @@ class TVDB(object):
 		return 'TheTVDB.com parser'
 
 	def accept(self, url):
-		return url.startswith('tvdb::')
+		return url.isdigit()
 
 	def parse(self, show, store):
 		self.show = show
 		self.store = store
 
-		name = show.url[6:]
-
-		if name.isdigit():
-			name = int(name)
+		if show.url.isdigit():
+			id = int(show.url)
 		else:
 			self.logger.error('%s is not a valid TVDB show id'
-									% name)
+					% show.url)
 			return
 
 		tv = tvdb_api.Tvdb()
 
 		try:
-			data = tv[name]
+			data = tv[id]
 		except tvdb_shownotfound:
-			self.logger.error('Show %s not found' % name)
+			self.logger.error('Show %s not found' % id)
 			return
 
 		self.show.name = data.data.get('seriesname')
@@ -136,6 +134,19 @@ class TVDB(object):
 
 		self.store.addEpisode(e)
 
+	@staticmethod
+	def lookup(text):
+		result = []
+
+		class search(BaseUI):
+			def selectSeries(self, allSeries):
+				result.extend(allSeries)
+				return BaseUI.selectSeries(self, allSeries)
+
+		db = Tvdb(custom_ui=search)
+		db[text]
+
+		return result
 
 class EpguidesParser(object):
 	def __init__(self):

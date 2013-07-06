@@ -52,6 +52,7 @@ Commands:
   disable <id>		disable updates for show
   enable <id>		enable updates for show
   list			show upcoming episodes (default)
+  lookup <keyword>	find shows
   remove <id>		remove show from database
   shows			list shows in the database
   update		update the database
@@ -196,6 +197,20 @@ def remove_show(options, config):
 	store.removeShow(id)
 	store.commit()
 
+def find_show(options, config):
+
+	search = options.get('search')
+
+	try:
+		res = plugins.TVDB.lookup(search)
+
+		print "ID\tName\n-------\t--------------------"
+		for x in res:
+			print "%s\t%s" % (x['seriesid'], x['seriesname'])
+
+	except:
+		print "Nothing found"
+
 def set_show_enabled(store, id, enabled):
 	show = store.getShowById(id)
 
@@ -309,6 +324,7 @@ def get_options():
 		'disable': disable_show,
 		'enable': enable_show,
 		'list': show_data,
+		'lookup': find_show,
 		'remove': remove_show,
 		'shows': list_shows,
 		'update': update_data
@@ -323,7 +339,7 @@ def get_options():
 	else:
 		command = commands[args[0]]
 
-	if command in [add_show, remove_show, enable_show, disable_show]:
+	if command in [add_show, remove_show, enable_show, disable_show, find_show]:
 		if len(args) < 2:
 			sys.stderr.write("ERROR: Argument missing for '%s'\n" %
 					args[0])
