@@ -1,9 +1,8 @@
-#summary ChangeLog for episoder
-#labels Featured,Phase-Deploy
-
 == v0.7.0 (UNRELEASED) ==
  * Added support for TVDB
- * Minor code cleanup
+ * Removed support for tv.com
+ * Reorganized the command line options. Check the documentation for details
+ * Updated the epguides.com parser to ignore trailer links in episode names
  * Fixed some more encoding issues in the console renderer
 
 == v0.6.5 (6 Oct 2010) ==
