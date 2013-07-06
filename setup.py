@@ -34,7 +34,7 @@ if __name__ == '__main__':
 		description		= 'TV episode notifier',
 		author			= 'Stefan Ott',
 		author_email		= 'stefan@ott.net',
-		url			= 'http://episoder.sf.net/',
+		url			= 'http://code.ott.net/projects/episoder',
 		packages		= [ 'pyepisoder' ],
 		scripts			= [ 'episoder' ],
 		long_description	= LONG_DESCRIPTION,

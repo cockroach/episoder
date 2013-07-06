@@ -1,6 +1,6 @@
-# episoder, http://episoder.googlecode.com/
+# episoder, http://code.ott.net/projects/episoder
 #
-# Copyright (C) 2004-2010 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2013 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,22 +16,15 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import sys
-import datetime
-from sqlalchemy import *
-from sqlalchemy.orm import *
-import logging
-import plugins
 
 class Episode(object):
-	def __init__(self, show, title, season, episode, airdate, prodnum,
-			total):
-		#assert isinstance(show, Show)
+
+	def __init__(self, show, name, season, episode, date, prodnum, total):
 		self._show = show
-		self.title = title
+		self.title = name
 		self.season = int(season)
 		self.episode = int(episode)
-		self.airdate = airdate
+		self.airdate = date
 		self.prodnum = str(prodnum)
 		self.total = int(total)
 		self.show_id = self._show.show_id

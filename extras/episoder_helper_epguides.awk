@@ -1,6 +1,6 @@
 # episoder epguides.com parser helper
 #
-# Copyright (C) 2006-2010 Stefan Ott. All rights reserved.
+# Copyright (C) 2006-2013 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#
-# $Id: episoder_helper_epguides.awk 172 2008-11-05 03:55:34Z stefan_ott $
 
 /<html>.*<head>/ {
 	# Some files don't have proper linebreaks - they'll have <html> and

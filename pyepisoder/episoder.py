@@ -1,6 +1,6 @@
-# episoder, http://episoder.googlecode.com/
+# episoder, http://code.ott.net/projects/episoder
 #
-# Copyright (C) 2004-2010 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2013 Stefan Ott. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,7 +16,6 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import sys
 import datetime
 from sqlalchemy import *
 from sqlalchemy.orm import *
