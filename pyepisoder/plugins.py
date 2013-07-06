@@ -25,7 +25,6 @@ import logging
 import urllib2
 import tempfile
 import datetime
-import tvdb_api
 
 from tvdb_api import BaseUI, Tvdb, tvdb_shownotfound
 
@@ -34,8 +33,7 @@ from episode import Episode
 
 def all():
 	return {
-		'parsing': [ EpguidesParser(), TVComParser(), TVDB(),
-			TVComDummyParser() ],
+		'parsing': [ EpguidesParser(), TVDB(), TVComDummyParser() ],
 		'output': [ ConsoleRenderer() ]
 	}
 
@@ -88,7 +86,7 @@ class TVDB(object):
 					% show.url)
 			return
 
-		tv = tvdb_api.Tvdb()
+		tv = Tvdb()
 
 		try:
 			data = tv[id]
@@ -276,205 +274,11 @@ class TVComDummyParser(object):
 		return 'dummy tv.com parser to detect old urls (DO NOT USE)'
 
 	def accept(self, url):
-		return url.startswith('http://www.tv.com')
-
-	def parse(self, source, _):
-		logging.error("The url %s needs to be updated" % source.url)
-
-class TVComParser(object):
-	def __init__(self):
-		self.logger = logging.getLogger('TVComParser')
-
-	def __str__(self):
-		return 'tv.com parser'
-
-	def accept(self, url):
-		exp = 'http://(www.)?tv.com/[-a-z0-9_!+%]+/show/\d+/?'
+		exp = 'http://(www.)?tv.com/.*'
 		return re.match(exp, url)
 
-	def _fetchPage(self, url):
-		self.logger.info('Fetching ' + url)
-		headers = {}
-
-		if (self.user_agent):
-			headers['User-Agent'] = self.user_agent
-
-		request = urllib2.Request(url, None, headers)
-		result = urllib2.urlopen(request)
-		(fd, name) = tempfile.mkstemp()
-		file = os.fdopen(fd, 'w')
-		file.write(result.read())
-		file.close()
-		self.logger.debug("Stored in %s" % name)
-		return name
-
-	def parse(self, show, store):
-		self.store = store
-		self.show = show
-		self.episodes = {}
-
-		try:
-			guidepage = self._fetchPage(self.show.url +
-				'episode.html?season=All&shv=guide')
-			listpage = self._fetchPage(self.show.url +
-				'episode.html?season=All&shv=list')
-		except Exception, e:
-			self.logger.error("Error fetching %s: %s" %
-					(self.show.url, e))
-			return
-
-		file = open(listpage)
-		data = file.read()
-		file.close()
-
-		cleanData = re.sub('<script.*?</script>', '',
-				data.replace('\n', ' '))
-		self.parseListViewPage(BeautifulSoup(cleanData.decode(
-			'ISO-8859-1')))
-
-		file = open(guidepage)
-		data = file.read()
-		file.close()
-		cleanData = re.sub('<script.*?</script>', '',
-				data.replace('\n', ' '))
-
-		self.parseGuideViewPage(BeautifulSoup(cleanData.decode(
-			'ISO-8859-1')))
-
-		os.unlink(guidepage)
-		os.unlink(listpage)
-
-		self.show.updated = datetime.datetime.now()
-
-		for key in self.episodes:
-			episode = self.episodes[key]
-			self.store.addEpisode(episode)
-
-		self.store.commit()
-
-	def parseFile(self, filename, store):
-		self.store = store
-		self.episodes = {}
-
-		file = open(filename)
-		data = file.read()
-		file.close()
-
-		cleanData = re.sub('<script.*?</script>', '',
-				data.replace('\n', ' '))
-		soup = BeautifulSoup(cleanData.decode('ISO-8859-1'))
-
-		elements = soup.findAll('li',
-				{ 'class': re.compile('episode.*')})
-
-		switch = soup.find('a', { 'class': 'switch_to_guide'})
-
-		if (switch):
-			self.logger.debug('This is a list view page')
-			self.parseListViewPage(soup)
-		else:
-			self.logger.debug('This is a guide view page')
-			self.parseGuideViewPage(soup)
-
-		for key in self.episodes:
-			self.store.addEpisode(self.episodes[key])
-
-		self.store.commit()
-
-	def parseListViewPage(self, soup):
-		div = soup.find('div', { 'class': 'title'})
-		show_name = div.a.contents[0]
-		self.show.name = show_name
-		self.logger.debug('Got show "%s" (list)' % show_name)
-
-		elements = soup.findAll('tr', { 'class': 'episode' })
-
-		for element in elements:
-			tr = element.find('td', { 'class': 'number' })
-			totalepnum = int(tr.contents[0].strip())
-
-			tr = element.find('td', { 'class': 'prod_no' })
-			if len(tr.contents) > 0:
-				prodnum = tr.contents[0].strip()
-			else:
-				prodnum = ''
-
-			td = element.find('td', { 'class': 'title' })
-			url = td.a['href']
-			parts = url.split('/')
-			id = int(parts[-2])
-
-			self.logger.debug("Found episode %d (%d)" %
-					(totalepnum, id))
-
-			if not id in self.episodes:
-				self.episodes[id] = Episode(self.show,
-					None, 0, 0, datetime.date.today(),
-					None, 0)
-
-			self.episodes[id].prodnum = prodnum
-			self.episodes[id].total = totalepnum
-
-	def parseGuideViewPage(self, soup):
-		div = soup.find('div', { 'class': 'title'})
-		show_name = div.a.contents[0]
-		self.show.name = show_name
-		self.logger.debug('Got show "%s" (guide)' % show_name)
-
-		span = soup.find('span', { 'class': 'tagline' })
-		tagline = span.contents[0]
-
-		if tagline.find('Ended') > -1:
-			self.show.setEnded()
-
-		elements = soup.findAll('li',
-				{ 'class': re.compile('episode.*')})
-
-		for element in elements:
-			meta = element.find('div', { 'class': 'meta' })
-			data = meta.contents[0].strip()
-
-			result = re.search('Season ([0-9]+)', data)
-			if result:
-				season = result.group(1)
-			else:
-				season = 0
-
-			result = re.search('Episode ([0-9]+)', data)
-			if result:
-				episode_num = result.group(1)
-			else:
-				episode_num = 0
-
-			result = re.search('Air(s|ed): (.*)$', data)
-
-			if result:
-				airtime = time.strptime(
-					result.group(2), "%m/%d/%Y")
-				airdate = datetime.datetime(
-					airtime.tm_year, airtime.tm_mon,
-					airtime.tm_mday).date()
-			else:
-				airdate = datetime.date(1900, 1, 1)
-
-			h3 = element.find('h3')
-			link = h3.find('a')
-			title = link.contents[0]
-			url = link['href']
-			parts = url.split('/')
-			id = int(parts[-2])
-
-			if not id in self.episodes:
-				self.episodes[id] = Episode(self.show,
-					None, 0, 0, datetime.date.today(),
-					None, 0)
-
-			self.episodes[id].season = int(season)
-			self.episodes[id].episode = int(episode_num)
-			self.episodes[id].airdate = airdate
-			self.episodes[id].title = title
-
-			self.logger.debug('Found episode %s (%d)' % (title, id))
+	def parse(self, source, _):
+		logging.error("The url %s is no longer supported" % source.url)
 
 class ConsoleRenderer(object):
 	DEFAULT='\033[30;0m'
