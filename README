@@ -1,6 +1,3 @@
-#summary ReadMe for episoder
-#labels Featured,Phase-Deploy
-
 == Purpose ==
 
 episoder is a tool to tell you about new episodes of your favourite TV shows.
@@ -10,9 +7,16 @@ episoder is a tool to tell you about new episodes of your favourite TV shows.
 
 In order to use episoder, you will need python installed on your system. In
 addition to the default distribution, the 'beautifulsoup', 'yaml', 'sqlite2'
-and 'sqlalchemy' modules are required. On debian systems the corresponding
-packages are called python-beautifulsoup, python-yaml, python-pysqlite2 and
-python-sqlalchemy.
+'sqlalchemy' and 'tvdb_api' modules are required. On Debian systems the
+corresponding packages are called python-beautifulsoup, python-yaml,
+python-pysqlite2, python-sqlalchemy and python-tvdb-api.
+
+
+== Installation ==
+
+* Run 'python setup.py install'
+* Create a cron job to have your database rebuilt once a day
+* Add "episoder" to your ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc or /etc/profile if you want to see your upcoming shows every time you start a shell. Consult the bash docs to find out which file you want to use.
 
 
 == Configuration ==
@@ -20,14 +24,7 @@ python-sqlalchemy.
 See "man episoder"
 
 
-== Installation ==
-
-  * Run 'python setup.py install'
-  * Create a cron job to have your database rebuilt once a day
-  * Add "episoder" to your ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc or /etc/profile if you want to see your upcoming shows every time you start a shell. Consult the bash docs to find out which file you want to use.
-
-
 == Contact ==
 
 If you find any bugs or have any idea on how to improve this tool, please
-use the bug tracker on our website.
+use the bug tracker on our website at http://code.ott.net/projects/episoder
