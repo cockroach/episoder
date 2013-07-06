@@ -4,6 +4,7 @@
  * Reorganized the command line options. Check the documentation for details
  * Updated the epguides.com parser to ignore trailer links in episode names
  * Fixed some more encoding issues in the console renderer
+ * Changed license to GPLv3
 
 == v0.6.5 (6 Oct 2010) ==
  * Updated the epguides.com parser to ignore links to trailers in episode names

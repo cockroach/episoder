@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
 	setup(	name			= 'episoder',
 		version			= version,
-		license			= 'GPLv2',
+		license			= 'GPLv3',
 		description		= 'TV episode notifier',
 		author			= 'Stefan Ott',
 		author_email		= 'stefan@ott.net',
