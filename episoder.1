@@ -92,19 +92,10 @@ The configuration file consists of a section with settings for the program
 and a list of sources to be used to build the database.
 .TP
 .B agent=foo
-Set the user-agent string to be used by wget (was required when tvtome blocked wget, might not be needed nowadays)
+Set the user-agent string to be used by wget
 .TP
 .B data=/path/to/file
 Specifies the file to be used to store the information about upcoming shows. If, instead of a file, you supply a database url (as expected by sqlalchemy, eg. 'mysql://localhost/episoder'), episoder is going to use that database for storage instead.
-.TP
-.B src=http://some.web.add/ress
-Each src entry specifies a URL with episode information. Make sure you have the
-appropriate plugin before adding random new URLs (check with \-p). Episoder currently understands the following types of source:
-.PP
-        src=http://www.epguides.com/CSI/
-        src=http://www.tv.com/CSI/show/19/
-.TP
-While this in no longer episoder's way of knowing which shows to parse (see ``Managing shows''), for compatibility reasons all shows listed in the config file will automatically be added to episoder's show database (as if specified with \-a).
 .TP
 .B format=unquoted format string
 This allows you to customize episoder's output. Available fields are:
@@ -133,7 +124,7 @@ You might want to have your episode db rebuilt on a regular basis (i.e. daily).
 The easiest way to achieve this is with a simple cron job:
 .PP
     crontab \-l > crontab
-    echo "40 5 * * * episoder \-b" >> crontab
+    echo "40 5 * * * episoder update" >> crontab
     crontab crontab
 .br
 .SH FILES

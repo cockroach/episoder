@@ -97,8 +97,6 @@ def parse_rc(path):
 		sys.stderr.write(path + ' does not exist\n')
 		sys.exit(2)
 
-	sources = []
-
 	try:
 		rc = open(path)
 	except Exception, msg:
@@ -116,22 +114,14 @@ def parse_rc(path):
 		elif line.startswith('agent='):
 			(_, agent) = line.split('=')
 		elif line.startswith('src='):
-			data = {}
-			src = line
-
-			(_, url) = src.split('=')
-			data['url'] = url
-
-			sources.append(data)
-			logging.debug('source entry: "%s"' % url)
+			logging.warn('Specifying shows in the configuration '
+				'file is no longer supported.')
 
 	rc.close()
 
 	if not datafile:
 		sys.stderr.write('No data file defined in configuration')
 		sys.exit(3)
-	if len(sources) < 1:
-		logging.info('No sources defined in configuration')
 
 	logging.debug('datafile=' + datafile)
 	logging.debug('format=' + format)
@@ -142,7 +132,6 @@ def parse_rc(path):
 		'datafile': datafile,
 		'format': format,
 		'dateformat': dateformat,
-		'sources': sources,
 		'agent': agent
 	}
 
@@ -254,17 +243,6 @@ def do_update_data(options, config, force):
 		update_data_from_file(file, parser, store)
 		return
 
-	# first, add all shows from the config file to our database
-	for source in config['sources']:
-		url = source['url']
-		show = store.getShowByUrl(url)
-
-		if not show:
-			show = episoder.Show(None, url=url)
-			show = store.addShow(show)
-			store.commit()
-
-	# then, update all shows that need updating
 	if options['search']:
 		show_id = int(options['search'])
 		shows = [store.getShowById(show_id)]
