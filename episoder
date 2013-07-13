@@ -236,8 +236,6 @@ def parseArgs():
 
 	parser_shows = subparsers.add_parser('shows',
 		help='List shows in the database')
-	parser_shows.add_argument('-C', '--nocolor', action='store_false',
-		help="don't use colors")
 	parser_shows.set_defaults(func=shows)
 
 	# OPTIONS FOR DATABASE UPDATE
