@@ -33,6 +33,7 @@ class DataStoreTest(unittest.TestCase):
 	def testAddShow(self):
 		show = episoder.Show('test show', url='http://test.show')
 		show = self.store.addShow(show)
+		self.store.commit()
 
 		id = show.show_id
 
@@ -46,6 +47,8 @@ class DataStoreTest(unittest.TestCase):
 		show2 = episoder.Show('moo show', url='http://test.show.2')
 		show2 = self.store.addShow(show2)
 		id2 = show2.show_id
+		self.store.commit()
+
 		shows = self.store.getShows()
 
 		self.assertNotEqual(id, id2)
@@ -63,13 +66,16 @@ class DataStoreTest(unittest.TestCase):
 		showC = episoder.Show('showB', url='urlB')
 
 		self.store.addShow(showA)
+		self.store.commit()
 		self.assertEqual(3, len(self.store.getShows()))
 
 		self.store.addShow(showB)
+		self.store.commit()
 		self.assertEqual(4, len(self.store.getShows()))
 
 		try:
 			self.store.addShow(showC)
+			self.store.commit()
 			self.assertTrue(false)
 		except Exception:
 			pass
@@ -105,19 +111,19 @@ class DataStoreTest(unittest.TestCase):
 		self.store.addEpisode(episode2)
 		self.store.commit()
 
-		episodes = self.store.search({'search': 'first'})
+		episodes = self.store.search('first')
 		self.assertTrue(episode1 in episodes)
 		self.assertFalse(episode2 in episodes)
 
-		episodes = self.store.search({'search': 'second'})
+		episodes = self.store.search('second')
 		self.assertFalse(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-		episodes = self.store.search({'search': 'episode'})
+		episodes = self.store.search('episode')
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-		episodes = self.store.search({'search': 'some show'})
+		episodes = self.store.search('some show')
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
@@ -392,7 +398,7 @@ class testEpguidesParser(unittest.TestCase):
 
 	def testAccept(self):
 		self.assertTrue(self._accept('http://www.epguides.com/Lost'))
-		self.assertFalse(self._accept('http://epguides.com/Lost'))
+		self.assertFalse(self._accept('http://epguides2.com/Lost'))
 		self.assertFalse(self._accept('http://www.tv.com/Lost'))
 
 	def testParseFile(self):
@@ -487,116 +493,6 @@ class testEpguidesParser(unittest.TestCase):
 
 		episode = episodes[len(episodes) - 2]
 		self.assertEquals('Massage Therapy', episode.title)
-
-
-class testTVComParser(unittest.TestCase):
-	def setUp(self):
-		self.path = tempfile.mktemp()
-		self.store = episoder.DataStore(self.path)
-		self.parser = plugins.TVComParser()
-
-	def tearDown(self):
-		os.unlink(self.path)
-
-	def _openfile(self, url):
-		(base, url) = url.split(' ')
-		if url.endswith('guide'):
-			file = base + '_guide.html'
-		else:
-			file = base + '_list.html'
-
-		tmp = tempfile.mktemp()
-		shutil.copyfile(file, tmp)
-		return tmp
-
-	def _parse(self, show):
-		url = 'test/testdata/tvcom_%s ' % show
-		show = self.store.getShowByUrl(url)
-
-		if not show:
-			show = episoder.Show('Unnamed', url=url)
-			show = self.store.addShow(show)
-
-		self.parser._fetchPage = self._openfile
-		self.parser.parse(show, self.store)
-
-	def _accept(self, url):
-		return self.parser.accept(url)
-
-	def testAccept(self):
-		self.assertFalse(self._accept('http://epguides.com/Lost'))
-		self.assertFalse(self._accept('http://www.tv.com/Lost'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/monk/show/9130/'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/black-books/show/5108/'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/battlestar-galactica-2003/show/23557/'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/south-park/show/344/'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/penn-and-teller-bullsh!/show/17579/'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/true+blood/show/74645/'))
-		self.assertTrue(self._accept
-				('http://www.tv.com/eastbound+%26+down/show/75067/'))
-		self.assertFalse(self._accept
-				('http://www.tv.com/Monk/show/9130/'))
-
-	def testParseFile1(self):
-		# http://www.tv.com/csi/show/19/
-		then = datetime.date(1970, 1, 1)
-		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('csi')
-		self.assertEquals(237, len(self.store.getEpisodes(then, 99999)))
-
-		episodes = self.store.search({'search': 'Hammer'})
-		self.assertEqual(1, len(episodes))
-		episode = episodes[0]
-		self.assertEqual('If I Had A Hammer...', episode.title)
-		self.assertEqual(9, episode.season)
-		self.assertEqual(21, episode.episode)
-		self.assertEqual(datetime.date(2009, 4, 23), episode.airdate)
-		self.assertEqual('921', episode.prodnum)
-		self.assertEqual(203, episode.total)
-		self.assertEqual('CSI', episode.show.name)
-
-		show = self.store.getShowByUrl('test/testdata/tvcom_csi ')
-		self.assertEqual('CSI', show.name)
-		self.assertEqual(episoder.Show.RUNNING, show.status)
-
-	def testParseFile2(self):
-		# http://www.tv.com/the-daily-show/show/1293/
-		then = datetime.date(1970, 1, 1)
-		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('tds')
-		self.assertEquals(1910,len(self.store.getEpisodes(then, 99999)))
-
-		episodes = self.store.search({'search': 'James Spader'})
-		self.assertEqual(1, len(episodes))
-		episode = episodes[0]
-		self.assertEqual('James Spader', episode.title)
-		self.assertEqual(8, episode.season)
-		self.assertEqual(63, episode.episode)
-		self.assertEqual(datetime.date(2003, 11, 19), episode.airdate)
-		self.assertEqual('8063', episode.prodnum)
-		self.assertEqual(835, episode.total)
-		self.assertEqual('The Daily Show', episode.show.name)
-
-	def testParseFile3(self):
-		# http://www.tv.com/knight-rider/show/74986/
-		then = datetime.date(1970, 1, 1)
-		self._parse('kr2008')
-		show = self.store.getShowByUrl('test/testdata/tvcom_kr2008 ')
-
-		self.assertEqual(episoder.Show.ENDED, show.status)
-
-	def testParseFile4(self):
-		# http://www.tv.com/fringe/show/75146
-		then = datetime.date(1970, 1, 1)
-		self._parse('fringe')
-		show = self.store.getShowByUrl('test/testdata/tvcom_fringe ')
-		self.assertEquals(47, len(self.store.getEpisodes(then, 99999)))
 
 if __name__ == '__main__':
 	unittest.main()
