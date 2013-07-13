@@ -1,6 +1,7 @@
 == v0.7.0 (UNRELEASED) ==
  * Added support for TVDB
  * Removed support for tv.com
+ * Changed command-line arguments. See the man page for details
  * Removed the ability to specify shows in the configuration file
  * Reorganized the command line options. Check the documentation for details
  * Updated the epguides.com parser to ignore trailer links in episode names
