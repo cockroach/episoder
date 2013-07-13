@@ -230,11 +230,9 @@ class DataStore(object):
 
 		return episodes
 
-	def search(self, options):
+	def search(self, search):
 		shows = []
 		episodes = []
-
-		search = options['search']
 
 		data = self.session.query(Episode).add_entity(Show). \
 			select_from(self.episodes.join(self.shows)). \

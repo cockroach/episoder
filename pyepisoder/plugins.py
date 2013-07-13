@@ -279,20 +279,25 @@ class TVComDummyParser(object):
 	def parse(self, source, _):
 		logging.error("The url %s is no longer supported" % source.url)
 
+
 class ConsoleRenderer(object):
+
 	DEFAULT='\033[30;0m'
 	RED='\033[31;1m'
 	YELLOW='\033[33;1m'
 	GREEN='\033[32;1m'
-	LIGHTBLUE='\033[36;1m'
+	CYAN='\033[36;1m'
 	GRAY=DEFAULT
+
 
 	def __init__(self):
 		self.logger = logging.getLogger('ConsoleRenderer')
 
-	def _renderEpisode(self, episode, color):
-		string = self.config['format']
-		date = episode.airdate.strftime(self.config['dateformat'])
+
+	def _render(self, episode, color, format, dateformat):
+
+		string = format
+		date = episode.airdate.strftime(dateformat)
 		string = string.replace('%airdate', date)
 		string = string.replace('%show', episode.show.name)
 		string = string.replace('%season', str(episode.season))
@@ -303,44 +308,48 @@ class ConsoleRenderer(object):
 		print ("%s%s%s" % (color, string.encode('utf8'),
 			ConsoleRenderer.DEFAULT))
 
-	def render(self, store, options, config):
-		self.config = config
+
+	def render(self, store, args, format, dateformat):
+
 		today = datetime.date.today()
 		yesterday = today - datetime.timedelta(1)
 		tomorrow = today + datetime.timedelta(1)
 
-		if options['nodate']:
+		if args.nodate:
 			startdate = datetime.date(1900, 1, 1)
 			n_days = 109500 # should be fine until late 21xx :)
 		else:
-			startdate = options['date']
-			n_days = options['days']
+			startdate = args.date
+			n_days = args.days
 
-		if options['search']:
-			episodes = store.search(options)
+		if args.search:
+			episodes = store.search(args.search)
 		else:
 			episodes = store.getEpisodes(startdate, n_days)
 
-		if not options['colors']:
-			ConsoleRenderer.DEFAULT = ''
-			ConsoleRenderer.RED = ''
-			ConsoleRenderer.YELLOW = ''
-			ConsoleRenderer.GREEN = ''
-			ConsoleRenderer.LIGHTBLUE = ''
+		if args.nocolor:
+			grey = ''
+			red = ''
+			yellow = ''
+			green = ''
+			cyan = ''
+		else:
+			grey = ConsoleRenderer.DEFAULT
+			red = ConsoleRenderer.RED
+			yellow = ConsoleRenderer.YELLOW
+			green = ConsoleRenderer.GREEN
+			cyan = ConsoleRenderer.CYAN
 
 		for episode in episodes:
 			if episode.airdate == yesterday:
-				self._renderEpisode(episode,
-						ConsoleRenderer.RED)
+				color = red
 			elif episode.airdate == today:
-				self._renderEpisode(episode,
-						ConsoleRenderer.YELLOW)
+				color = yellow
 			elif episode.airdate == tomorrow:
-				self._renderEpisode(episode,
-						ConsoleRenderer.GREEN)
+				color = green
 			elif episode.airdate > tomorrow:
-				self._renderEpisode(episode,
-						ConsoleRenderer.LIGHTBLUE)
+				color = cyan
 			else:
-				self._renderEpisode(episode,
-						ConsoleRenderer.DEFAULT)
+				color = grey
+
+			self._render(episode, color, format, dateformat)
