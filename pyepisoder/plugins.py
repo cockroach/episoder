@@ -282,21 +282,13 @@ class TVComDummyParser(object):
 
 class ConsoleRenderer(object):
 
-	DEFAULT='\033[30;0m'
-	RED='\033[31;1m'
-	YELLOW='\033[33;1m'
-	GREEN='\033[32;1m'
-	CYAN='\033[36;1m'
-	GRAY=DEFAULT
-
-
 	def __init__(self, format, dateformat):
 		self.logger = logging.getLogger('ConsoleRenderer')
 		self.format = format
 		self.dateformat = dateformat
 
 
-	def _render(self, episode, color):
+	def _render(self, episode, color, endColor):
 
 		string = self.format
 		date = episode.airdate.strftime(self.dateformat)
@@ -307,8 +299,7 @@ class ConsoleRenderer(object):
 		string = string.replace('%eptitle', episode.title)
 		string = string.replace('%totalep', str(episode.total))
 		string = string.replace('%prodnum', str(episode.prodnum))
-		print ("%s%s%s" % (color, string.encode('utf8'),
-			ConsoleRenderer.DEFAULT))
+		print ("%s%s%s" % (color, string.encode('utf8'), endColor))
 
 
 	def render(self, episodes, color=True):
@@ -318,17 +309,17 @@ class ConsoleRenderer(object):
 		tomorrow = today + datetime.timedelta(1)
 
 		if color:
-			grey = ConsoleRenderer.DEFAULT
-			red = ConsoleRenderer.RED
-			yellow = ConsoleRenderer.YELLOW
-			green = ConsoleRenderer.GREEN
-			cyan = ConsoleRenderer.CYAN
+			red = '\033[31;1m'
+			cyan = '\033[36;1m'
+			grey = '\033[30;0m'
+			green = '\033[32;1m'
+			yellow = '\033[33;1m'
 		else:
-			grey = ''
 			red = ''
-			yellow = ''
-			green = ''
 			cyan = ''
+			grey = ''
+			green = ''
+			yellow = ''
 
 		for episode in episodes:
 			if episode.airdate == yesterday:
@@ -342,4 +333,4 @@ class ConsoleRenderer(object):
 			else:
 				color = grey
 
-			self._render(episode, color)
+			self._render(episode, color, grey)
