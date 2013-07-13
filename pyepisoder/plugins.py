@@ -23,8 +23,8 @@ import time
 import logging
 import urllib2
 import tempfile
-import datetime
 
+from datetime import date, datetime, timedelta
 from tvdb_api import BaseUI, Tvdb, tvdb_shownotfound
 
 from BeautifulSoup import BeautifulSoup
@@ -33,7 +33,7 @@ from episode import Episode
 def all():
 	return {
 		'parsing': [ EpguidesParser(), TVDB(), TVComDummyParser() ],
-		'output': [ ConsoleRenderer() ]
+		'output': [ ConsoleRenderer(None, None) ]
 	}
 
 def parser_for(url):
@@ -94,7 +94,7 @@ class TVDB(object):
 			return
 
 		self.show.name = data.data.get('seriesname')
-		self.show.updated = datetime.datetime.now()
+		self.show.updated = datetime.now()
 
 		for (idx, season) in data.items():
 			for (epidx, episode) in season.items():
@@ -107,15 +107,15 @@ class TVDB(object):
 		season = episode.get('seasonnumber', 0)
 		num = episode.get('episodenumber', 0)
 
-		date = episode.get('firstaired')
+		airdate = episode.get('firstaired')
 
-		if not date:
+		if not airdate:
 			self.logger.debug('Throwing away episode %s' % num)
 			return
 
-		date = time.strptime(date, '%Y-%m-%d')
-		date = datetime.datetime(date.tm_year, date.tm_mon,
-						date.tm_mday).date()
+		airdate = time.strptime(airdate, '%Y-%m-%d')
+		airdate = datetime(airdate.tm_year, airdate.tm_mon,
+						airdate.tm_mday).date()
 
 		prodcode = episode.get('productioncode')
 		abs_number = episode.get('absolute_number', 0)
@@ -126,7 +126,7 @@ class TVDB(object):
 
 		self.logger.debug('Found episode %s' % name)
 
-		e = Episode(self.show, name, season, num, date, prodcode,
+		e = Episode(self.show, name, season, num, airdate, prodcode,
 			abs_number)
 
 		self.store.addEpisode(e)
@@ -158,7 +158,8 @@ class EpguidesParser(object):
 		return 'epguides.com parser'
 
 	def accept(self, url):
-		return url.startswith('http://www.epguides.com/')
+		exp = 'http://(www.)?epguides.com/.*'
+		return re.match(exp, url)
 
 	def parse(self, show, store):
 		self.show = show
@@ -246,7 +247,7 @@ class EpguidesParser(object):
 		else:
 			self.show.setEnded()
 
-		self.show.updated = datetime.datetime.now()
+		self.show.updated = datetime.now()
 
 		self.logger.debug('Got show "%s"', title)
 
@@ -291,8 +292,8 @@ class ConsoleRenderer(object):
 	def _render(self, episode, color, endColor):
 
 		string = self.format
-		date = episode.airdate.strftime(self.dateformat)
-		string = string.replace('%airdate', date)
+		airdate = episode.airdate.strftime(self.dateformat)
+		string = string.replace('%airdate', airdate)
 		string = string.replace('%show', episode.show.name)
 		string = string.replace('%season', str(episode.season))
 		string = string.replace('%epnum', "%02d" % episode.episode)
@@ -304,9 +305,9 @@ class ConsoleRenderer(object):
 
 	def render(self, episodes, color=True):
 
-		today = datetime.date.today()
-		yesterday = today - datetime.timedelta(1)
-		tomorrow = today + datetime.timedelta(1)
+		today = date.today()
+		yesterday = today - timedelta(1)
+		tomorrow = today + timedelta(1)
 
 		if color:
 			red = '\033[31;1m'
