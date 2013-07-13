@@ -30,48 +30,28 @@ from tvdb_api import BaseUI, Tvdb, tvdb_shownotfound
 from BeautifulSoup import BeautifulSoup
 from episode import Episode
 
-def all():
-	return {
-		'parsing': [ EpguidesParser(), TVDB(), TVComDummyParser() ],
-		'output': [ ConsoleRenderer(None, None) ]
-	}
 
 def parser_for(url):
-	parsers = all()['parsing']
+
+	parsers = [ TVDB, EpguidesParser, TVComDummyParser ]
 
 	for parser in parsers:
 		if parser.accept(url):
-			return parser
+			return parser()
 
 	return None
 
-def parser_named(name):
-	parsers = all()['parsing']
-
-	for parser in parsers:
-		if parser.__class__.__name__ == name:
-			return parser
-
-	raise Exception('Parser %s not found\n' % name)
-
-class DummyParser(object):
-	def __init__(self):
-		self.logger = logging.getLogger('DummyParser')
-
-	def __str__(self):
-		return 'dummy parser'
-
-	def accept(self, url):
-		return False
 
 class TVDB(object):
+
 	def __init__(self):
 		self.logger = logging.getLogger('TVDB')
 
 	def __str__(self):
 		return 'TheTVDB.com parser'
 
-	def accept(self, url):
+	@staticmethod
+	def accept(url):
 		return url.isdigit()
 
 	def parse(self, show, store):
@@ -145,11 +125,14 @@ class TVDB(object):
 
 		return result
 
+
 class EpguidesParser(object):
+
 	def __init__(self):
 		self.logger = logging.getLogger('EpguidesParser')
 		self.awkfile = os.path.join(sys.prefix, "share", "episoder",
 				"episoder_helper_epguides.awk")
+		self.awkfile = '/home/stefan/projects/episoder/extras/episoder_helper_epguides.awk'
 		self.awk = '/usr/bin/awk'
 		self.user_agent = None
 		self.url = ''
@@ -157,7 +140,8 @@ class EpguidesParser(object):
 	def __str__(self):
 		return 'epguides.com parser'
 
-	def accept(self, url):
+	@staticmethod
+	def accept(url):
 		exp = 'http://(www.)?epguides.com/.*'
 		return re.match(exp, url)
 
@@ -269,11 +253,14 @@ class EpguidesParser(object):
 					episode['totalepnum']
 				))
 
+
 class TVComDummyParser(object):
+
 	def __str__(self):
 		return 'dummy tv.com parser to detect old urls (DO NOT USE)'
 
-	def accept(self, url):
+	@staticmethod
+	def accept(url):
 		exp = 'http://(www.)?tv.com/.*'
 		return re.match(exp, url)
 
