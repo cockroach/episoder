@@ -15,18 +15,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
-from sqlalchemy import *
-from sqlalchemy.orm import *
-import logging
-import plugins
-from episode import Episode
+from datetime import date, timedelta
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer
+from sqlalchemy import MetaData, Sequence, Table, Text
+from sqlalchemy import create_engine
+from sqlalchemy.orm import clear_mappers, create_session, mapper, relation
 
-version="0.7.0"
+import logging
+
+from episode import Episode
+from plugins import parser_for
+
+version='0.7.0'
+
 
 class DataStore(object):
+
 	def __init__(self, path):
+
 		self.logger = logging.getLogger('DataStore')
+
 		if path.find('://') > -1:
 			engine = create_engine(path, convert_unicode=True)
 		else:
@@ -39,10 +47,14 @@ class DataStore(object):
 		self.session.begin()
 		self._initdb()
 
+
 	def __str__(self):
-		return "DataStore(%s)" % self.conn
+
+		return 'DataStore(%s)' % self.conn
+
 
 	def clear(self):
+
 		episodes = self.session.query(Episode).all()
 
 		for episode in episodes:
@@ -50,7 +62,9 @@ class DataStore(object):
 
 		self.session.flush()
 
+
 	def update(self):
+
 		result = self.meta.select().execute()
 		meta = {}
 
@@ -60,14 +74,14 @@ class DataStore(object):
 		if not 'schema' in meta:
 			meta['schema'] = '1'
 
-		self.logger.debug("Found v%s schema" % meta['schema'])
+		self.logger.debug('Found v%s schema' % meta['schema'])
 
 		if meta['schema'] == '-1':
 			self.logger.debug('Automatic schema updates disabled')
 			return
 
 		if meta['schema'] < '3':
-			self.logger.info("Updating database schema")
+			self.logger.info('Updating database schema')
 			self.episodes.drop()
 			self.shows.drop()
 			self._initdb()
@@ -78,8 +92,11 @@ class DataStore(object):
 					value=3)
 			self.conn.execute(insert)
 
+
 	def _initdb(self):
+
 		clear_mappers()
+
 		self.shows = Table('shows', self.metadata,
 			Column('show_id', Integer,
 				Sequence('shows_show_id_seq'),
@@ -90,6 +107,7 @@ class DataStore(object):
 			Column('enabled', Boolean),
 			Column('status', Integer, default=Show.RUNNING),
 			extend_existing=True)
+
 		showmapper = mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name,
 			'episodes': relation(Episode, backref='show',
@@ -102,7 +120,7 @@ class DataStore(object):
 			extend_existing=True)
 
 		self.episodes = Table('episodes', self.metadata,
-			Column('show_id', ForeignKey("shows.show_id"),
+			Column('show_id', ForeignKey('shows.show_id'),
 				primary_key=True),
 			Column('num', Integer, primary_key=True),
 			Column('airdate', Date),
@@ -111,6 +129,7 @@ class DataStore(object):
 			Column('totalnum', Integer),
 			Column('prodnum', Text),
 			extend_existing=True)
+
 		episodemapper = mapper(Episode, self.episodes, properties={
 			'title': self.episodes.c.title,
 			'season': self.episodes.c.season,
@@ -122,11 +141,13 @@ class DataStore(object):
 
 		self.metadata.create_all()
 
+
 	def getExpiredShows(self):
-		today = datetime.date.today()
-		deltaRunning = datetime.timedelta(2)	# 2 days
-		deltaSuspended = datetime.timedelta(7)	# 1 week
-		deltaNotRunning = datetime.timedelta(14)# 2 weeks
+
+		today = date.today()
+		deltaRunning = timedelta(2)	# 2 days
+		deltaSuspended = timedelta(7)	# 1 week
+		deltaNotRunning = timedelta(14)	# 2 weeks
 
 		shows = self.session.query(Show).filter(or_(
 				and_(
@@ -148,49 +169,54 @@ class DataStore(object):
 
 		return shows.all()
 
+
 	def getEnabledShows(self):
+
 		shows = self.session.query(Show).filter(Show.enabled == True)
 		return shows.all()
 
+
 	def getShowByUrl(self, url):
-		shows = self.session.query(Show) \
-				.filter(Show.url == url)
+
+		shows = self.session.query(Show).filter(Show.url == url)
 
 		if shows.count() < 1:
 			return None
 
-		show = shows[0]
-		return show
+		return shows.first()
+
 
 	def getShowById(self, id):
+
 		shows = self.session.query(Show).filter(Show.show_id == id)
 
 		if shows.count() < 1:
 			return None
 
-		show = shows[0]
-		return show
+		return shows.first()
+
 
 	def addShow(self, show):
+
 		show = self.session.merge(show)
 		self.session.flush()
 		return show
 
+
 	def removeShow(self, id):
-		shows = self.session.query(Show)\
-				.filter(Show.show_id == id)\
-				.all()
 
-		assert len(shows) < 2
+		shows = self.session.query(Show).filter(Show.show_id == id)
 
-		if len(shows) < 1:
-			self.logger.error("No such show")
+		if shows.count() < 1:
+			self.logger.error('No such show')
 			return
 
-		self.session.delete(shows[0])
+		self.session.delete(shows.first())
 		self.session.flush()
 
+
 	def getShows(self):
+
 		select = self.shows.select()
 		result = select.execute()
 
@@ -201,15 +227,19 @@ class DataStore(object):
 
 		return shows
 
+
 	def addEpisode(self, episode):
+
 		self.session.merge(episode)
 		self.session.flush()
 
-	def getEpisodes(self, basedate=datetime.date.today(), n_days=0):
+
+	def getEpisodes(self, basedate=date.today(), n_days=0):
+
 		shows = []
 		episodes = []
 
-		enddate = basedate + datetime.timedelta(n_days)
+		enddate = basedate + timedelta(n_days)
 
 		data = self.session.query(Episode).add_entity(Show). \
 			select_from(self.episodes.join(self.shows)). \
@@ -230,7 +260,9 @@ class DataStore(object):
 
 		return episodes
 
+
 	def search(self, search):
+
 		shows = []
 		episodes = []
 
@@ -254,15 +286,21 @@ class DataStore(object):
 
 		return episodes
 
+
 	def commit(self):
+
 		self.session.commit()
 		self.session.begin()
 
+
 	def rollback(self):
+
 		self.session.rollback()
 		self.session.begin()
 
+
 	def removeBefore(self, date, show=None):
+
 		episodes = self.session.query(Episode).filter(
 				Episode.airdate < date)
 
@@ -270,19 +308,20 @@ class DataStore(object):
 			episodes = episodes.filter(
 					Episode.show_id == show.show_id)
 
-
 		for episode in episodes:
 			self.session.delete(episode)
 
 		self.commit()
 
+
 class Show(object):
+
 	RUNNING = 1
 	SUSPENDED = 2
 	ENDED = 3
 
-	def __init__(self, name, id=-1, url='',
-			updated=datetime.date(1970, 1, 1)):
+	def __init__(self, name, id=-1, url='', updated=date(1970, 1, 1)):
+
 		self.name = name
 		self.url = url
 		self.updated = updated
@@ -290,17 +329,26 @@ class Show(object):
 		self.episodes = []
 		self.enabled = True
 
+
 	def addEpisode(self, episode):
+
 		self.episodes.append(episode)
 
+
 	def setRunning(self):
+
 		self.status = Show.RUNNING
 
+
 	def setEnded(self):
+
 		self.status = Show.ENDED
 
+
 	def update(self, store, userAgent=None):
-		parser = plugins.parser_for(self.url)
+
+		parser = parser_for(self.url)
+
 		if not parser:
 			raise RuntimeError('No parser found for %s' % self.url)
 
@@ -309,13 +357,18 @@ class Show(object):
 
 		parser.parse(self, store)
 
+
 	def removeEpisodesBefore(self, store, date):
+
 		logging.debug('Removing episodes from before %s' % date)
 		store.removeBefore(date, show=self)
 
+
 	def __str__(self):
+
 		return 'Show("%s")' % self.name
 
+
 	def __eq__(self, other):
-		return (self.name == other.name and
-			self.url == other.url)
+
+		return (self.name == other.name and self.url == other.url)
