@@ -22,7 +22,7 @@ import logging
 import plugins
 from episode import Episode
 
-version="0.6.5"
+version="0.7.0"
 
 class DataStore(object):
 	def __init__(self, path):
