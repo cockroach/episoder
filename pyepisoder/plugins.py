@@ -290,14 +290,16 @@ class ConsoleRenderer(object):
 	GRAY=DEFAULT
 
 
-	def __init__(self):
+	def __init__(self, format, dateformat):
 		self.logger = logging.getLogger('ConsoleRenderer')
+		self.format = format
+		self.dateformat = dateformat
 
 
-	def _render(self, episode, color, format, dateformat):
+	def _render(self, episode, color):
 
-		string = format
-		date = episode.airdate.strftime(dateformat)
+		string = self.format
+		date = episode.airdate.strftime(self.dateformat)
 		string = string.replace('%airdate', date)
 		string = string.replace('%show', episode.show.name)
 		string = string.replace('%season', str(episode.season))
@@ -309,36 +311,24 @@ class ConsoleRenderer(object):
 			ConsoleRenderer.DEFAULT))
 
 
-	def render(self, store, args, format, dateformat):
+	def render(self, episodes, color=True):
 
 		today = datetime.date.today()
 		yesterday = today - datetime.timedelta(1)
 		tomorrow = today + datetime.timedelta(1)
 
-		if args.nodate:
-			startdate = datetime.date(1900, 1, 1)
-			n_days = 109500 # should be fine until late 21xx :)
-		else:
-			startdate = args.date
-			n_days = args.days
-
-		if args.search:
-			episodes = store.search(args.search)
-		else:
-			episodes = store.getEpisodes(startdate, n_days)
-
-		if args.nocolor:
-			grey = ''
-			red = ''
-			yellow = ''
-			green = ''
-			cyan = ''
-		else:
+		if color:
 			grey = ConsoleRenderer.DEFAULT
 			red = ConsoleRenderer.RED
 			yellow = ConsoleRenderer.YELLOW
 			green = ConsoleRenderer.GREEN
 			cyan = ConsoleRenderer.CYAN
+		else:
+			grey = ''
+			red = ''
+			yellow = ''
+			green = ''
+			cyan = ''
 
 		for episode in episodes:
 			if episode.airdate == yesterday:
@@ -352,4 +342,4 @@ class ConsoleRenderer(object):
 			else:
 				color = grey
 
-			self._render(episode, color, format, dateformat)
+			self._render(episode, color)

@@ -136,8 +136,21 @@ def shows(args):
 def episodes(args):
 
 	store = DataStore(args.datafile)
-	renderer = ConsoleRenderer()
-	renderer.render(store, args, args.format, args.dateformat)
+	renderer = ConsoleRenderer(args.format, args.dateformat)
+
+	if args.nodate:
+		startdate = date(1900, 1, 1)
+		n_days = 109500 # should be fine until late 21xx :)
+	else:
+		startdate = args.date
+		n_days = args.days
+
+	if args.search:
+		episodes = store.search(args.search)
+	else:
+		episodes = store.getEpisodes(startdate, n_days)
+
+	renderer.render(episodes, not args.nocolor)
 
 
 def search(args):
