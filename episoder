@@ -219,7 +219,7 @@ def parseArgs():
 	parser_list.add_argument('-n', '--days', type=int, default=2,
 		help='number of future days to show (default: 2)')
 	parser_list.add_argument('-i', '--nodate', action='store_true',
-		help="ignore date, don't remove old episodes")
+		help="ignore date, show all episodes")
 	parser_list.add_argument('-s', dest='search',
 		help='search episodes')
 	parser_list.set_defaults(func=episodes)
