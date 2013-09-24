@@ -18,7 +18,7 @@
 from datetime import date, timedelta
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer
 from sqlalchemy import MetaData, Sequence, Table, Text
-from sqlalchemy import create_engine, or_
+from sqlalchemy import create_engine, or_, and_
 from sqlalchemy.orm import clear_mappers, create_session, mapper, relation
 
 import logging
