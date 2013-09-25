@@ -2,8 +2,7 @@
 import os
 import sys
 
-from distutils.core import setup
-from distutils.sysconfig import get_python_lib
+from setuptools import setup
 
 # files to install
 files = []
@@ -17,27 +16,21 @@ awkfile = os.path.join("extras", "episoder_helper_epguides.awk")
 files.append((os.path.join(sys.prefix, "share", "episoder"), [awkfile]))
 
 # documentation
-doc_files = ["AUTHORS", "CHANGELOG", "COPYING", "README", "README.tvcom" ]
+doc_files = ["AUTHORS", "CHANGELOG", "COPYING", "README"]
 
 for file in doc_files:
 	files.append((os.path.join(sys.prefix, "share", "episoder"), [file]))
 
-if __name__ == '__main__':
-	LONG_DESCRIPTION = \
-"""episoder is a tool to tell you about new episodes of your favourite TV shows."""
-
-	from pyepisoder.episoder import version
-
-	setup(	name			= 'episoder',
-		version			= version,
-		license			= 'GPLv3',
-		description		= 'TV episode notifier',
-		author			= 'Stefan Ott',
-		author_email		= 'stefan@ott.net',
-		url			= 'http://code.ott.net/projects/episoder',
-		packages		= [ 'pyepisoder' ],
-		scripts			= [ 'episoder' ],
-		long_description	= LONG_DESCRIPTION,
-		data_files		= files,
-		requires		= [ 'beautifulsoup', 'pysqlite2', 'yaml', 'sqlalchemy', 'tvdb_api' ]
-	)
+setup(	name			= 'episoder',
+	version			= '0.7.0',
+	license			= 'GPLv3',
+	description		= 'TV episode notifier',
+	author			= 'Stefan Ott',
+	author_email		= 'stefan@ott.net',
+	url			= 'http://code.ott.net/projects/episoder',
+	packages		= [ 'pyepisoder' ],
+	scripts			= [ 'episoder' ],
+	long_description	= 'episoder is a tool to tell you about new episodes of your favourite TV shows.',
+	data_files		= files,
+	install_requires	= [ 'beautifulsoup', 'pyyaml', 'sqlalchemy>=0.7', 'tvdb_api' ]
+)
