@@ -36,7 +36,13 @@ def update(args):
 	store.update()
 
 	if args.show:
-		shows = [store.getShowById(args.show)]
+		show = store.getShowById(args.show)
+
+		if not show:
+			logging.error('Show #%d not found' % args.show)
+			return
+
+		shows = [show]
 	elif args.force:
 		shows = store.getEnabledShows()
 	else:
