@@ -132,7 +132,6 @@ class EpguidesParser(object):
 		self.logger = logging.getLogger('EpguidesParser')
 		self.awkfile = os.path.join(sys.prefix, "share", "episoder",
 				"episoder_helper_epguides.awk")
-		self.awkfile = '/home/stefan/projects/episoder/extras/episoder_helper_epguides.awk'
 		self.awk = '/usr/bin/awk'
 		self.user_agent = None
 		self.url = ''
