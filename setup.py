@@ -28,7 +28,7 @@ setup(	name			= 'episoder',
 	scripts			= [ 'episoder' ],
 	long_description	= 'episoder is a tool to tell you about new episodes of your favourite TV shows',
 	data_files		= files,
-	install_requires	= [	'beautifulsoup', 'pyyaml',
+	install_requires	= [	'beautifulsoup', 'pyyaml', 'argparse',
 					'sqlalchemy>=0.7', 'tvdb_api' ],
 	classifiers		= [
 		'Development Status :: 5 - Production/Stable',
