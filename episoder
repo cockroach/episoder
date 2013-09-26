@@ -27,7 +27,7 @@ from sys import exit, stderr
 from traceback import print_exc
 
 from pyepisoder.episoder import DataStore, Show, version
-from pyepisoder.plugins import ConsoleRenderer, TVDB
+from pyepisoder.plugins import ConsoleRenderer, TVDB, parser_for
 
 
 def update(args):
@@ -75,6 +75,10 @@ def add(args):
 
 	if show:
 		stderr.write('A show with that url/id already exists\n')
+		return
+
+	if not parser_for(url):
+		stderr.write('Invalid show url/id: %s\n' % url)
 		return
 
 	show = Show('Unknown Show', url=url)
