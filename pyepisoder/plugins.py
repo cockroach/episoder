@@ -17,8 +17,8 @@
 
 import re
 import os
-import sys
 import yaml
+import pyepisoder
 import time
 import logging
 import urllib2
@@ -130,8 +130,12 @@ class EpguidesParser(object):
 
 	def __init__(self):
 		self.logger = logging.getLogger('EpguidesParser')
-		self.awkfile = os.path.join(sys.prefix, "share", "episoder",
-				"episoder_helper_epguides.awk")
+
+		dirname = os.path.dirname(pyepisoder.__file__)
+		prefix = os.path.join(dirname, '..')
+
+		self.awkfile = os.path.join(prefix, 'share', 'episoder',
+				'episoder_helper_epguides.awk')
 		self.awk = '/usr/bin/awk'
 		self.user_agent = None
 		self.url = ''
