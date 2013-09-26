@@ -134,7 +134,7 @@ class EpguidesParser(object):
 		dirname = os.path.dirname(pyepisoder.__file__)
 		prefix = os.path.join(dirname, '..')
 
-		self.awkfile = os.path.join(prefix, 'share', 'episoder',
+		self.awkfile = os.path.join(prefix, 'extras',
 				'episoder_helper_epguides.awk')
 		self.awk = '/usr/bin/awk'
 		self.user_agent = None

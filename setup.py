@@ -1,25 +1,21 @@
 #!/usr/bin/env python
-import os
-import sys
-
-from setuptools import setup
+from distutils.core import setup
+from os import path
 
 # files to install
 files = []
 
 # man page
-manpage = "episoder.1"
-files.append((os.path.join(sys.prefix, "share", "man", "man1"), [manpage]))
+manpage = 'episoder.1'
+files.append(('man/man1', ['episoder.1']))
 
 # awk parser
-awkfile = os.path.join("extras", "episoder_helper_epguides.awk")
-files.append((os.path.join(sys.prefix, "share", "episoder"), [awkfile]))
+awkfile = path.join('extras', 'episoder_helper_epguides.awk')
+files.append(('extras', [awkfile]))
 
 # documentation
-doc_files = ["AUTHORS", "CHANGELOG", "COPYING", "README"]
-
-for file in doc_files:
-	files.append((os.path.join(sys.prefix, "share", "episoder"), [file]))
+for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README' ]:
+	files.append(('', [file]))
 
 setup(	name			= 'episoder',
 	version			= '0.7.0',
@@ -30,7 +26,18 @@ setup(	name			= 'episoder',
 	url			= 'http://code.ott.net/projects/episoder',
 	packages		= [ 'pyepisoder' ],
 	scripts			= [ 'episoder' ],
-	long_description	= 'episoder is a tool to tell you about new episodes of your favourite TV shows.',
+	long_description	= 'episoder is a tool to tell you about new episodes of your favourite TV shows',
 	data_files		= files,
-	install_requires	= [ 'beautifulsoup', 'pyyaml', 'sqlalchemy>=0.7', 'tvdb_api' ]
+	install_requires	= [	'beautifulsoup', 'pyyaml',
+					'sqlalchemy>=0.7', 'tvdb_api' ],
+	classifiers		= [
+		'Development Status :: 5 - Production/Stable',
+		'Environment :: Console',
+		'Intended Audience :: End Users/Desktop',
+		'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+		'Natural Language :: English',
+		'Operating System :: OS Independent',
+		'Programming Language :: Python',
+		'Topic :: Multimedia :: Video'
+	]
 )
