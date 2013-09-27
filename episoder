@@ -50,7 +50,7 @@ def update(args):
 
 	for show in shows:
 		try:
-			show.update(store, args.agent)
+			show.update(store, args)
 		except:
 			logging.error('Error parsing %s' % show)
 			print_exc()
@@ -347,6 +347,7 @@ def loadConfig(args):
 				path.join(environ['HOME'], '.episodes'))
 	args.dateformat = config.get('dateformat', '%a, %b %d, %Y')
 	args.format = config.get('format', '%airdate %show %seasonx%epnum')
+	args.tvdb_key = config.get('tvdb_key', '8F15287C4B23B36E')
 
 	logging.info('Loaded rcfile')
 

@@ -345,17 +345,17 @@ class Show(object):
 		self.status = Show.ENDED
 
 
-	def update(self, store, userAgent=None):
+	def update(self, store, args):
 
 		parser = parser_for(self.url)
 
 		if not parser:
 			raise RuntimeError('No parser found for %s' % self.url)
 
-		if userAgent:
-			parser.user_agent = userAgent
+		if 'agent' in args:
+			parser.user_agent = args.agent
 
-		parser.parse(self, store)
+		parser.parse(self, store, args)
 
 
 	def removeEpisodesBefore(self, store, date):

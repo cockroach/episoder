@@ -54,7 +54,8 @@ class TVDB(object):
 	def accept(url):
 		return url.isdigit()
 
-	def parse(self, show, store):
+	def parse(self, show, store, args):
+
 		self.show = show
 		self.store = store
 
@@ -65,7 +66,7 @@ class TVDB(object):
 					% show.url)
 			return
 
-		tv = Tvdb()
+		tv = Tvdb(apikey=args.tvdb_key)
 
 		try:
 			data = tv[id]
@@ -148,7 +149,7 @@ class EpguidesParser(object):
 		exp = 'http://(www.)?epguides.com/.*'
 		return re.match(exp, url)
 
-	def parse(self, show, store):
+	def parse(self, show, store, _):
 		self.show = show
 
 		BeautifulSoup.CDATA_CONTENT_ELEMENTS = ()
@@ -267,7 +268,7 @@ class TVComDummyParser(object):
 		exp = 'http://(www.)?tv.com/.*'
 		return re.match(exp, url)
 
-	def parse(self, source, _):
+	def parse(self, source, _, __):
 		logging.error("The url %s is no longer supported" % source.url)
 
 

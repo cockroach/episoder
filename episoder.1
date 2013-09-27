@@ -38,7 +38,7 @@ Show program version and quit.
 This adds a \fISHOW\fR to episoder's database. You can either specify a URL from epguides.com or a show ID from TheTVDB.com. Note that this won't fetch any episodes or meta data about the show, to do this you will need to
 .B update
 your database.
-.SS Find Shows on TVDB
+.SS Find Shows on TheTVDB.com
 .B episoder
 [options]
 .B search
@@ -157,7 +157,7 @@ Show all episodes regardless of their date.
 Search for \fISEARCH\fR in show and episode names.
 
 .SH EXAMPLES
-Find a show on TVDB:
+Find a show on TheTVDB.com:
 .IP
 .B episoder search dexter
 .IP
@@ -228,7 +228,11 @@ Here you can define the date format you'd like to be used for the output. To get
 .BR date(1).
 
 The default is %a, %b %d, %Y
+.TP
+.B tvdb_key=KEY
+Use your own TVDB API \fIKEY\fR instead of episoder's built-in default key. This is recommended if you use episoder on a larger scale.
 
+See http://thetvdb.com/?tab=apiregister for more details.
 .SH CRON
 .LP
 You might want to have your episode database rebuilt on a regular basis (i.e. daily). The easiest way to achieve this is with a simple cron job:
