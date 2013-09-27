@@ -1,5 +1,5 @@
 == v0.7.0 (UNRELEASED) ==
- * Added support for TVDB
+ * Added support for TheTVDB.com
  * Removed support for tv.com
  * Changed command-line arguments. See the man page for details
  * Removed the ability to specify shows in the configuration file
