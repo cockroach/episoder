@@ -340,6 +340,11 @@ class Show(object):
 		self.status = Show.RUNNING
 
 
+	def setSuspended(self):
+
+		self.status = Show.SUSPENDED
+
+
 	def setEnded(self):
 
 		self.status = Show.ENDED

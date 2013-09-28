@@ -46,6 +46,7 @@ class TVDB(object):
 
 	def __init__(self):
 		self.logger = logging.getLogger('TVDB')
+		self.latest = 0
 
 	def __str__(self):
 		return 'TheTVDB.com parser'
@@ -81,6 +82,18 @@ class TVDB(object):
 			for (epidx, episode) in season.items():
 				self.__addEpisode(episode)
 
+		now = int(time.time())
+		age = now - self.latest
+
+		# 31536000 seconds -> 1 year
+		# 2419200 seconds -> 4 weeks
+		if age > 31536000:
+			self.show.setEnded()
+		elif age > 2419200:
+			self.show.setSuspended()
+		else:
+			self.show.setRunning()
+
 		self.store.commit()
 
 	def __addEpisode(self, episode):
@@ -97,6 +110,8 @@ class TVDB(object):
 		airdate = time.strptime(airdate, '%Y-%m-%d')
 		airdate = datetime(airdate.tm_year, airdate.tm_mon,
 						airdate.tm_mday).date()
+
+		self.latest = max(self.latest, int(airdate.strftime('%s')))
 
 		prodcode = episode.get('productioncode')
 		abs_number = episode.get('absolute_number', 0)
