@@ -14,8 +14,8 @@ awkfile = path.join('extras', 'episoder_helper_epguides.awk')
 files.append(('extras', [awkfile]))
 
 # documentation
-for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README' ]:
-	files.append(('', [file]))
+for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README', 'home.episoder' ]:
+	files.append(('doc/episoder', [file]))
 
 setup(	name			= 'episoder',
 	version			= '0.7.0',
