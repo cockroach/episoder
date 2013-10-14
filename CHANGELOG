@@ -1,4 +1,4 @@
-== v0.7.0 (UNRELEASED) ==
+== v0.7.0 (14 Oct 2013) ==
  * Added support for TheTVDB.com
  * Removed support for tv.com
  * Changed command-line arguments. See the man page for details
