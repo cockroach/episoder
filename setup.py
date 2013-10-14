@@ -7,15 +7,17 @@ files = []
 
 # man page
 manpage = 'episoder.1'
-files.append(('man/man1', ['episoder.1']))
+files.append((path.join('man', 'man1'), ['episoder.1']))
 
 # awk parser
 awkfile = path.join('extras', 'episoder_helper_epguides.awk')
 files.append(('extras', [awkfile]))
 
 # documentation
-for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README', 'home.episoder' ]:
-	files.append(('doc/episoder', [file]))
+for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README' ]:
+	files.append((path.join('doc', 'episoder'), [file]))
+
+files.append((path.join('doc', 'episoder', 'examples'), [ 'home.episoder' ]))
 
 setup(	name			= 'episoder',
 	version			= '0.7.0',
