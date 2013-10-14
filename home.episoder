@@ -1,0 +1,22 @@
+# Datafile
+#data=/home/stefan/.episodes
+
+# User agent to be used for epguides.com
+#agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
+
+# Output format
+# Currently available fields are (last column: example values):
+#
+#  %airdate     The episode's airdate                   Sun, Apr 04, 2005
+#  %show   	Name of the show			Monk
+#  %season 	Current season				3
+#  %epnum	Episode's number in season		16
+#  %eptitle	Title of the episode			Mr. Monk and the kid
+#  %totalep	Episode's total number			45
+#  %prodnum	Production number			T-3015
+#
+# Default value: %airdate %show %seasonx%epnum
+#format=%airdate %show %seasonx%epnum - %eptitle
+
+# Your favourite dateformat as used by the date command (see `man date`)
+#dateformat=%a, %b %d, %Y
