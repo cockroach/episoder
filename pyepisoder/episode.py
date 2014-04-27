@@ -24,7 +24,7 @@ class Episode(object):
 		self.season = int(season)
 		self.episode = int(episode)
 		self.airdate = date
-		self.prodnum = str(prodnum)
+		self.prodnum = unicode(prodnum)
 		self.total = int(total)
 		self.show_id = self._show.show_id
 

@@ -305,7 +305,7 @@ class ConsoleRenderer(object):
 		string = string.replace('%epnum', "%02d" % episode.episode)
 		string = string.replace('%eptitle', unicode(episode.title))
 		string = string.replace('%totalep', str(episode.total))
-		string = string.replace('%prodnum', str(episode.prodnum))
+		string = string.replace('%prodnum', unicode(episode.prodnum))
 		print ("%s%s%s" % (color, string.encode('utf8'), endColor))
 
 
