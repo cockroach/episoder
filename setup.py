@@ -20,12 +20,12 @@ for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README' ]:
 files.append((path.join('doc', 'episoder', 'examples'), [ 'home.episoder' ]))
 
 setup(	name			= 'episoder',
-	version			= '0.7.0',
+	version			= '0.7.1',
 	license			= 'GPLv3',
 	description		= 'TV episode notifier',
 	author			= 'Stefan Ott',
 	author_email		= 'stefan@ott.net',
-	url			= 'http://code.ott.net/projects/episoder',
+	url			= 'https://github.com/cockroach/episoder',
 	packages		= [ 'pyepisoder' ],
 	scripts			= [ 'episoder' ],
 	long_description	= 'episoder is a tool to tell you about new episodes of your favourite TV shows',
