@@ -98,11 +98,7 @@ function set_show(showName) {
 /^[0-9]+/ {
 	# A data file format used for shows like Eureka
 	totalep = $1
-	epnum = substr($0, index($0, "-")+1, 2)
-
-	if (epnum < 10) {
-		epnum = 0 substr(epnum, 2, 1)
-	}
+	epnum = int(substr($0, index($0, "-")+1, 2))
 
 	prodnum = substr($0, 16, 9)
 	gsub(/^ */, "", prodnum)
@@ -133,11 +129,7 @@ function set_show(showName) {
 /^ *[0-9]+\./ {
 	totalep = substr ($1, 0, index($1, "."))
 	gsub (/\.$/, "", totalep)
-	epnum = substr($0, index($0, "-")+1, 2)
-
-	if (epnum < 10) {
-		epnum = 0 substr(epnum, 2, 1)
-	}
+	epnum = int(substr($0, index($0, "-")+1, 2))
 
 	prodnum = substr($0, 16, 9)
 	gsub(/^ */, "", prodnum)
