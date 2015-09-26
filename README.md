@@ -5,7 +5,7 @@ Currently episoder can get data from [epguides](http://www.epguides.com/) and [T
 There is also a web-based version of episoder, called [webisoder](http://code.ott.net/projects/webisoder).
 
 #### Dependencies
-In order to use episoder, you will need python installed on your system. In addition to the default distribution, the `beautifulsoup`, `yaml`, `sqlite2`, `sqlalchemy` and `tvdb_api` modules are required. On Debian systems the corresponding packages are called [python-beautifulsoup](http://packages.debian.org/python-beautifulsoup), [python-yaml](http://packages.debian.org/python-yaml), [python-pysqlite2](http://packages.debian.org/python-pysqlite2), [python-sqlalchemy](http://packages.debian.org/python-sqlalchemy) and [python-tvdb-api](http://packages.debian.org/python-tvdb-api).
+In order to use episoder, you will need python installed on your system. In addition to the default distribution, the `yaml`, `sqlite2`, `sqlalchemy` and `tvdb_api` modules are required.
 
 #### Installation
 
