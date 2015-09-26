@@ -3,7 +3,7 @@ episoder is a tool to tell you about new episodes of your favourite TV shows.
 #### Installation
 
 You can install episoder through [pypi](https://pypi.python.org/pypi/episoder) (using `easy_install` or `pip`) or by
-downloading the tarball from here and running `easy_install episoder-0.7.1.tar.gz`
+downloading the tarball from here and running `easy_install episoder-0.7.2.tar.gz`
 
 #### Configuration
 

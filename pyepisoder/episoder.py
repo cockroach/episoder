@@ -28,7 +28,7 @@ import logging
 from .episode import Episode
 from .plugins import parser_for
 
-version='0.7.1'
+version='0.7.2'
 
 
 class DataStore(object):

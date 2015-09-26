@@ -20,7 +20,7 @@ for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README' ]:
 files.append((path.join('doc', 'episoder', 'examples'), [ 'home.episoder' ]))
 
 setup(	name			= 'episoder',
-	version			= '0.7.1',
+	version			= '0.7.2',
 	license			= 'GPLv3',
 	description		= 'TV episode notifier',
 	author			= 'Stefan Ott',

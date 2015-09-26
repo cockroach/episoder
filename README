@@ -5,7 +5,7 @@ episoder is a tool to tell you about new episodes of your favourite TV shows.
 
 == Installation ==
 
-* Run 'easy_install episoder-0.7.0.tar.gz'
+* Run 'easy_install episoder-0.7.2.tar.gz'
 * Create a cron job to have your database rebuilt once a day
 * Add "episoder" to your ~/.bashrc, ~/.bash_profile, /etc/bash.bashrc or /etc/profile if you want to see your upcoming shows every time you start a shell. Consult the bash docs to find out which file you want to use.
 
