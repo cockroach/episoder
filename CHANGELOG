@@ -1,3 +1,8 @@
+== v0.7.2 (unreleased) ==
+ * Dropped unneeded dependency on BeautifulSoup
+ * Fixed episode number parsing for epguides.com (thanks to jethrogb)
+ * Improved python3 compatibility
+
 == v0.7.1 (27 Apr 2014) ==
  * Accept unicode characters in prodnum fields
 
