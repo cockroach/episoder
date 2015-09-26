@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import logging
 
 from argparse import ArgumentParser
@@ -137,10 +139,10 @@ def shows(args):
 	for show in shows:
 		status = show.status
 
-		print '[%4d] %s' % (show.show_id, show.url)
-		print '       %s, %s, %s' % (show.show_name,
+		print('[%4d] %s' % (show.show_id, show.url))
+		print('       %s, %s, %s') % (show.show_name,
 			statusStrings[status], enabledStrings[show.enabled])
-		print '       Last update: %s' % (show.updated)
+		print('       Last update: %s') % (show.updated)
 
 
 def episodes(args):
@@ -170,12 +172,12 @@ def search(args):
 	try:
 		res = TVDB.lookup(search)
 
-		print "ID\tName\n-------\t--------------------"
+		print("ID\tName\n-------\t--------------------")
 		for x in res:
-			print "%s\t%s" % (x['seriesid'], x['seriesname'])
+			print("%s\t%s" % (x['seriesid'], x['seriesname']))
 
 	except:
-		print 'Nothing found'
+		print('Nothing found')
 
 
 def parseArgs():
@@ -316,10 +318,10 @@ def loadConfig(args):
 
 	try:
 		rc = open(rcfile)
-	except IOError, e:
+	except IOError as e:
 		stderr.write('%s: %s\n' % (rcfile, e.strerror))
 		exit(2)
-	except Exception, e:
+	except Exception as e:
 		stderr.write('%s\n' % e)
 		exit(2)
 

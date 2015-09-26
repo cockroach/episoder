@@ -15,20 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import re
 import os
 import yaml
 import pyepisoder
 import time
 import logging
-import urllib2
+
+try:
+    import urllib.request as urllib2
+except:
+    import urllib2
 import tempfile
 
 from datetime import date, datetime, timedelta
 from tvdb_api import BaseUI, Tvdb, tvdb_shownotfound
 
-from BeautifulSoup import BeautifulSoup
-from episode import Episode
+from .episode import Episode
 
 
 def parser_for(url):
@@ -167,11 +172,9 @@ class EpguidesParser(object):
 	def parse(self, show, store, _):
 		self.show = show
 
-		BeautifulSoup.CDATA_CONTENT_ELEMENTS = ()
-
 		try:
 			webdata = self._fetchPage(self.show.url)
-		except Exception, e:
+		except Exception as e:
 			self.logger.error("Error fetching %s: %s" %
 					(self.show.url, e))
 			return

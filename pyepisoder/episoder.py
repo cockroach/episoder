@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 from datetime import date, timedelta
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer
 from sqlalchemy import MetaData, Sequence, Table, Text
@@ -23,8 +25,8 @@ from sqlalchemy.orm import clear_mappers, create_session, mapper, relation
 
 import logging
 
-from episode import Episode
-from plugins import parser_for
+from .episode import Episode
+from .plugins import parser_for
 
 version='0.7.1'
 
