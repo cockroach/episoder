@@ -1,4 +1,4 @@
-# episoder, http://cockroach.github.io/episoder/
+# episoder, https://github.com/cockroach/episoder
 #
 # Copyright (C) 2004-2014 Stefan Ott. All rights reserved.
 #
