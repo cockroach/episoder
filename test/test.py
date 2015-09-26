@@ -415,7 +415,23 @@ class testEpguidesParser(unittest.TestCase):
 
 		self._parse('test/testdata/epguides_lost.html')
 		self.store.commit()
-		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
+		episodes = self.store.getEpisodes(then, 99999)
+		self.assertEquals(102, len(episodes))
+
+		ep = episodes[0]
+		self.assertEquals('Pilot (1)', ep.title)
+		self.assertEquals(1, ep.season)
+		self.assertEquals(1, ep.episode)
+
+		ep = episodes[9]
+		self.assertEquals('Raised by Another', ep.title)
+		self.assertEquals(1, ep.season)
+		self.assertEquals(10, ep.episode)
+
+		ep = episodes[24]
+		self.assertEquals('Man of Science, Man of Faith', ep.title)
+		self.assertEquals(2, ep.season)
+		self.assertEquals(1, ep.episode)
 
 		self.store.clear()
 		self.assertEquals(0, len(self.store.getEpisodes()))
@@ -428,18 +444,38 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('test/testdata/epguides_eureka.html')
 		episodes = self.store.getEpisodes(then, 99999)
-		self.assertEquals(43, len(episodes))
-		self.assertEquals('Best in Faux', episodes[27].title)
+		self.assertEquals(76, len(episodes))
+
+		ep = episodes[0]
+		self.assertEquals('Pilot', ep.title)
+		self.assertEquals(1, ep.season)
+		self.assertEquals(1, ep.episode)
+
+		ep = episodes[9]
+		self.assertEquals('Purple Haze', ep.title)
+		self.assertEquals(1, ep.season)
+		self.assertEquals(10, ep.episode)
+
+		ep = episodes[27]
+		self.assertEquals('Best in Faux', ep.title)
+		self.assertEquals(3, ep.season)
+		self.assertEquals(3, ep.episode)
 
 	def testEpguidesFormat3(self):
 		# Yet another format
 		then = datetime.date(1970, 1, 1)
 		self._parse('test/testdata/epguides_midsomer_murders.html')
 		episodes = self.store.getEpisodes(then, 99999)
-		episode = episodes[1]
 
+		episode = episodes[0]
 		self.assertEquals(1, episode.season)
 		self.assertEquals(1, episode.episode)
+		self.assertEquals('Written in Blood', episode.title)
+
+		episode = episodes[5]
+		self.assertEquals(2, episode.season)
+		self.assertEquals(2, episode.episode)
+		self.assertEquals("Strangler's Wood", episode.title)
 
 	def testEpguidesRemoveIllegalChars(self):
 		# This one contains an illegal character somewhere
@@ -447,8 +483,10 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/testdata/epguides_american_idol.html')
 		episodes = self.store.getEpisodes(then, 99999)
 
-		self.assertEquals('Pride Goeth Before The Fro',
-				episodes[10].title)
+		episode = episodes[10]
+		self.assertEquals('Pride Goeth Before The Fro', episode.title)
+		self.assertEquals(1, episode.season)
+		self.assertEquals(12, episode.episode)
 
 	def testEpguidesMissingSeasonNumber(self):
 		# This one lacks a season number somewhere
@@ -456,6 +494,10 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/testdata/epguides_48_hours_mistery.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		self.assertEquals(31, len(episodes))
+
+		episode = episodes[0]
+		self.assertEquals(19, episode.season)
+		self.assertEquals(1, episode.episode)
 
 	def testEpguidesEndedShow(self):
 		# This one is no longer on the air
