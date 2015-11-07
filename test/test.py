@@ -404,16 +404,16 @@ class testEpguidesParser(unittest.TestCase):
 	def testParseFile(self):
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('test/testdata/epguides_lost.html')
+		self._parse('test/fixtures/epguides_lost.html')
 		self.store.commit()
 		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
 
 		show = self.store.getShowByUrl(
-				'test/testdata/epguides_lost.html')
+				'test/fixtures/epguides_lost.html')
 		self.assertEquals('Lost', show.name)
 		self.assertEquals(episoder.Show.RUNNING, show.status)
 
-		self._parse('test/testdata/epguides_lost.html')
+		self._parse('test/fixtures/epguides_lost.html')
 		self.store.commit()
 		episodes = self.store.getEpisodes(then, 99999)
 		self.assertEquals(102, len(episodes))
@@ -435,14 +435,14 @@ class testEpguidesParser(unittest.TestCase):
 
 		self.store.clear()
 		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('test/testdata/epguides_bsg.html')
+		self._parse('test/fixtures/epguides_bsg.html')
 		self.assertEquals(74, len(self.store.getEpisodes(then, 99999)))
 
 	def testEpguidesFormat2(self):
 		# Another format
 		then = datetime.date(1970, 1, 1)
 		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('test/testdata/epguides_eureka.html')
+		self._parse('test/fixtures/epguides_eureka.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		self.assertEquals(76, len(episodes))
 
@@ -464,7 +464,7 @@ class testEpguidesParser(unittest.TestCase):
 	def testEpguidesFormat3(self):
 		# Yet another format
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_midsomer_murders.html')
+		self._parse('test/fixtures/epguides_midsomer_murders.html')
 		episodes = self.store.getEpisodes(then, 99999)
 
 		episode = episodes[0]
@@ -480,7 +480,7 @@ class testEpguidesParser(unittest.TestCase):
 	def testEpguidesRemoveIllegalChars(self):
 		# This one contains an illegal character somewhere
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_american_idol.html')
+		self._parse('test/fixtures/epguides_american_idol.html')
 		episodes = self.store.getEpisodes(then, 99999)
 
 		episode = episodes[10]
@@ -491,7 +491,7 @@ class testEpguidesParser(unittest.TestCase):
 	def testEpguidesMissingSeasonNumber(self):
 		# This one lacks a season number somewhere
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_48_hours_mistery.html')
+		self._parse('test/fixtures/epguides_48_hours_mistery.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		self.assertEquals(31, len(episodes))
 
@@ -502,15 +502,15 @@ class testEpguidesParser(unittest.TestCase):
 	def testEpguidesEndedShow(self):
 		# This one is no longer on the air
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_kr2008.html')
+		self._parse('test/fixtures/epguides_kr2008.html')
 		show = self.store.getShowByUrl(
-				'test/testdata/epguides_kr2008.html')
+				'test/fixtures/epguides_kr2008.html')
 		self.assertEquals(episoder.Show.ENDED, show.status)
 
 	def testEpguidesEncoding(self):
 		# This one has funny characters
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_buzzcocks.html')
+		self._parse('test/fixtures/epguides_buzzcocks.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes[20]
 		self.assertEquals(
@@ -520,7 +520,7 @@ class testEpguidesParser(unittest.TestCase):
 	def testEpguidesWithAnchor(self):
 		# This one has an anchor tag before the bullet for season 6
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_futurama.html')
+		self._parse('test/fixtures/epguides_futurama.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes.pop()
 		self.assertEquals(6, episode.season)
@@ -528,7 +528,7 @@ class testEpguidesParser(unittest.TestCase):
 	def testEpguidesWithTrailerAndRecap(self):
 		# This one has [Trailer] and [Recap] in episode titles
 		then = datetime.date(1970, 1, 1)
-		self._parse('test/testdata/epguides_house.html')
+		self._parse('test/fixtures/epguides_house.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes[len(episodes) - 3]
 		self.assertEquals('Unwritten', episode.title)
