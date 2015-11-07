@@ -75,6 +75,18 @@ function set_show(showName) {
 	}
 }
 
+/^<a id="latest"><\/a>Season/ {
+	# remove ^M
+	gsub(/\015/, "", $3)
+
+	# Some files come with an anchor
+	season = $3
+
+	if (season == "") {
+		season = 0
+	}
+}
+
 /^Season/ {
 	# Most, however, don't
 
