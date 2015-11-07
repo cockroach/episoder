@@ -1,4 +1,4 @@
-== v0.7.3 (unreleased) ==
+== v0.7.3 (7 Nov 2015) ==
  * Fixed a syntax error in the list of shows
  * Fixed season number parsing for epguides.com (thanks to jethrogb)
 
