@@ -406,17 +406,17 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('test/fixtures/epguides_lost.html')
 		self.store.commit()
-		self.assertEquals(102, len(self.store.getEpisodes(then, 99999)))
+		self.assertEquals(121, len(self.store.getEpisodes(then, 99999)))
 
 		show = self.store.getShowByUrl(
 				'test/fixtures/epguides_lost.html')
 		self.assertEquals('Lost', show.name)
-		self.assertEquals(episoder.Show.RUNNING, show.status)
+		self.assertEquals(episoder.Show.ENDED, show.status)
 
 		self._parse('test/fixtures/epguides_lost.html')
 		self.store.commit()
 		episodes = self.store.getEpisodes(then, 99999)
-		self.assertEquals(102, len(episodes))
+		self.assertEquals(121, len(episodes))
 
 		ep = episodes[0]
 		self.assertEquals('Pilot (1)', ep.title)
@@ -428,7 +428,7 @@ class testEpguidesParser(unittest.TestCase):
 		self.assertEquals(1, ep.season)
 		self.assertEquals(10, ep.episode)
 
-		ep = episodes[24]
+		ep = episodes[25]
 		self.assertEquals('Man of Science, Man of Faith', ep.title)
 		self.assertEquals(2, ep.season)
 		self.assertEquals(1, ep.episode)
@@ -436,7 +436,7 @@ class testEpguidesParser(unittest.TestCase):
 		self.store.clear()
 		self.assertEquals(0, len(self.store.getEpisodes()))
 		self._parse('test/fixtures/epguides_bsg.html')
-		self.assertEquals(74, len(self.store.getEpisodes(then, 99999)))
+		self.assertEquals(73, len(self.store.getEpisodes(then, 99999)))
 
 	def testEpguidesFormat2(self):
 		# Another format
