@@ -523,7 +523,7 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/fixtures/epguides_futurama.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes.pop()
-		self.assertEquals(6, episode.season)
+		self.assertEquals(7, episode.season)
 
 	def testEpguidesWithTrailerAndRecap(self):
 		# This one has [Trailer] and [Recap] in episode titles
@@ -531,10 +531,10 @@ class testEpguidesParser(unittest.TestCase):
 		self._parse('test/fixtures/epguides_house.html')
 		episodes = self.store.getEpisodes(then, 99999)
 		episode = episodes[len(episodes) - 3]
-		self.assertEquals('Unwritten', episode.title)
+		self.assertEquals('Post Mortem', episode.title)
 
 		episode = episodes[len(episodes) - 2]
-		self.assertEquals('Massage Therapy', episode.title)
+		self.assertEquals('Holding On', episode.title)
 
 if __name__ == '__main__':
 	unittest.main()
