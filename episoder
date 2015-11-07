@@ -140,9 +140,9 @@ def shows(args):
 		status = show.status
 
 		print('[%4d] %s' % (show.show_id, show.url))
-		print('       %s, %s, %s') % (show.show_name,
-			statusStrings[status], enabledStrings[show.enabled])
-		print('       Last update: %s') % (show.updated)
+		print('       %s, %s, %s' % (show.show_name,
+			statusStrings[status], enabledStrings[show.enabled]))
+		print('       Last update: %s' % (show.updated))
 
 
 def episodes(args):
