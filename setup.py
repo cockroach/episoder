@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from distutils.core import setup
+from setuptools import setup
 from os import path
 
 # files to install
@@ -27,6 +27,7 @@ setup(	name			= 'episoder',
 	author_email		= 'stefan@ott.net',
 	url			= 'https://github.com/cockroach/episoder',
 	packages		= [ 'pyepisoder' ],
+	test_suite		= 'test',
 	scripts			= [ 'episoder' ],
 	long_description	= 'episoder is a tool to tell you about new episodes of your favourite TV shows',
 	data_files		= files,

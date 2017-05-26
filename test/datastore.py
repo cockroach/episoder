@@ -1,24 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 import os
-import shutil
-import logging
-import unittest
 import tempfile
 import datetime
 
-import pyepisoder.episoder as episoder
-import pyepisoder.plugins as plugins
+from unittest import TestCase, TestLoader, TestSuite
 
-class DataStoreTest(unittest.TestCase):
+import pyepisoder.episoder as episoder
+
+
+class DataStoreTest(TestCase):
+
 	def setUp(self):
+
 		self.path = tempfile.mktemp()
 		self.store = episoder.DataStore(self.path)
 
 	def tearDown(self):
+
 		os.unlink(self.path)
 
 	def testGetShowByUrl(self):
+
 		show1 = episoder.Show('test show', url='a')
 		show2 = episoder.Show('test show 2', url='b')
 
@@ -31,6 +34,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertEqual(None, self.store.getShowByUrl('c'))
 
 	def testAddShow(self):
+
 		show = episoder.Show('test show', url='http://test.show')
 		show = self.store.addShow(show)
 		self.store.commit()
@@ -76,11 +80,12 @@ class DataStoreTest(unittest.TestCase):
 		try:
 			self.store.addShow(showC)
 			self.store.commit()
-			self.assertTrue(false)
+			self.assertTrue(False)
 		except Exception:
 			pass
 
 	def testAddEpisode(self):
+
 		show = episoder.Show('some show', url='foo')
 		show = self.store.addShow(show)
 		self.store.commit()
@@ -100,6 +105,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertTrue(episode2 in episodes)
 
 	def testSearch(self):
+
 		show = episoder.Show('some show')
 		show = self.store.addShow(show)
 		episode1 = episoder.Episode(show, 'first episode', 3,
@@ -128,6 +134,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertTrue(episode2 in episodes)
 
 	def testRemoveShow(self):
+
 		show1 = episoder.Show('random show', url='z')
 		show2 = episoder.Show('other show', url='x')
 
@@ -156,6 +163,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertEquals(episode3, episodes[0])
 
 	def testRollback(self):
+
 		show = episoder.Show('some show')
 		show = self.store.addShow(show)
 		self.store.commit()
@@ -176,6 +184,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertTrue(episode2 in episodes)
 
 	def testGetEpisodes(self):
+
 		show = episoder.Show('some show')
 		show = self.store.addShow(show)
 
@@ -223,6 +232,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertTrue(episode4 in episodes)
 
 	def testRemoveBefore(self):
+
 		show = episoder.Show('some show')
 		show = self.store.addShow(show)
 
@@ -259,6 +269,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertTrue(episode4 in episodes)
 
 	def testRemoveBeforeWithShow(self):
+
 		show1 = episoder.Show('some show', url='a')
 		show1 = self.store.addShow(show1)
 
@@ -283,8 +294,8 @@ class DataStoreTest(unittest.TestCase):
 		episodes = self.store.getEpisodes(basedate = yesterday, n_days=10)
 		self.assertEquals(1, len(episodes))
 
-
 	def testDuplicateEpisodes(self):
+
 		today = datetime.date.today()
 
 		show = episoder.Show('some show')
@@ -306,6 +317,7 @@ class DataStoreTest(unittest.TestCase):
 		self.assertEquals('f', episodes[0].title)
 
 	def testClear(self):
+
 		today = datetime.date.today()
 
 		show = episoder.Show('some show', url='urlX')
@@ -332,209 +344,10 @@ class DataStoreTest(unittest.TestCase):
 		self.store.addEpisode(episode5)
 		self.assertEqual(2, len(self.store.getEpisodes()))
 
-class ShowTest(unittest.TestCase):
-	def setUp(self):
-		self.path = tempfile.mktemp()
-		self.store = episoder.DataStore(self.path)
-		self.show = episoder.Show('A', url='a')
-		self.show = self.store.addShow(self.show)
 
-	def tearDown(self):
-		os.unlink(self.path)
+def test_suite():
 
-	def testRemoveEpisodesBefore(self):
-		now = datetime.date.today()
-		then = now - datetime.timedelta(3)
-
-		show2 = episoder.Show('B', url='b')
-		show2 = self.store.addShow(show2)
-
-		episode1 = episoder.Episode(self.show, 'e', 1, 1, now, 'x', 1)
-		episode2 = episoder.Episode(self.show, 'e', 1, 2, then, 'x', 1)
-		episode3 = episoder.Episode(show2, 'e', 1, 3, now, 'x', 1)
-		episode4 = episoder.Episode(show2, 'e', 1, 4, then, 'x', 1)
-
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
-		self.store.addEpisode(episode4)
-		self.store.commit()
-
-		episodes = self.store.getEpisodes(basedate = then, n_days=10)
-		self.assertEqual(4, len(episodes))
-
-		show2.removeEpisodesBefore(self.store, now)
-
-		episodes = self.store.getEpisodes(basedate = then, n_days=10)
-		self.assertEqual(3, len(episodes))
-
-		self.show.removeEpisodesBefore(self.store, now)
-
-		episodes = self.store.getEpisodes(basedate = then, n_days=10)
-		self.assertEqual(2, len(episodes))
-
-class testEpguidesParser(unittest.TestCase):
-	def setUp(self):
-		self.path = tempfile.mktemp()
-		self.store = episoder.DataStore(self.path)
-		self.parser = plugins.EpguidesParser()
-		self.parser.awkfile = 'extras/episoder_helper_epguides.awk'
-
-	def tearDown(self):
-		os.unlink(self.path)
-
-	def _accept(self, url):
-		return self.parser.accept(url)
-
-	def _parse(self, file):
-		show = self.store.getShowByUrl(file)
-
-		if not show:
-			show = episoder.Show(name='', url=file)
-			show = self.store.addShow(show)
-
-		self.parser.show = show
-		self.parser.parseFile(file, self.store)
-
-	def testAccept(self):
-		self.assertTrue(self._accept('http://www.epguides.com/Lost'))
-		self.assertFalse(self._accept('http://epguides2.com/Lost'))
-		self.assertFalse(self._accept('http://www.tv.com/Lost'))
-
-	def testParseFile(self):
-		then = datetime.date(1970, 1, 1)
-		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('test/fixtures/epguides_lost.html')
-		self.store.commit()
-		self.assertEquals(121, len(self.store.getEpisodes(then, 99999)))
-
-		show = self.store.getShowByUrl(
-				'test/fixtures/epguides_lost.html')
-		self.assertEquals('Lost', show.name)
-		self.assertEquals(episoder.Show.ENDED, show.status)
-
-		self._parse('test/fixtures/epguides_lost.html')
-		self.store.commit()
-		episodes = self.store.getEpisodes(then, 99999)
-		self.assertEquals(121, len(episodes))
-
-		ep = episodes[0]
-		self.assertEquals('Pilot (1)', ep.title)
-		self.assertEquals(1, ep.season)
-		self.assertEquals(1, ep.episode)
-
-		ep = episodes[9]
-		self.assertEquals('Raised by Another', ep.title)
-		self.assertEquals(1, ep.season)
-		self.assertEquals(10, ep.episode)
-
-		ep = episodes[25]
-		self.assertEquals('Man of Science, Man of Faith', ep.title)
-		self.assertEquals(2, ep.season)
-		self.assertEquals(1, ep.episode)
-
-		self.store.clear()
-		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('test/fixtures/epguides_bsg.html')
-		self.assertEquals(73, len(self.store.getEpisodes(then, 99999)))
-
-	def testEpguidesFormat2(self):
-		# Another format
-		then = datetime.date(1970, 1, 1)
-		self.assertEquals(0, len(self.store.getEpisodes()))
-		self._parse('test/fixtures/epguides_eureka.html')
-		episodes = self.store.getEpisodes(then, 99999)
-		self.assertEquals(76, len(episodes))
-
-		ep = episodes[0]
-		self.assertEquals('Pilot', ep.title)
-		self.assertEquals(1, ep.season)
-		self.assertEquals(1, ep.episode)
-
-		ep = episodes[9]
-		self.assertEquals('Purple Haze', ep.title)
-		self.assertEquals(1, ep.season)
-		self.assertEquals(10, ep.episode)
-
-		ep = episodes[27]
-		self.assertEquals('Best in Faux', ep.title)
-		self.assertEquals(3, ep.season)
-		self.assertEquals(3, ep.episode)
-
-	def testEpguidesFormat3(self):
-		# Yet another format
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_midsomer_murders.html')
-		episodes = self.store.getEpisodes(then, 99999)
-
-		episode = episodes[0]
-		self.assertEquals(1, episode.season)
-		self.assertEquals(1, episode.episode)
-		self.assertEquals('Written in Blood', episode.title)
-
-		episode = episodes[5]
-		self.assertEquals(2, episode.season)
-		self.assertEquals(2, episode.episode)
-		self.assertEquals("Strangler's Wood", episode.title)
-
-	def testEpguidesRemoveIllegalChars(self):
-		# This one contains an illegal character somewhere
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_american_idol.html')
-		episodes = self.store.getEpisodes(then, 99999)
-
-		episode = episodes[10]
-		self.assertEquals('Pride Goeth Before The Fro', episode.title)
-		self.assertEquals(1, episode.season)
-		self.assertEquals(12, episode.episode)
-
-	def testEpguidesMissingSeasonNumber(self):
-		# This one lacks a season number somewhere
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_48_hours_mistery.html')
-		episodes = self.store.getEpisodes(then, 99999)
-		self.assertEquals(31, len(episodes))
-
-		episode = episodes[0]
-		self.assertEquals(19, episode.season)
-		self.assertEquals(1, episode.episode)
-
-	def testEpguidesEndedShow(self):
-		# This one is no longer on the air
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_kr2008.html')
-		show = self.store.getShowByUrl(
-				'test/fixtures/epguides_kr2008.html')
-		self.assertEquals(episoder.Show.ENDED, show.status)
-
-	def testEpguidesEncoding(self):
-		# This one has funny characters
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_buzzcocks.html')
-		episodes = self.store.getEpisodes(then, 99999)
-		episode = episodes[20]
-		self.assertEquals(
-			'Zoë Ball, Louis Eliot, Graham Norton, Keith Duffy',
-			episodes[20].title.encode('utf8'))
-
-	def testEpguidesWithAnchor(self):
-		# This one has an anchor tag before the bullet for season 6
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_futurama.html')
-		episodes = self.store.getEpisodes(then, 99999)
-		episode = episodes.pop()
-		self.assertEquals(7, episode.season)
-
-	def testEpguidesWithTrailerAndRecap(self):
-		# This one has [Trailer] and [Recap] in episode titles
-		then = datetime.date(1970, 1, 1)
-		self._parse('test/fixtures/epguides_house.html')
-		episodes = self.store.getEpisodes(then, 99999)
-		episode = episodes[len(episodes) - 3]
-		self.assertEquals('Post Mortem', episode.title)
-
-		episode = episodes[len(episodes) - 2]
-		self.assertEquals('Holding On', episode.title)
-
-if __name__ == '__main__':
-	unittest.main()
+	suite = TestSuite()
+	loader = TestLoader()
+	suite.addTests(loader.loadTestsFromTestCase(DataStoreTest))
+	return suite
