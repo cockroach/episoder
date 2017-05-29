@@ -153,14 +153,14 @@ class DataStoreTest(TestCase):
 		self.store.commit()
 
 		episodes = self.store.getEpisodes()
-		self.assertEquals(3, len(episodes))
+		self.assertEqual(3, len(episodes))
 
 		self.store.removeShow(show1.show_id)
 		self.store.commit()
 
 		episodes = self.store.getEpisodes()
-		self.assertEquals(1, len(episodes))
-		self.assertEquals(episode3, episodes[0])
+		self.assertEqual(1, len(episodes))
+		self.assertEqual(episode3, episodes[0])
 
 	def testRollback(self):
 
@@ -292,7 +292,7 @@ class DataStoreTest(TestCase):
 
 		self.store.removeBefore(today, show=show1)
 		episodes = self.store.getEpisodes(basedate = yesterday, n_days=10)
-		self.assertEquals(1, len(episodes))
+		self.assertEqual(1, len(episodes))
 
 	def testDuplicateEpisodes(self):
 
@@ -309,12 +309,12 @@ class DataStoreTest(TestCase):
 		self.store.addEpisode(episode1)
 		episodes = self.store.getEpisodes()
 		self.assertEqual(1, len(episodes))
-		self.assertEquals('e', episodes[0].title)
+		self.assertEqual('e', episodes[0].title)
 
 		self.store.addEpisode(episode2)
 		episodes = self.store.getEpisodes()
 		self.assertEqual(1, len(episodes))
-		self.assertEquals('f', episodes[0].title)
+		self.assertEqual('f', episodes[0].title)
 
 	def testClear(self):
 
