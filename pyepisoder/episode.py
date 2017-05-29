@@ -24,9 +24,15 @@ class Episode(object):
 		self.season = int(season)
 		self.episode = int(episode)
 		self.airdate = date
-		self.prodnum = unicode(prodnum)
+		self.prodnum = str(prodnum)
 		self.total = int(total)
 		self.show_id = self._show.show_id
+
+	def __lt__(self, other):
+
+		return (self.season < other.season or
+			(self.season == other.season and self.episode <
+			other.episode))
 
 	def setAirDate(self, airdate):
 		# meh, hack to make sure that we actually get a date object

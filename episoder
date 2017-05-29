@@ -30,6 +30,7 @@ from traceback import print_exc
 
 from pyepisoder.episoder import DataStore, Show, version
 from pyepisoder.plugins import ConsoleRenderer, TVDB, parser_for
+from pyepisoder.sources import TVDBShowNotFoundError
 
 
 def update(args):
@@ -52,7 +53,9 @@ def update(args):
 
 	for show in shows:
 		try:
-			show.update(store, args)
+			parser = parser_for(show.url)
+			parser.login(args)
+			show.update(store, args, parser)
 		except:
 			logging.error('Error parsing %s' % show)
 			print_exc()
@@ -167,17 +170,18 @@ def episodes(args):
 
 def search(args):
 
-	search = args.keyword
+	term = args.keyword
+
+	tvdb = TVDB()
+	tvdb.login(args)
 
 	try:
-		res = TVDB.lookup(search)
-
 		print("ID\tName\n-------\t--------------------")
-		for x in res:
-			print("%s\t%s" % (x['seriesid'], x['seriesname']))
+		for show in tvdb.lookup(term):
+			print("%s\t%s" % (show.url, show.name))
 
-	except:
-		print('Nothing found')
+	except TVDBShowNotFoundError:
+		print("Nothing found")
 
 
 def parseArgs():

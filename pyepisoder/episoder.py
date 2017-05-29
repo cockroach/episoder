@@ -17,7 +17,7 @@
 
 from __future__ import absolute_import
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer
 from sqlalchemy import MetaData, Sequence, Table, Text
 from sqlalchemy import create_engine, or_, and_
@@ -26,7 +26,6 @@ from sqlalchemy.orm import clear_mappers, create_session, mapper, relation
 import logging
 
 from .episode import Episode
-from .plugins import parser_for
 
 version='0.7.2'
 
@@ -110,7 +109,7 @@ class DataStore(object):
 			Column('status', Integer, default=Show.RUNNING),
 			extend_existing=True)
 
-		showmapper = mapper(Show, self.shows, properties={
+		mapper(Show, self.shows, properties={
 			'name': self.shows.c.show_name,
 			'episodes': relation(Episode, backref='show',
 				cascade='all')
@@ -132,7 +131,7 @@ class DataStore(object):
 			Column('prodnum', Text),
 			extend_existing=True)
 
-		episodemapper = mapper(Episode, self.episodes, properties={
+		mapper(Episode, self.episodes, properties={
 			'title': self.episodes.c.title,
 			'season': self.episodes.c.season,
 			'episode': self.episodes.c.num,
@@ -322,7 +321,8 @@ class Show(object):
 	SUSPENDED = 2
 	ENDED = 3
 
-	def __init__(self, name, id=-1, url='', updated=date(1970, 1, 1)):
+	def __init__(self, name, id=-1, url='',
+					updated=datetime.utcfromtimestamp(0)):
 
 		self.name = name
 		self.url = url
@@ -352,9 +352,7 @@ class Show(object):
 		self.status = Show.ENDED
 
 
-	def update(self, store, args):
-
-		parser = parser_for(self.url)
+	def update(self, store, args, parser):
 
 		if not parser:
 			raise RuntimeError('No parser found for %s' % self.url)
@@ -362,7 +360,7 @@ class Show(object):
 		if 'agent' in args:
 			parser.user_agent = args.agent
 
-		parser.parse(self, store, args)
+		parser.parse(self, store)
 
 
 	def removeEpisodesBefore(self, store, date):

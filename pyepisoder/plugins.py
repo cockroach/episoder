@@ -1,6 +1,6 @@
 # episoder, https://github.com/cockroach/episoder
 #
-# Copyright (C) 2004-2015 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,19 +21,18 @@ import re
 import os
 import yaml
 import pyepisoder
-import time
 import logging
 
 try:
-    import urllib.request as urllib2
+	import urllib.request as urllib2
 except:
-    import urllib2
+	import urllib2
 import tempfile
 
 from datetime import date, datetime, timedelta
-from tvdb_api import BaseUI, Tvdb, tvdb_shownotfound
 
 from .episode import Episode
+from .sources import TVDB
 
 
 def parser_for(url):
@@ -45,106 +44,6 @@ def parser_for(url):
 			return parser()
 
 	return None
-
-
-class TVDB(object):
-
-	def __init__(self):
-		self.logger = logging.getLogger('TVDB')
-		self.latest = 0
-
-	def __str__(self):
-		return 'TheTVDB.com parser'
-
-	@staticmethod
-	def accept(url):
-		return url.isdigit()
-
-	def parse(self, show, store, args):
-
-		self.show = show
-		self.store = store
-
-		if show.url.isdigit():
-			id = int(show.url)
-		else:
-			self.logger.error('%s is not a valid TVDB show id'
-					% show.url)
-			return
-
-		tv = Tvdb(apikey=args.tvdb_key)
-
-		try:
-			data = tv[id]
-		except tvdb_shownotfound:
-			self.logger.error('Show %s not found' % id)
-			return
-
-		self.show.name = data.data.get('seriesname')
-		self.show.updated = datetime.now()
-
-		for (idx, season) in data.items():
-			for (epidx, episode) in season.items():
-				self.__addEpisode(episode)
-
-		now = int(time.time())
-		age = now - self.latest
-
-		# 31536000 seconds -> 1 year
-		# 2419200 seconds -> 4 weeks
-		if age > 31536000:
-			self.show.setEnded()
-		elif age > 2419200:
-			self.show.setSuspended()
-		else:
-			self.show.setRunning()
-
-		self.store.commit()
-
-	def __addEpisode(self, episode):
-		name = episode.get('episodename')
-		season = episode.get('seasonnumber', 0)
-		num = episode.get('episodenumber', 0)
-
-		airdate = episode.get('firstaired')
-
-		if not airdate:
-			self.logger.debug('Throwing away episode %s' % num)
-			return
-
-		airdate = time.strptime(airdate, '%Y-%m-%d')
-		airdate = datetime(airdate.tm_year, airdate.tm_mon,
-						airdate.tm_mday).date()
-
-		self.latest = max(self.latest, int(airdate.strftime('%s')))
-
-		prodcode = episode.get('productioncode')
-		abs_number = episode.get('absolute_number', 0)
-
-		# can be None which is bad
-		if not abs_number:
-			abs_number = 0
-
-		self.logger.debug('Found episode %s' % name)
-
-		e = Episode(self.show, name, season, num, airdate, prodcode,
-			abs_number)
-
-		self.store.addEpisode(e)
-
-	@staticmethod
-	def lookup(text):
-		result = []
-
-		class search(BaseUI):
-			def selectSeries(self, allSeries):
-				result.extend(allSeries)
-				return BaseUI.selectSeries(self, allSeries)
-
-		db = Tvdb(custom_ui=search)
-		db[text]
-
-		return result
 
 
 class EpguidesParser(object):
@@ -169,7 +68,7 @@ class EpguidesParser(object):
 		exp = 'http://(www.)?epguides.com/.*'
 		return re.match(exp, url)
 
-	def parse(self, show, store, _):
+	def parse(self, show, store):
 		self.show = show
 
 		try:
@@ -182,10 +81,14 @@ class EpguidesParser(object):
 		self.parseFile(webdata, store)
 		os.unlink(webdata)
 
+	def login(self, args):
+
+		pass
+
 	def parseFile(self, file, store):
 		self.store = store
 		yamlfile = self._runAwk(file)
-		data = self._readYaml(yamlfile)
+		self._readYaml(yamlfile)
 		self.store.commit()
 		os.unlink(yamlfile)
 
@@ -286,7 +189,7 @@ class TVComDummyParser(object):
 		exp = 'http://(www.)?tv.com/.*'
 		return re.match(exp, url)
 
-	def parse(self, source, _, __):
+	def parse(self, source, _):
 		logging.error("The url %s is no longer supported" % source.url)
 
 
