@@ -1,4 +1,5 @@
 == v0.8.0 (UNRELEASED) ==
+ * Episoder should now work with Python 3
  * Switched from distutils to setuptools
  * We now use the new TVDB JSON API
  * Rewrote the epguides.com parser in pure Python

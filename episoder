@@ -2,7 +2,7 @@
 
 # episoder, https://github.com/cockroach/episoder
 #
-# Copyright (C) 2004-2015 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ def update(args):
 		show = store.getShowById(args.show)
 
 		if not show:
-			logging.error('Show #%d not found' % args.show)
+			logging.error("Show #%d not found" % args.show)
 			return
 
 		shows = [show]
@@ -57,7 +57,7 @@ def update(args):
 			parser.login(args)
 			show.update(store, args, parser)
 		except:
-			logging.error('Error parsing %s' % show)
+			logging.error("Error parsing %s" % show)
 			print_exc()
 			store.rollback()
 
@@ -66,8 +66,7 @@ def update(args):
 			show.removeEpisodesBefore(store, basedate)
 
 	if not shows:
-		logging.info('None of your shows need to be updated')
-
+		logging.info("None of your shows need to be updated")
 
 def add(args):
 
@@ -79,18 +78,17 @@ def add(args):
 	show = store.getShowByUrl(url)
 
 	if show:
-		stderr.write('A show with that url/id already exists\n')
+		stderr.write("A show with url %s already exists\n" % url)
 		return
 
 	if not parser_for(url):
-		stderr.write('Invalid show url/id: %s\n' % url)
+		stderr.write("Invalid show url/id: %s\n" % url)
 		return
 
-	show = Show(u'Unknown Show', url=url.decode('utf8'))
+	show = Show(u"Unknown Show", url=url)
 
 	store.addShow(show)
 	store.commit()
-
 
 def remove(args):
 
@@ -102,18 +100,16 @@ def remove(args):
 	store.removeShow(id)
 	store.commit()
 
-
 def set_show_enabled(store, id, enabled):
 
 	show = store.getShowById(id)
 
 	if not show:
-		stderr.write('There is no show with that ID\n')
+		stderr.write("There is no show with id=%s\n" % id)
 		return
 
 	show.enabled = enabled
 	store.commit()
-
 
 def enable(args):
 
@@ -121,13 +117,11 @@ def enable(args):
 	store.update()
 	set_show_enabled(store, args.show, True)
 
-
 def disable(args):
 
 	store = DataStore(args.datafile)
 	store.update()
 	set_show_enabled(store, args.show, False)
-
 
 def shows(args):
 
@@ -136,16 +130,16 @@ def shows(args):
 
 	shows = store.getShows()
 
-	statusStrings = ['?Invalid', 'Running', 'Suspended', 'Ended' ]
-	enabledStrings = ['Disabled', 'Enabled']
+	statusStrings = ["?Invalid", "Running", "Suspended", "Ended" ]
+	enabledStrings = ["Disabled", "Enabled"]
 
 	for show in shows:
 		status = show.status
 
-		print('[%4d] %s' % (show.show_id, show.url))
-		print('       %s, %s, %s' % (show.show_name,
+		print("[%4d] %s" % (show.show_id, show.url))
+		print("       %s, %s, %s" % (show.show_name,
 			statusStrings[status], enabledStrings[show.enabled]))
-		print('       Last update: %s' % (show.updated))
+		print("       Last update: %s" % (show.updated))
 
 
 def episodes(args):
@@ -167,7 +161,6 @@ def episodes(args):
 
 	renderer.render(episodes, not args.nocolor)
 
-
 def search(args):
 
 	term = args.keyword
@@ -183,8 +176,7 @@ def search(args):
 	except TVDBShowNotFoundError:
 		print("Nothing found")
 
-
-def parseArgs():
+def parse_args():
 
 	yesterday = date.today() - timedelta(1)
 
@@ -314,66 +306,51 @@ def parseArgs():
 
 	return args
 
+def load_config(args):
 
-def loadConfig(args):
+	def mkconfig(line):
 
-	rcfile = args.c
-	config = {}
+		line = line.strip().decode("ascii")
+		(key, value) = line.split("=")
+		logging.debug('%s=%s' % (key, value))
+		return (key, value)
 
-	try:
-		rc = open(rcfile)
-	except IOError as e:
-		stderr.write('%s: %s\n' % (rcfile, e.strerror))
-		exit(2)
-	except Exception as e:
-		stderr.write('%s\n' % e)
-		exit(2)
+	if path.exists(args.c):
+		with open(args.c, "rb") as rc:
+			cfg = dict(map(mkconfig, rc.readlines()))
+	else:
+		stderr.write("No config file found, using default settings\n")
 
-	for line in rc:
-		line = line.strip()
-		if line.startswith('data='):
-			(_, config['datafile']) = line.split('=')
-		elif line.startswith('format='):
-			(_, config['format']) = line.split('=')
-		elif line.startswith('dateformat='):
-			(_, config['dateformat']) = line.split('=')
-		elif line.startswith('agent='):
-			(_, config['agent']) = line.split('=')
-		elif line.startswith('src='):
-			logging.warn('Specifying shows in the configuration '
-				'file is no longer supported.')
+	if "src" in cfg:
+		logging.error("Specifying shows in the configuration file is "
+							"no longer supported.")
 
-	rc.close()
+	args.agent = cfg.get("agent", "episoder/" + version)
+	args.datafile = cfg.get("data", path.join(environ["HOME"], ".episodes"))
+	args.dateformat = cfg.get("dateformat", "%a, %b %d, %Y")
+	args.format = cfg.get("format", "%airdate %show %seasonx%epnum")
+	args.tvdb_key = cfg.get("tvdb_key", "8F15287C4B23B36E")
 
-	for key in config:
-		logging.debug('%s=%s' % (key, config.get(key)))
+	logging.info("Loaded rcfile")
 
-	args.agent = config.get('agent', 'episoder/' + version)
-	args.datafile = config.get('datafile',
-				path.join(environ['HOME'], '.episodes'))
-	args.dateformat = config.get('dateformat', '%a, %b %d, %Y')
-	args.format = config.get('format', '%airdate %show %seasonx%epnum')
-	args.tvdb_key = config.get('tvdb_key', '8F15287C4B23B36E')
+def check_data_file(path):
 
-	logging.info('Loaded rcfile')
+	with open(path, "rb") as file:
 
+		if file.read(6) != b"SQLite":
+			stderr.write("%s: Please remove old data file\n" % path)
+			exit(4)
 
 def main():
 
-	args = parseArgs()
-	loadConfig(args)
+	args = parse_args()
+	load_config(args)
 
 	if path.exists(args.datafile):
-		file = open(args.datafile)
-		if file.read(6) != 'SQLite':
-			stderr.write('episoder found an old data file at ' +
-				'%s. You have to delete ' % args.datafile +
-				'that file before episoder can proceed.\n')
-			exit(4)
-		file.close()
+		check_data_file(args.datafile)
 
 	args.func(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 	main()
