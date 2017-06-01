@@ -1,56 +1,57 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-import os
-import tempfile
-import datetime
 
+from datetime import date, timedelta
+from tempfile import mktemp
 from unittest import TestCase, TestSuite, TestLoader
+from os import unlink
 
-import pyepisoder.episoder as episoder
+from pyepisoder.episoder import DataStore, Show
+from pyepisoder.episode  import Episode
 
 class ShowTest(TestCase):
 
 	def setUp(self):
 
-		self.path = tempfile.mktemp()
-		self.store = episoder.DataStore(self.path)
-		self.show = episoder.Show('A', url='a')
-		self.show = self.store.addShow(self.show)
+		self.path = mktemp()
+		self.db = DataStore(self.path)
+		self.show = Show(u"A", url=u"a")
+		self.show = self.db.addShow(self.show)
 
 	def tearDown(self):
 
-		os.unlink(self.path)
+		unlink(self.path)
 
-	def testRemoveEpisodesBefore(self):
+	def test_remove_episodes_before(self):
 
-		now = datetime.date.today()
-		then = now - datetime.timedelta(3)
+		now = date.today()
+		then = now - timedelta(3)
 
-		show2 = episoder.Show('B', url='b')
-		show2 = self.store.addShow(show2)
+		show2 = Show(u"B", url=u"b")
+		show2 = self.db.addShow(show2)
 
-		episode1 = episoder.Episode(self.show, 'e', 1, 1, now, 'x', 1)
-		episode2 = episoder.Episode(self.show, 'e', 1, 2, then, 'x', 1)
-		episode3 = episoder.Episode(show2, 'e', 1, 3, now, 'x', 1)
-		episode4 = episoder.Episode(show2, 'e', 1, 4, then, 'x', 1)
+		episode1 = Episode(self.show, u"e", 1, 1, now, u"x", 1)
+		episode2 = Episode(self.show, u"e", 1, 2, then, u"x", 1)
+		episode3 = Episode(show2, u"e", 1, 3, now, u"x", 1)
+		episode4 = Episode(show2, u"e", 1, 4, then, u"x", 1)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
-		self.store.addEpisode(episode4)
-		self.store.commit()
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.addEpisode(episode3)
+		self.db.addEpisode(episode4)
+		self.db.commit()
 
-		episodes = self.store.getEpisodes(basedate = then, n_days=10)
+		episodes = self.db.getEpisodes(basedate = then, n_days=10)
 		self.assertEqual(4, len(episodes))
 
-		show2.removeEpisodesBefore(self.store, now)
+		show2.removeEpisodesBefore(self.db, now)
 
-		episodes = self.store.getEpisodes(basedate = then, n_days=10)
+		episodes = self.db.getEpisodes(basedate = then, n_days=10)
 		self.assertEqual(3, len(episodes))
 
-		self.show.removeEpisodesBefore(self.store, now)
+		self.show.removeEpisodesBefore(self.db, now)
 
-		episodes = self.store.getEpisodes(basedate = then, n_days=10)
+		episodes = self.db.getEpisodes(basedate = then, n_days=10)
 		self.assertEqual(2, len(episodes))
 
 
