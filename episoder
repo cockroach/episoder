@@ -29,8 +29,8 @@ from sys import exit, stderr
 from traceback import print_exc
 
 from pyepisoder.episoder import DataStore, Show, version
-from pyepisoder.plugins import ConsoleRenderer, TVDB, parser_for
-from pyepisoder.sources import TVDBShowNotFoundError
+from pyepisoder.plugins import ConsoleRenderer
+from pyepisoder.sources import TVDB, TVDBShowNotFoundError, parser_for
 
 
 def update(args):

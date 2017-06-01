@@ -7,7 +7,7 @@ from unittest import TestCase, TestSuite, TestLoader
 import requests
 
 from pyepisoder.episoder import Show
-from pyepisoder.plugins import EpguidesParser
+from pyepisoder.sources import EpguidesParser
 
 from .util import MockResponse, MockArgs
 
