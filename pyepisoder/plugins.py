@@ -17,19 +17,14 @@
 
 from __future__ import absolute_import
 
-import re
-import os
-import yaml
-import pyepisoder
 import logging
 
-try:
-	import urllib.request as urllib2
-except:
-	import urllib2
-import tempfile
-
 from datetime import date, datetime, timedelta
+from os import fdopen
+from re import search, match
+from tempfile import mkstemp
+
+import requests
 
 from .episode import Episode
 from .sources import TVDB
@@ -49,134 +44,92 @@ def parser_for(url):
 class EpguidesParser(object):
 
 	def __init__(self):
-		self.logger = logging.getLogger('EpguidesParser')
 
-		dirname = os.path.dirname(pyepisoder.__file__)
-		prefix = os.path.join(dirname, '..')
-
-		self.awkfile = os.path.join(prefix, 'extras',
-				'episoder_helper_epguides.awk')
-		self.awk = '/usr/bin/awk'
-		self.user_agent = None
-		self.url = ''
+		self.logger = logging.getLogger("EpguidesParser")
+		self.user_agent = None # TODO
 
 	def __str__(self):
-		return 'epguides.com parser'
+
+		return "epguides.com parser"
 
 	@staticmethod
 	def accept(url):
-		exp = 'http://(www.)?epguides.com/.*'
-		return re.match(exp, url)
 
-	def parse(self, show, store):
-		self.show = show
-
-		try:
-			webdata = self._fetchPage(self.show.url)
-		except Exception as e:
-			self.logger.error("Error fetching %s: %s" %
-					(self.show.url, e))
-			return
-
-		self.parseFile(webdata, store)
-		os.unlink(webdata)
+		return "epguides.com/" in url
 
 	def login(self, args):
 
 		pass
 
-	def parseFile(self, file, store):
-		self.store = store
-		yamlfile = self._runAwk(file)
-		self._readYaml(yamlfile)
-		self.store.commit()
-		os.unlink(yamlfile)
+	def guess_encoding(self, response):
 
-	def _fetchPage(self, url):
-		self.logger.info('Fetching ' + url)
-		headers = {}
+		raw = response.raw.read()
+		text = raw.decode("iso-8859-1")
 
-		if (self.user_agent):
-			headers['User-Agent'] = self.user_agent
+		if "charset=iso-8859-1" in text:
+			return "iso-8859-1"
 
-		request = urllib2.Request(url, None, headers)
-		result = urllib2.urlopen(request)
-		(fd, name) = tempfile.mkstemp()
-		file = os.fdopen(fd, 'w')
-		file.write(result.read())
-		file.close()
+		return "utf8"
+
+	def parse(self, show, db):
+
+		response = requests.get(show.url)
+		response.encoding = self.guess_encoding(response)
+
+		(fd, name) = mkstemp()
+		with fdopen(fd, "wb") as file:
+			file.write(response.text.encode("utf8"))
+
 		self.logger.debug("Stored in %s" % name)
-		return name
 
-	def _runAwk(self, webdata):
-		yamlfile = tempfile.mktemp()
-		logfile = tempfile.mktemp()
-		cleanwebdata = tempfile.mktemp()
-		self.logger.info('Parsing data')
+		with open(name, "rb") as file:
+			for line in file:
+				self._parse_line(line.decode("utf8"), show, db)
 
-		self.logger.debug('Calling iconv')
-		cmd = 'iconv -c -f utf8 -t iso-8859-1 %s >%s' % (webdata,
-				cleanwebdata)
-		if os.system(cmd) != 0:
-			self.logger.debug('iconv failed, ignoring')
+		db.commit()
 
-		self.logger.debug('Calling AWK')
-		cmd = 'LC_CTYPE=UTF-8 %s -f %s output=%s %s >%s 2>&1' % (
-				self.awk, self.awkfile, yamlfile,
-				cleanwebdata, logfile)
-		if os.system(cmd) != 0:
-			raise Exception("Error running %s" % cmd)
+	def _parse_line(self, line, show, db):
 
-		file = open(logfile)
-		self.logger.debug(file.read().strip())
-		file.close()
+		# Name of the show
+		match = search("<title>(.*)</title>", line)
+		if match:
+			title = match.groups()[0]
+			show.name = title.split(" (a ")[0]
 
-		os.unlink(cleanwebdata)
-		os.unlink(logfile)
-		return yamlfile
-
-	def _readYaml(self, yamlfile):
-		self.logger.debug('Reading YAML')
-		file = open(yamlfile)
-		data = yaml.load(file.read().decode('iso8859-1'))
-		file.close()
-
-		show_data = data[0]
-
-		if not 'title' in show_data or not show_data['title']:
-			self.logger.warning('Show has no title, aborting')
-			self.store.rollback()
-			return
-
-		title = show_data['title']
-		self.show.name = title
-
-		if show_data['running']:
-			self.show.setRunning()
+		# Current status (running / ended)
+		match = search('<span class="status">(.*)</span>', line)
+		if match:
+			text = match.groups()[0]
+			if "current" in text:
+				show.setRunning()
+			else:
+				show.setEnded()
 		else:
-			self.show.setEnded()
+			match = search("aired.*to.*[\d+]", line)
+			if match:
+				show.setEnded()
 
-		self.show.updated = datetime.now()
+		# Known formatting supported by this fine regex:
+		# 4.     1-4            19 Jun 02  <a [..]>title</a>
+		#   1.  19- 1   01-01    5 Jan 88  <a [..]>title</a>
+		# 23     3-05           27/Mar/98  <a [..]>title</a>
+		# 65.   17-10           23 Apr 05  <a [..]>title</a>
+		# 101.   5-15           09 May 09  <a [..]>title</a>
+		# 254.    - 5  05-254   15 Jan 92  <a [..]>title</a>
 
-		self.logger.debug('Got show "%s"', title)
+		match = search("^ *(\d+)\.? +(\d*)- ?(\d+) +([a-zA-Z0-9-]*)"\
+		" +(\d{1,2}[ /][A-Z][a-z]{2}[ /]\d{2}) *<a.*>(.*)</a>", line)
 
-		if not 'episodes' in show_data or not show_data['episodes']:
-			self.logger.warning('Show has no episodes, aborting')
-			self.store.rollback()
-			return
+		if match:
 
-		episodes = show_data['episodes']
+			fields = match.groups()
+			(total, season, epnum, prodnum, day, title) = fields
 
-		for episode in episodes:
-			self.logger.debug('Found episode %s' % episode['title'])
-			self.store.addEpisode(Episode(self.show,
-					episode['title'],
-					episode['season'],
-					episode['episode'],
-					episode['airdate'],
-					episode['prodnum'],
-					episode['totalepnum']
-				))
+			day = day.replace("/", " ")
+			airtime = datetime.strptime(day, "%d %b %y")
+
+			db.addEpisode(Episode(show, title, season or 0, epnum,
+						airtime.date(), prodnum, total))
 
 
 class TVComDummyParser(object):
@@ -186,11 +139,17 @@ class TVComDummyParser(object):
 
 	@staticmethod
 	def accept(url):
+
 		exp = 'http://(www.)?tv.com/.*'
-		return re.match(exp, url)
+		return match(exp, url)
 
 	def parse(self, source, _):
+
 		logging.error("The url %s is no longer supported" % source.url)
+
+	def login(self):
+
+		pass
 
 
 class ConsoleRenderer(object):
