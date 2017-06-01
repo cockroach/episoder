@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-from datetime import date
+from datetime import date, datetime
 from unittest import TestCase, TestSuite, TestLoader
 
 import requests
@@ -92,6 +92,9 @@ class EpguidesParserTest(TestCase):
 		show = Show(u"none", url=u"http://epguides.com/lost")
 		show.show_id = 93
 		self.parser.parse(show, db)
+
+		timediff = datetime.now() - show.updated
+		self.assertTrue(timediff.total_seconds() < 1)
 
 		self.assertEqual("Lost", show.name)
 		self.assertEqual(Show.ENDED, show.status)

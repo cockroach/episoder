@@ -86,6 +86,7 @@ class EpguidesParser(object):
 			for line in file:
 				self._parse_line(line.decode("utf8"), show, db)
 
+		show.updated = datetime.now()
 		db.commit()
 
 	def _parse_line(self, line, show, db):
