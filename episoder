@@ -86,7 +86,7 @@ def add(args):
 		stderr.write('Invalid show url/id: %s\n' % url)
 		return
 
-	show = Show('Unknown Show', url=url)
+	show = Show(u'Unknown Show', url=url.decode('utf8'))
 
 	store.addShow(show)
 	store.commit()

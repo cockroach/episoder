@@ -1,6 +1,6 @@
 # episoder, https://github.com/cockroach/episoder
 #
-# Copyright (C) 2004-2015 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,11 +48,9 @@ class DataStore(object):
 		self.session.begin()
 		self._initdb()
 
-
 	def __str__(self):
 
 		return 'DataStore(%s)' % self.conn
-
 
 	def clear(self):
 
@@ -62,7 +60,6 @@ class DataStore(object):
 			self.session.delete(episode)
 
 		self.session.flush()
-
 
 	def update(self):
 
@@ -92,7 +89,6 @@ class DataStore(object):
 			insert = self.meta.insert().values(key='schema',
 					value=3)
 			self.conn.execute(insert)
-
 
 	def _initdb(self):
 
@@ -142,7 +138,6 @@ class DataStore(object):
 
 		self.metadata.create_all()
 
-
 	def getExpiredShows(self):
 
 		today = date.today()
@@ -170,12 +165,10 @@ class DataStore(object):
 
 		return shows.all()
 
-
 	def getEnabledShows(self):
 
 		shows = self.session.query(Show).filter(Show.enabled == True)
 		return shows.all()
-
 
 	def getShowByUrl(self, url):
 
@@ -186,7 +179,6 @@ class DataStore(object):
 
 		return shows.first()
 
-
 	def getShowById(self, id):
 
 		shows = self.session.query(Show).filter(Show.show_id == id)
@@ -196,13 +188,11 @@ class DataStore(object):
 
 		return shows.first()
 
-
 	def addShow(self, show):
 
 		show = self.session.merge(show)
 		self.session.flush()
 		return show
-
 
 	def removeShow(self, id):
 
@@ -214,7 +204,6 @@ class DataStore(object):
 
 		self.session.delete(shows.first())
 		self.session.flush()
-
 
 	def getShows(self):
 
@@ -228,12 +217,10 @@ class DataStore(object):
 
 		return shows
 
-
 	def addEpisode(self, episode):
 
 		self.session.merge(episode)
 		self.session.flush()
-
 
 	def getEpisodes(self, basedate=date.today(), n_days=0):
 
@@ -261,7 +248,6 @@ class DataStore(object):
 
 		return episodes
 
-
 	def search(self, search):
 
 		shows = []
@@ -287,18 +273,15 @@ class DataStore(object):
 
 		return episodes
 
-
 	def commit(self):
 
 		self.session.commit()
 		self.session.begin()
 
-
 	def rollback(self):
 
 		self.session.rollback()
 		self.session.begin()
-
 
 	def removeBefore(self, date, show=None):
 
@@ -331,26 +314,21 @@ class Show(object):
 		self.episodes = []
 		self.enabled = True
 
-
 	def addEpisode(self, episode):
 
 		self.episodes.append(episode)
-
 
 	def setRunning(self):
 
 		self.status = Show.RUNNING
 
-
 	def setSuspended(self):
 
 		self.status = Show.SUSPENDED
 
-
 	def setEnded(self):
 
 		self.status = Show.ENDED
-
 
 	def update(self, store, args, parser):
 
@@ -362,17 +340,14 @@ class Show(object):
 
 		parser.parse(self, store)
 
-
 	def removeEpisodesBefore(self, store, date):
 
 		logging.debug('Removing episodes from before %s' % date)
 		store.removeBefore(date, show=self)
 
-
 	def __str__(self):
 
 		return 'Show("%s")' % self.name
-
 
 	def __eq__(self, other):
 
