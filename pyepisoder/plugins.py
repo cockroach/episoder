@@ -46,7 +46,6 @@ class EpguidesParser(object):
 	def __init__(self):
 
 		self.logger = logging.getLogger("EpguidesParser")
-		self.user_agent = None # TODO
 
 	def __str__(self):
 
@@ -71,9 +70,10 @@ class EpguidesParser(object):
 
 		return "utf8"
 
-	def parse(self, show, db):
+	def parse(self, show, db, args):
 
-		response = requests.get(show.url)
+		headers = {"User-Agent": args.agent}
+		response = requests.get(show.url, headers=headers)
 		response.encoding = self.guess_encoding(response)
 
 		(fd, name) = mkstemp()
@@ -129,6 +129,7 @@ class EpguidesParser(object):
 			day = day.replace("/", " ")
 			airtime = datetime.strptime(day, "%d %b %y")
 
+			self.logger.debug("Found episode %s" % title)
 			db.addEpisode(Episode(show, title, season or 0, epnum,
 						airtime.date(), prodnum, total))
 
@@ -144,7 +145,7 @@ class TVComDummyParser(object):
 		exp = 'http://(www.)?tv.com/.*'
 		return match(exp, url)
 
-	def parse(self, source, _):
+	def parse(self, source, db, args):
 
 		logging.error("The url %s is no longer supported" % source.url)
 
@@ -169,10 +170,10 @@ class ConsoleRenderer(object):
 		string = string.replace('%show', episode.show.name)
 		string = string.replace('%season', str(episode.season))
 		string = string.replace('%epnum', "%02d" % episode.episode)
-		string = string.replace('%eptitle', unicode(episode.title))
+		string = string.replace('%eptitle', episode.title)
 		string = string.replace('%totalep', str(episode.total))
-		string = string.replace('%prodnum', unicode(episode.prodnum))
-		print ("%s%s%s" % (color, string.encode('utf8'), endColor))
+		string = string.replace('%prodnum', episode.prodnum)
+		print ("%s%s%s" % (color, string, endColor))
 
 
 	def render(self, episodes, color=True):

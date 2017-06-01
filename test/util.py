@@ -33,3 +33,9 @@ class MockResponse(object):
 	text = property(_get_text)
 
 
+class MockArgs(dict):
+
+	def __init__(self, tvdb_key, agent=None):
+
+		self.tvdb_key = tvdb_key
+		self.agent = agent

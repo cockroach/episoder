@@ -335,10 +335,7 @@ class Show(object):
 		if not parser:
 			raise RuntimeError('No parser found for %s' % self.url)
 
-		if 'agent' in args:
-			parser.user_agent = args.agent
-
-		parser.parse(self, store)
+		parser.parse(self, store, args)
 
 	def removeEpisodesBefore(self, store, date):
 

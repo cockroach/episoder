@@ -191,7 +191,7 @@ class TVDB(object):
 
 		return self._state.lookup(text)
 
-	def parse(self, show, db):
+	def parse(self, show, db, args):
 
 		return self._state.parse(show, db)
 

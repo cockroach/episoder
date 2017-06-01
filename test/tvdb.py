@@ -26,13 +26,7 @@ from pyepisoder.episoder import Show
 from pyepisoder.sources import TVDB, TVDBNotLoggedInError, InvalidLoginError
 from pyepisoder.sources import TVDBShowNotFoundError
 
-from .util import MockResponse
-
-class MockArgs(object):
-
-	def __init__(self, key):
-
-		self.tvdb_key = key
+from .util import MockResponse, MockArgs
 
 
 class FakeRequest(object):
@@ -158,6 +152,8 @@ class TVDBTest(TestCase):
 	def setUp(self):
 
 		self.req = MockRequests()
+		self.args = MockArgs("fake-api-key")
+
 		self.__get_orig = requests.get
 		self.__post_orig = requests.post
 		requests.get = self.req.get
@@ -272,14 +268,14 @@ class TVDBTest(TestCase):
 	def test_encoding_utf8(self):
 
 		tvdb = TVDB()
-		tvdb.login(MockArgs("fake-api-key"))
+		tvdb.login(self.args)
 
 		show = Show(u"unnamed show", url=u"73739")
 		show.show_id = 73739 # TODO: wtf?
 		self.assertTrue(TVDB.accept(show.url))
 		store = MockStore()
 
-		tvdb.parse(show, store)
+		tvdb.parse(show, store, self.args)
 
 		self.assertEqual("Lost", show.name)
 		self.assertEqual(Show.ENDED, show.status)
@@ -299,10 +295,10 @@ class TVDBTest(TestCase):
 		store = MockStore()
 
 		with self.assertRaises(TVDBNotLoggedInError):
-			tvdb.parse(show, None)
+			tvdb.parse(show, None, self.args)
 
-		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.parse(show, store)
+		tvdb.login(self.args)
+		tvdb.parse(show, store, self.args)
 
 		req = self.req.requests[-2]
 		self.assertEqual(req.url, "https://api.thetvdb.com/series/260")
@@ -359,8 +355,8 @@ class TVDBTest(TestCase):
 		show = Show(u"unnamed show", url=u"261")
 		show.show_id = 261
 
-		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.parse(show, store)
+		tvdb.login(self.args)
+		tvdb.parse(show, store, self.args)
 
 		self.assertEqual(show.status, Show.ENDED)
 		self.assertEqual(len(store.episodes), 8)
@@ -392,22 +388,22 @@ class TVDBTest(TestCase):
 	def testParseInvalidShow(self):
 
 		tvdb = TVDB()
-		tvdb.login(MockArgs("fake-api-key"))
+		tvdb.login(self.args)
 
 		show = Show(u"test show", url=u"293")
 
 		with self.assertRaises(TVDBShowNotFoundError):
-			tvdb.parse(show, None)
+			tvdb.parse(show, None, self.args)
 
 	def testParseShowWithInvalidData(self):
 
 		tvdb = TVDB()
 		store = MockStore()
-		tvdb.login(MockArgs("fake-api-key"))
+		tvdb.login(self.args)
 		show = Show(u"unnamed show", url=u"262")
 		show.show_id = 262
 
-		tvdb.parse(show, store)
+		tvdb.parse(show, store, self.args)
 		self.assertEqual(len(store.episodes), 2)
 
 
