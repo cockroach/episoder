@@ -304,7 +304,7 @@ class Show(object):
 	SUSPENDED = 2
 	ENDED = 3
 
-	def __init__(self, name, id=-1, url='',
+	def __init__(self, name, id=-1, url=u'',
 					updated=datetime.utcfromtimestamp(0)):
 
 		self.name = name

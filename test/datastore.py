@@ -1,59 +1,59 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-import os
-import tempfile
-import datetime
 
+from datetime import date, timedelta
+from os import unlink
+from tempfile import mktemp
 from unittest import TestCase, TestLoader, TestSuite
 
-import pyepisoder.episoder as episoder
+from pyepisoder.episoder import DataStore, Show
+from pyepisoder.episode import Episode
 
 
 class DataStoreTest(TestCase):
 
 	def setUp(self):
 
-		self.path = tempfile.mktemp()
-		self.store = episoder.DataStore(self.path)
+		self.path = mktemp()
+		self.db = DataStore(self.path)
 
 	def tearDown(self):
 
-		os.unlink(self.path)
+		unlink(self.path)
 
-	def testGetShowByUrl(self):
+	def test_get_show_by_url(self):
 
-		show1 = episoder.Show('test show', url='a')
-		show2 = episoder.Show('test show 2', url='b')
+		show1 = Show(u"test show", url=u"a")
+		show2 = Show(u"test show 2", url=u"b")
 
-		self.store.addShow(show1)
-		self.store.addShow(show2)
+		self.db.addShow(show1)
+		self.db.addShow(show2)
 
-		self.assertEqual(show1, self.store.getShowByUrl('a'))
-		self.assertEqual(show2, self.store.getShowByUrl('b'))
+		self.assertEqual(show1, self.db.getShowByUrl(u"a"))
+		self.assertEqual(show2, self.db.getShowByUrl(u"b"))
+		self.assertEqual(None, self.db.getShowByUrl(u"c"))
 
-		self.assertEqual(None, self.store.getShowByUrl('c'))
+	def test_add_show(self):
 
-	def testAddShow(self):
-
-		show = episoder.Show('test show', url='http://test.show')
-		show = self.store.addShow(show)
-		self.store.commit()
+		show = Show(u"test show", url=u"http://test.show")
+		show = self.db.addShow(show)
+		self.db.commit()
 
 		id = show.show_id
 
 		self.assertTrue(id > 0, "id is %d, must be > 0" % id)
-		shows = self.store.getShows()
+		shows = self.db.getShows()
 
 		self.assertEqual(1, len(shows))
 		self.assertEqual(id, shows[0].show_id)
-		self.assertEqual('test show', shows[0].show_name)
+		self.assertEqual(u"test show", shows[0].show_name)
 
-		show2 = episoder.Show('moo show', url='http://test.show.2')
-		show2 = self.store.addShow(show2)
+		show2 = Show(u"moo show", url=u"http://test.show.2")
+		show2 = self.db.addShow(show2)
 		id2 = show2.show_id
-		self.store.commit()
+		self.db.commit()
 
-		shows = self.store.getShows()
+		shows = self.db.getShows()
 
 		self.assertNotEqual(id, id2)
 
@@ -65,284 +65,273 @@ class DataStoreTest(TestCase):
 
 		self.assertTrue(id2 in ids)
 
-		showA = episoder.Show('showA', url='urlA')
-		showB = episoder.Show('showA', url='urlB')
-		showC = episoder.Show('showB', url='urlB')
+		showA = Show(u"showA", url=u"urlA")
+		showB = Show(u"showA", url=u"urlB")
+		showC = Show(u"showB", url=u"urlB")
 
-		self.store.addShow(showA)
-		self.store.commit()
-		self.assertEqual(3, len(self.store.getShows()))
+		self.db.addShow(showA)
+		self.db.commit()
+		self.assertEqual(3, len(self.db.getShows()))
 
-		self.store.addShow(showB)
-		self.store.commit()
-		self.assertEqual(4, len(self.store.getShows()))
+		self.db.addShow(showB)
+		self.db.commit()
+		self.assertEqual(4, len(self.db.getShows()))
 
 		try:
-			self.store.addShow(showC)
-			self.store.commit()
+			self.db.addShow(showC)
+			self.db.commit()
 			self.assertTrue(False)
 		except Exception:
 			pass
 
-	def testAddEpisode(self):
+	def test_add_episode(self):
 
-		show = episoder.Show('some show', url='foo')
-		show = self.store.addShow(show)
-		self.store.commit()
+		show = Show(u"some show", url=u"foo")
+		show = self.db.addShow(show)
+		self.db.commit()
 
-		episode1 = episoder.Episode(show, 'Some episode', 3,
-				10, datetime.date.today(), 'FOO', 30)
-		episode2 = episoder.Episode(show, 'No episode', 3,
-				12, datetime.date.today(), 'FOO', 32)
+		episode1 = Episode(show, u"Some episode", 3, 10, date.today(),
+								u"FOO", 30)
+		episode2 = Episode(show, u"No episode", 3, 12, date.today(),
+								u"FOO", 32)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.commit()
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.commit()
 
-		episodes = self.store.getEpisodes()
+		episodes = self.db.getEpisodes()
 
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-	def testSearch(self):
+	def test_search(self):
 
-		show = episoder.Show('some show')
-		show = self.store.addShow(show)
-		episode1 = episoder.Episode(show, 'first episode', 3,
-				10, datetime.date.today(), 'FOO', 30)
-		episode2 = episoder.Episode(show, 'Second episode', 3,
-				12, datetime.date.today(), 'FOO', 32)
+		show = Show(u"some show")
+		show = self.db.addShow(show)
+		episode1 = Episode(show, u"first episode", 3, 10, date.today(),
+								u"FOO", 30)
+		episode2 = Episode(show, u"Second episode", 3, 12, date.today(),
+								u"FOO", 32)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.commit()
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.commit()
 
-		episodes = self.store.search('first')
+		episodes = self.db.search(u"first")
 		self.assertTrue(episode1 in episodes)
 		self.assertFalse(episode2 in episodes)
 
-		episodes = self.store.search('second')
+		episodes = self.db.search(u"second")
 		self.assertFalse(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-		episodes = self.store.search('episode')
+		episodes = self.db.search(u"episode")
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-		episodes = self.store.search('some show')
+		episodes = self.db.search(u"some show")
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-	def testRemoveShow(self):
+	def test_remove_show(self):
 
-		show1 = episoder.Show('random show', url='z')
-		show2 = episoder.Show('other show', url='x')
+		show1 = Show(u"random show", url=u"z")
+		show2 = Show(u"other show", url=u"x")
 
-		show1 = self.store.addShow(show1)
-		show2 = self.store.addShow(show2)
-		self.store.commit()
+		show1 = self.db.addShow(show1)
+		show2 = self.db.addShow(show2)
+		self.db.commit()
 
-		now = datetime.date.today()
-		episode1 = episoder.Episode(show1, 'first', 1, 1, now, 'x', 1)
-		episode2 = episoder.Episode(show1, 'second', 1, 2, now, 'x', 1)
-		episode3 = episoder.Episode(show2, 'first', 1, 1, now, 'x', 1)
+		now = date.today()
+		episode1 = Episode(show1, u"first", 1, 1, now, u"x", 1)
+		episode2 = Episode(show1, u"second",1, 2, now, u"x", 1)
+		episode3 = Episode(show2, u"first", 1, 1, now, u"x", 1)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
-		self.store.commit()
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.addEpisode(episode3)
+		self.db.commit()
 
-		episodes = self.store.getEpisodes()
+		episodes = self.db.getEpisodes()
 		self.assertEqual(3, len(episodes))
 
-		self.store.removeShow(show1.show_id)
-		self.store.commit()
+		self.db.removeShow(show1.show_id)
+		self.db.commit()
 
-		episodes = self.store.getEpisodes()
+		episodes = self.db.getEpisodes()
 		self.assertEqual(1, len(episodes))
 		self.assertEqual(episode3, episodes[0])
 
-	def testRollback(self):
+	def test_rollback(self):
 
-		show = episoder.Show('some show')
-		show = self.store.addShow(show)
-		self.store.commit()
+		show = Show(u"some show")
+		show = self.db.addShow(show)
+		self.db.commit()
 
-		episode1 = episoder.Episode(show, 'first episode', 3,
-				10, datetime.date.today(), 'FOO', 30)
-		episode2 = episoder.Episode(show, 'Second episode', 3,
-				12, datetime.date.today(), 'FOO', 32)
+		episode1 = Episode(show, u"first episode", 3, 10, date.today(),
+								u"FOO", 30)
+		episode2 = Episode(show, u"Second episode", 3, 12, date.today(),
+								u"FOO", 32)
 
-		self.store.addEpisode(episode1)
-		self.store.rollback()
-		self.store.addEpisode(episode2)
-		self.store.commit()
+		self.db.addEpisode(episode1)
+		self.db.rollback()
+		self.db.addEpisode(episode2)
+		self.db.commit()
 
-		episodes = self.store.getEpisodes()
+		episodes = self.db.getEpisodes()
 
 		self.assertFalse(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
-	def testGetEpisodes(self):
+	def test_get_episodes(self):
 
-		show = episoder.Show('some show')
-		show = self.store.addShow(show)
+		show = Show(u"some show")
+		show = self.db.addShow(show)
 
-		today = datetime.date.today()
-		yesterday = today - datetime.timedelta(1)
-		before = yesterday - datetime.timedelta(1)
-		tomorrow = today + datetime.timedelta(1)
+		today = date.today()
+		yesterday = today - timedelta(1)
+		before = yesterday - timedelta(1)
+		tomorrow = today + timedelta(1)
 
-		episode1 = episoder.Episode(show, 'episode1', 1, 1,
-				before, 'x', 1)
-		episode2 = episoder.Episode(show, 'episode2', 1, 2,
-				yesterday, 'x', 2)
-		episode3 = episoder.Episode(show, 'episode3', 1, 3,
-				today, 'x', 3)
-		episode4 = episoder.Episode(show, 'episode4', 1, 4,
-				tomorrow, 'x', 4)
+		episode1 = Episode(show, u"episode1", 1, 1, before, u"x", 1)
+		episode2 = Episode(show, u"episode2", 1, 2, yesterday, u"x", 2)
+		episode3 = Episode(show, u"episode3", 1, 3, today, u"x", 3)
+		episode4 = Episode(show, u"episode4", 1, 4, tomorrow, u"x", 4)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
-		self.store.addEpisode(episode4)
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.addEpisode(episode3)
+		self.db.addEpisode(episode4)
 
-		episodes = self.store.getEpisodes(basedate = before, n_days=1)
+		episodes = self.db.getEpisodes(basedate = before, n_days=1)
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 		self.assertFalse(episode3 in episodes)
 		self.assertFalse(episode4 in episodes)
 
-		episodes = self.store.getEpisodes(basedate = before, n_days=0)
+		episodes = self.db.getEpisodes(basedate = before, n_days=0)
 		self.assertTrue(episode1 in episodes)
 		self.assertFalse(episode2 in episodes)
 		self.assertFalse(episode3 in episodes)
 		self.assertFalse(episode4 in episodes)
 
-		episodes = self.store.getEpisodes(basedate = today, n_days=0)
+		episodes = self.db.getEpisodes(basedate = today, n_days=0)
 		self.assertFalse(episode1 in episodes)
 		self.assertFalse(episode2 in episodes)
 		self.assertTrue(episode3 in episodes)
 		self.assertFalse(episode4 in episodes)
 
-		episodes = self.store.getEpisodes(basedate = yesterday,n_days=2)
+		episodes = self.db.getEpisodes(basedate = yesterday,n_days=2)
 		self.assertFalse(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 		self.assertTrue(episode3 in episodes)
 		self.assertTrue(episode4 in episodes)
 
-	def testRemoveBefore(self):
+	def test_remove_before(self):
 
-		show = episoder.Show('some show')
-		show = self.store.addShow(show)
+		show = Show(u"some show")
+		show = self.db.addShow(show)
 
-		today = datetime.date.today()
-		yesterday = today - datetime.timedelta(1)
-		before = yesterday - datetime.timedelta(1)
-		tomorrow = today + datetime.timedelta(1)
+		today = date.today()
+		yesterday = today - timedelta(1)
+		before = yesterday - timedelta(1)
+		tomorrow = today + timedelta(1)
 
-		episode1 = episoder.Episode(show, 'episode1', 1, 1,
-				before, 'x', 1)
-		episode2 = episoder.Episode(show, 'episode2', 1, 2,
-				yesterday, 'x', 2)
-		episode3 = episoder.Episode(show, 'episode3', 1, 3,
-				today, 'x', 3)
-		episode4 = episoder.Episode(show, 'episode4', 1, 4,
-				tomorrow, 'x', 4)
+		episode1 = Episode(show, u"episode1", 1, 1, before, u"x", 1)
+		episode2 = Episode(show, u"episode2", 1, 2, yesterday, u"x", 2)
+		episode3 = Episode(show, u"episode3", 1, 3, today, u"x", 3)
+		episode4 = Episode(show, u"episode4", 1, 4, tomorrow, u"x", 4)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
-		self.store.addEpisode(episode4)
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.addEpisode(episode3)
+		self.db.addEpisode(episode4)
 
-		episodes = self.store.getEpisodes(basedate = before, n_days=10)
+		episodes = self.db.getEpisodes(basedate = before, n_days=10)
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 		self.assertTrue(episode3 in episodes)
 		self.assertTrue(episode4 in episodes)
 
-		self.store.removeBefore(today)
-		episodes = self.store.getEpisodes(basedate = before, n_days=10)
+		self.db.removeBefore(today)
+		episodes = self.db.getEpisodes(basedate = before, n_days=10)
 		self.assertFalse(episode1 in episodes)
 		self.assertFalse(episode2 in episodes)
 		self.assertTrue(episode3 in episodes)
 		self.assertTrue(episode4 in episodes)
 
-	def testRemoveBeforeWithShow(self):
+	def test_remove_before_with_show(self):
 
-		show1 = episoder.Show('some show', url='a')
-		show1 = self.store.addShow(show1)
+		show1 = Show(u"some show", url=u"a")
+		show1 = self.db.addShow(show1)
 
-		show2 = episoder.Show('some other show', url='b')
-		show2 = self.store.addShow(show2)
+		show2 = Show(u"some other show", url=u"b")
+		show2 = self.db.addShow(show2)
 
-		today = datetime.date.today()
-		yesterday = today - datetime.timedelta(1)
+		today = date.today()
+		yesterday = today - timedelta(1)
 
-		episode1 = episoder.Episode(show1, 'episode1', 1, 1,
-				yesterday, 'x', 1)
-		episode2 = episoder.Episode(show1, 'episode1', 1, 2,
-				yesterday, 'x', 1)
-		episode3 = episoder.Episode(show2, 'episode1', 1, 2,
-				yesterday, 'x', 1)
+		episode1 = Episode(show1, u"episode1", 1, 1, yesterday, u"x", 1)
+		episode2 = Episode(show1, u"episode1", 1, 2, yesterday, u"x", 1)
+		episode3 = Episode(show2, u"episode1", 1, 2, yesterday, u"x", 1)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.addEpisode(episode3)
 
-		self.store.removeBefore(today, show=show1)
-		episodes = self.store.getEpisodes(basedate = yesterday, n_days=10)
+		self.db.removeBefore(today, show=show1)
+		episodes = self.db.getEpisodes(basedate = yesterday, n_days=10)
 		self.assertEqual(1, len(episodes))
 
-	def testDuplicateEpisodes(self):
+	def test_duplicate_episodes(self):
 
-		today = datetime.date.today()
+		today = date.today()
 
-		show = episoder.Show('some show')
-		show = self.store.addShow(show)
-		self.assertEqual(0, len(self.store.getEpisodes()))
+		show = Show(u"some show")
+		show = self.db.addShow(show)
+		self.assertEqual(0, len(self.db.getEpisodes()))
 
-		episode1 = episoder.Episode(show, 'e', 1, 1, today, 'x', 1)
-		episode2 = episoder.Episode(show, 'f', 1, 1, today, 'x', 1)
+		episode1 = Episode(show, u"e", 1, 1, today, u"x", 1)
+		episode2 = Episode(show, u"f", 1, 1, today, u"x", 1)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode1)
-		episodes = self.store.getEpisodes()
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode1)
+		episodes = self.db.getEpisodes()
 		self.assertEqual(1, len(episodes))
-		self.assertEqual('e', episodes[0].title)
+		self.assertEqual(u"e", episodes[0].title)
 
-		self.store.addEpisode(episode2)
-		episodes = self.store.getEpisodes()
+		self.db.addEpisode(episode2)
+		episodes = self.db.getEpisodes()
 		self.assertEqual(1, len(episodes))
-		self.assertEqual('f', episodes[0].title)
+		self.assertEqual(u"f", episodes[0].title)
 
-	def testClear(self):
+	def test_clear(self):
 
-		today = datetime.date.today()
+		today = date.today()
 
-		show = episoder.Show('some show', url='urlX')
-		show = self.store.addShow(show)
-		self.assertEqual(0, len(self.store.getEpisodes()))
+		show = Show(u"some show", url=u"urlX")
+		show = self.db.addShow(show)
+		self.assertEqual(0, len(self.db.getEpisodes()))
 
-		episode1 = episoder.Episode(show, 'e', 1, 1, today, 'x', 1)
-		episode2 = episoder.Episode(show, 'e', 1, 2, today, 'x', 1)
-		episode3 = episoder.Episode(show, 'e', 1, 3, today, 'x', 1)
-		episode4 = episoder.Episode(show, 'e', 1, 3, today, 'x', 1)
-		episode5 = episoder.Episode(show, 'e', 1, 4, today, 'x', 1)
+		episode1 = Episode(show, u"e", 1, 1, today, u"x", 1)
+		episode2 = Episode(show, u"e", 1, 2, today, u"x", 1)
+		episode3 = Episode(show, u"e", 1, 3, today, u"x", 1)
+		episode4 = Episode(show, u"e", 1, 3, today, u"x", 1)
+		episode5 = Episode(show, u"e", 1, 4, today, u"x", 1)
 
-		self.store.addEpisode(episode1)
-		self.store.addEpisode(episode2)
-		self.store.addEpisode(episode3)
-		self.store.commit()
+		self.db.addEpisode(episode1)
+		self.db.addEpisode(episode2)
+		self.db.addEpisode(episode3)
+		self.db.commit()
 
-		self.assertEqual(3, len(self.store.getEpisodes()))
+		self.assertEqual(3, len(self.db.getEpisodes()))
 
-		self.store.clear()
-		self.assertEqual(0, len(self.store.getEpisodes()))
+		self.db.clear()
+		self.assertEqual(0, len(self.db.getEpisodes()))
 
-		self.store.addEpisode(episode4)
-		self.store.addEpisode(episode5)
-		self.assertEqual(2, len(self.store.getEpisodes()))
+		self.db.addEpisode(episode4)
+		self.db.addEpisode(episode5)
+		self.assertEqual(2, len(self.db.getEpisodes()))
 
 
 def test_suite():
