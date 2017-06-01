@@ -20,9 +20,7 @@ from __future__ import absolute_import
 import logging
 
 from datetime import date, datetime, timedelta
-from os import fdopen
 from re import search, match
-from tempfile import mkstemp
 
 import requests
 
@@ -76,15 +74,8 @@ class EpguidesParser(object):
 		response = requests.get(show.url, headers=headers)
 		response.encoding = self.guess_encoding(response)
 
-		(fd, name) = mkstemp()
-		with fdopen(fd, "wb") as file:
-			file.write(response.text.encode("utf8"))
-
-		self.logger.debug("Stored in %s" % name)
-
-		with open(name, "rb") as file:
-			for line in file:
-				self._parse_line(line.decode("utf8"), show, db)
+		for line in response.text.split("\n"):
+			self._parse_line(line, show, db)
 
 		show.updated = datetime.now()
 		db.commit()
