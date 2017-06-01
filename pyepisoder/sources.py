@@ -110,7 +110,7 @@ class TVDBOnline(object):
 		def mkshow(entry):
 
 			name = entry.get("seriesName")
-			url = str(entry.get("id"))
+			url = str(entry.get("id")).encode("utf8").decode("utf8")
 			return Show(name, url=url)
 
 		matches = self._get("search/series", {"name": term})
@@ -126,12 +126,13 @@ class TVDBOnline(object):
 
 			num = int(row.get("airedEpisodeNumber", "0"))
 			aired = row.get("firstAired")
-			name = row.get("episodeName", "Unnamed episode")
+			name = row.get("episodeName") or u"Unnamed episode"
 			season = int(row.get("airedSeason", "0"))
 			aired = datetime.strptime(aired, "%Y-%m-%d").date()
+			pnum = u"UNK"
 
 			self._logger.debug("Found episode %s" % name)
-			return Episode(show, name, season, num, aired, "UNK", 0)
+			return Episode(show, name, season, num, aired, pnum, 0)
 
 		def isvalid(row):
 
@@ -177,6 +178,10 @@ class TVDB(object):
 	def __init__(self):
 
 		self._state = TVDBOffline(self)
+
+	def __str__(self):
+
+		return "thetvdb.com parser"
 
 	def login(self, args):
 

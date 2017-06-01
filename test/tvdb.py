@@ -1,4 +1,5 @@
 # episoder, https://github.com/cockroach/episoder
+# -*- coding: utf8 -*-
 #
 # Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
 #
@@ -25,6 +26,7 @@ from pyepisoder.episoder import Show
 from pyepisoder.sources import TVDB, TVDBNotLoggedInError, InvalidLoginError
 from pyepisoder.sources import TVDBShowNotFoundError
 
+from .util import MockResponse
 
 class MockArgs(object):
 
@@ -44,19 +46,6 @@ class FakeRequest(object):
 		self.params = params
 
 
-class FakeResponse(object):
-
-	def __init__(self, text, encoding, status=200):
-
-		self.text = text
-		self.encoding = encoding
-		self.status_code = status
-
-	def json(self):
-
-		return json.loads(self.text.decode("utf8"))
-
-
 class MockRequests(object):
 
 	def __init__(self):
@@ -65,7 +54,7 @@ class MockRequests(object):
 
 	def load_fixture(self, name):
 
-		with open("test/fixtures/tvdb_%s.json" % name) as file:
+		with open("test/fixtures/tvdb_%s.json" % name, "rb") as file:
 
 			data = file.read()
 
@@ -74,7 +63,7 @@ class MockRequests(object):
 	def fixture(self, name, code):
 
 		response = self.load_fixture(name)
-		return FakeResponse(response.encode("utf8"), "utf8", code)
+		return MockResponse(response, "utf8", code)
 
 	def get_search(self, url, headers, params):
 
@@ -122,7 +111,7 @@ class MockRequests(object):
 			else:
 				return self.get_show(url, headers, params)
 
-		return FakeResponse("{}", "utf8", 404)
+		return MockResponse("{}", "utf8", 404)
 
 	def post_login(self, body, headers):
 
@@ -132,10 +121,10 @@ class MockRequests(object):
 		if key == "fake-api-key":
 
 			text = '{ "token": "fake-token" }'
-			return FakeResponse(text.encode("utf8"), "utf8", 200)
+			return MockResponse(text.encode("utf8"), "utf8", 200)
 
 		text = '{"Error": "Not Authorized"}'
-		return FakeResponse(text.encode("utf8"), "utf8", 401)
+		return MockResponse(text.encode("utf8"), "utf8", 401)
 
 	def post(self, url, body, headers = {}):
 
@@ -146,7 +135,7 @@ class MockRequests(object):
 
 			return self.post_login(body.decode("utf8"), headers)
 
-		return FakeResponse("{}", "utf8", 404)
+		return MockResponse("{}", "utf8", 404)
 
 
 class MockStore(object):
@@ -179,17 +168,22 @@ class TVDBTest(TestCase):
 		requests.get = self.__get_orig
 		requests.post = self.__post_orig
 
+	def test_parser_name(self):
+
+		parser = TVDB()
+		self.assertEqual(u"thetvdb.com parser", str(parser))
+
 	def testNeedLogin(self):
 
 		tvdb = TVDB()
 		with self.assertRaises(TVDBNotLoggedInError):
-			tvdb.lookup("Frasier")
+			tvdb.lookup(u"Frasier")
 
 		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.lookup("Frasier")
+		tvdb.lookup(u"Frasier")
 
 		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.lookup("Frasier")
+		tvdb.lookup(u"Frasier")
 
 	def testLogin(self):
 
@@ -275,11 +269,31 @@ class TVDBTest(TestCase):
 		self.assertTrue(TVDB.accept("123"))
 		self.assertFalse(TVDB.accept("http://www.epguides.com/test"))
 
+	def test_encoding_utf8(self):
+
+		tvdb = TVDB()
+		tvdb.login(MockArgs("fake-api-key"))
+
+		show = Show(u"unnamed show", url=u"73739")
+		show.show_id = 73739 # TODO: wtf?
+		self.assertTrue(TVDB.accept(show.url))
+		store = MockStore()
+
+		tvdb.parse(show, store)
+
+		self.assertEqual("Lost", show.name)
+		self.assertEqual(Show.ENDED, show.status)
+		self.assertEqual(len(store.episodes), 1)
+
+		episode = store.episodes[0]
+		self.assertEqual(episode.title, u"Exposé")
+
+
 	def testParse(self):
 
 		tvdb = TVDB()
 
-		show = Show("unnamed show", url="260")
+		show = Show(u"unnamed show", url=u"260")
 		show.show_id = 260 # TODO: wtf?
 		self.assertTrue(TVDB.accept(show.url))
 		store = MockStore()
@@ -342,7 +356,7 @@ class TVDBTest(TestCase):
 
 		tvdb = TVDB()
 		store = MockStore()
-		show = Show("unnamed show", url="261")
+		show = Show(u"unnamed show", url=u"261")
 		show.show_id = 261
 
 		tvdb.login(MockArgs("fake-api-key"))
@@ -380,7 +394,7 @@ class TVDBTest(TestCase):
 		tvdb = TVDB()
 		tvdb.login(MockArgs("fake-api-key"))
 
-		show = Show("test show", url="293")
+		show = Show(u"test show", url=u"293")
 
 		with self.assertRaises(TVDBShowNotFoundError):
 			tvdb.parse(show, None)
@@ -390,7 +404,7 @@ class TVDBTest(TestCase):
 		tvdb = TVDB()
 		store = MockStore()
 		tvdb.login(MockArgs("fake-api-key"))
-		show = Show("unnamed show", url="262")
+		show = Show(u"unnamed show", url=u"262")
 		show.show_id = 262
 
 		tvdb.parse(show, store)
