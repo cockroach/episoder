@@ -18,7 +18,7 @@
 
 from unittest import TestCase, TestSuite, TestLoader
 
-from pyepisoder.sources import TVDB, EpguidesParser, TVComDummyParser
+from pyepisoder.sources import TVDB, Epguides, TVCom
 from pyepisoder.sources import parser_for
 
 
@@ -30,10 +30,10 @@ class SourcesTest(TestCase):
 		self.assertTrue(isinstance(parser, TVDB))
 
 		parser = parser_for("http://www.epguides.com/test/")
-		self.assertTrue(isinstance(parser, EpguidesParser))
+		self.assertTrue(isinstance(parser, Epguides))
 
 		parser = parser_for("http://www.tv.com/test/")
-		self.assertTrue(isinstance(parser, TVComDummyParser))
+		self.assertTrue(isinstance(parser, TVCom))
 
 		parser = parser_for("http://www.googe.com/")
 		self.assertIsNone(parser)

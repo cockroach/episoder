@@ -1,5 +1,20 @@
-#!/usr/bin/env python
+# episoder, https://github.com/cockroach/episoder
 # -*- coding: utf8 -*-
+#
+# Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import date, timedelta
 from os import unlink
@@ -40,10 +55,9 @@ class DataStoreTest(TestCase):
 		self.db.commit()
 
 		id = show.show_id
-
 		self.assertTrue(id > 0, "id is %d, must be > 0" % id)
-		shows = self.db.getShows()
 
+		shows = self.db.getShows()
 		self.assertEqual(1, len(shows))
 		self.assertEqual(id, shows[0].show_id)
 		self.assertEqual(u"test show", shows[0].show_name)
@@ -54,15 +68,10 @@ class DataStoreTest(TestCase):
 		self.db.commit()
 
 		shows = self.db.getShows()
-
 		self.assertNotEqual(id, id2)
-
 		self.assertEqual(2, len(shows))
 
-		ids = []
-		for show in shows:
-			ids.append(show.show_id)
-
+		ids = [x.show_id for x in shows]
 		self.assertTrue(id2 in ids)
 
 		showA = Show(u"showA", url=u"urlA")
@@ -77,12 +86,9 @@ class DataStoreTest(TestCase):
 		self.db.commit()
 		self.assertEqual(4, len(self.db.getShows()))
 
-		try:
+		with self.assertRaises(Exception):
 			self.db.addShow(showC)
 			self.db.commit()
-			self.assertTrue(False)
-		except Exception:
-			pass
 
 	def test_add_episode(self):
 
@@ -100,7 +106,6 @@ class DataStoreTest(TestCase):
 		self.db.commit()
 
 		episodes = self.db.getEpisodes()
-
 		self.assertTrue(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
@@ -179,7 +184,6 @@ class DataStoreTest(TestCase):
 		self.db.commit()
 
 		episodes = self.db.getEpisodes()
-
 		self.assertFalse(episode1 in episodes)
 		self.assertTrue(episode2 in episodes)
 
@@ -262,11 +266,8 @@ class DataStoreTest(TestCase):
 
 	def test_remove_before_with_show(self):
 
-		show1 = Show(u"some show", url=u"a")
-		show1 = self.db.addShow(show1)
-
-		show2 = Show(u"some other show", url=u"b")
-		show2 = self.db.addShow(show2)
+		show1 = self.db.addShow(Show(u"some show", url=u"a"))
+		show2 = self.db.addShow(Show(u"some other show", url=u"b"))
 
 		today = date.today()
 		yesterday = today - timedelta(1)
@@ -285,12 +286,10 @@ class DataStoreTest(TestCase):
 
 	def test_duplicate_episodes(self):
 
-		today = date.today()
-
-		show = Show(u"some show")
-		show = self.db.addShow(show)
+		show = self.db.addShow(Show(u"some show"))
 		self.assertEqual(0, len(self.db.getEpisodes()))
 
+		today = date.today()
 		episode1 = Episode(show, u"e", 1, 1, today, u"x", 1)
 		episode2 = Episode(show, u"f", 1, 1, today, u"x", 1)
 
@@ -307,12 +306,10 @@ class DataStoreTest(TestCase):
 
 	def test_clear(self):
 
-		today = date.today()
-
-		show = Show(u"some show", url=u"urlX")
-		show = self.db.addShow(show)
+		show = self.db.addShow(Show(u"some show", url=u"urlX"))
 		self.assertEqual(0, len(self.db.getEpisodes()))
 
+		today = date.today()
 		episode1 = Episode(show, u"e", 1, 1, today, u"x", 1)
 		episode2 = Episode(show, u"e", 1, 2, today, u"x", 1)
 		episode3 = Episode(show, u"e", 1, 3, today, u"x", 1)

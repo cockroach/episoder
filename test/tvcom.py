@@ -18,25 +18,25 @@
 
 from unittest import TestCase, TestSuite, TestLoader
 
-from pyepisoder.sources import TVComDummyParser
+from pyepisoder.sources import TVCom
 
 
 class TVComTest(TestCase):
 
 	def test_accept(self):
 
-		self.assertTrue(TVComDummyParser.accept("http://www.tv.com/XY"))
+		self.assertTrue(TVCom.accept("http://www.tv.com/XY"))
 
 	def test_login(self):
 
-		parser = TVComDummyParser()
+		parser = TVCom()
 		parser.login()
 
 	def test_parser_name(self):
 
-		parser = TVComDummyParser()
-		self.assertEqual(u"dummy tv.com parser to detect old urls",
-								str(parser))
+		parser = TVCom()
+		expect = u"dummy tv.com parser to detect old urls"
+		self.assertEqual(expect, str(parser))
 
 
 def test_suite():

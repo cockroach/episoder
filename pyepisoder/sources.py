@@ -28,7 +28,7 @@ from .episode import Episode
 
 def parser_for(url):
 
-	parsers = [ TVDB, EpguidesParser, TVComDummyParser ]
+	parsers = [TVDB, Epguides, TVCom]
 
 	for parser in parsers:
 		if parser.accept(url):
@@ -221,11 +221,11 @@ class TVDB(object):
 		return url.isdigit()
 
 
-class EpguidesParser(object):
+class Epguides(object):
 
 	def __init__(self):
 
-		self.logger = logging.getLogger("EpguidesParser")
+		self.logger = logging.getLogger("Epguides")
 
 	def __str__(self):
 
@@ -290,12 +290,10 @@ class EpguidesParser(object):
 		# 65.   17-10           23 Apr 05  <a [..]>title</a>
 		# 101.   5-15           09 May 09  <a [..]>title</a>
 		# 254.    - 5  05-254   15 Jan 92  <a [..]>title</a>
-
 		match = search("^ *(\d+)\.? +(\d*)- ?(\d+) +([a-zA-Z0-9-]*)"\
 		" +(\d{1,2}[ /][A-Z][a-z]{2}[ /]\d{2}) *<a.*>(.*)</a>", line)
 
 		if match:
-
 			fields = match.groups()
 			(total, season, epnum, prodnum, day, title) = fields
 
@@ -307,9 +305,10 @@ class EpguidesParser(object):
 						airtime.date(), prodnum, total))
 
 
-class TVComDummyParser(object):
+class TVCom(object):
 
 	def __str__(self):
+
 		return "dummy tv.com parser to detect old urls"
 
 	@staticmethod

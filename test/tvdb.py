@@ -16,31 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
-import requests
 from datetime import date, datetime
-
+from json import loads
 from unittest import TestCase, TestSuite, TestLoader
+
+import requests
 
 from pyepisoder.episoder import Show
 from pyepisoder.sources import TVDB, TVDBNotLoggedInError, InvalidLoginError
 from pyepisoder.sources import TVDBShowNotFoundError
 
-from .util import MockResponse, MockArgs
+from .util import MockResponse, MockArgs, LoggedRequest, MockDB
 
 
-class FakeRequest(object):
-
-	def __init__(self, method, url, body, headers, params):
-
-		self.method = method
-		self.url = url
-		self.body = body
-		self.headers = headers
-		self.params = params
-
-
-class MockRequests(object):
+class MockRequestHandler(object):
 
 	def __init__(self):
 
@@ -49,7 +38,6 @@ class MockRequests(object):
 	def load_fixture(self, name):
 
 		with open("test/fixtures/tvdb_%s.json" % name, "rb") as file:
-
 			data = file.read()
 
 		return data
@@ -91,15 +79,12 @@ class MockRequests(object):
 
 	def get(self, url, headers={}, params={}):
 
-		req = FakeRequest("GET", url, "", headers, params)
+		req = LoggedRequest("GET", url, "", headers, params)
 		self.requests.append(req)
 
 		if url.startswith("https://api.thetvdb.com/search/series"):
-
 			return self.get_search(url, headers, params)
-
 		elif url.startswith("https://api.thetvdb.com/series"):
-
 			if url.endswith("/episodes"):
 				return self.get_episodes(url, headers, params)
 			else:
@@ -109,11 +94,10 @@ class MockRequests(object):
 
 	def post_login(self, body, headers):
 
-		data = json.loads(body)
+		data = loads(body)
 		key = data.get("apikey")
 
 		if key == "fake-api-key":
-
 			text = '{ "token": "fake-token" }'
 			return MockResponse(text.encode("utf8"), "utf8", 200)
 
@@ -122,36 +106,22 @@ class MockRequests(object):
 
 	def post(self, url, body, headers = {}):
 
-		req = FakeRequest("POST", url, body, headers, {})
+		req = LoggedRequest("POST", url, body, headers, {})
 		self.requests.append(req)
 
 		if url.startswith("https://api.thetvdb.com/login"):
-
 			return self.post_login(body.decode("utf8"), headers)
 
 		return MockResponse("{}", "utf8", 404)
-
-
-class MockStore(object):
-
-	def __init__(self):
-
-		self.episodes = []
-
-	def addEpisode(self, episode):
-
-		self.episodes.append(episode)
-
-	def commit(self):
-
-		pass
 
 
 class TVDBTest(TestCase):
 
 	def setUp(self):
 
-		self.req = MockRequests()
+		self.db = MockDB()
+		self.tvdb = TVDB()
+		self.req = MockRequestHandler()
 		self.args = MockArgs("fake-api-key", "episoder/test")
 
 		self.__get_orig = requests.get
@@ -166,25 +136,22 @@ class TVDBTest(TestCase):
 
 	def test_parser_name(self):
 
-		parser = TVDB()
-		self.assertEqual(u"thetvdb.com parser", str(parser))
+		self.assertEqual(u"thetvdb.com parser", str(self.tvdb))
 
 	def test_need_login(self):
 
-		tvdb = TVDB()
 		with self.assertRaises(TVDBNotLoggedInError):
-			tvdb.lookup(u"Frasier", self.args)
+			self.tvdb.lookup(u"Frasier", self.args)
 
-		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.lookup(u"Frasier", self.args)
+		self.tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.lookup(u"Frasier", self.args)
 
-		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.lookup(u"Frasier", self.args)
+		self.tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.lookup(u"Frasier", self.args)
 
 	def test_login(self):
 
-		tvdb = TVDB()
-		tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.login(MockArgs("fake-api-key"))
 
 		reqs = len(self.req.requests)
 		self.assertTrue(reqs > 0)
@@ -197,38 +164,34 @@ class TVDBTest(TestCase):
 		headers = req.headers
 		self.assertEqual(headers.get("Content-type"),"application/json")
 
-		tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.login(MockArgs("fake-api-key"))
 		self.assertEqual(reqs, len(self.req.requests))
 
 	def test_login_failure(self):
 
-		tvdb = TVDB()
+		with self.assertRaises(InvalidLoginError):
+			self.tvdb.login(MockArgs("wrong-api-key"))
 
 		with self.assertRaises(InvalidLoginError):
-			tvdb.login(MockArgs("wrong-api-key"))
+			self.tvdb.login(MockArgs("wrong-api-key"))
 
 		with self.assertRaises(InvalidLoginError):
-			tvdb.login(MockArgs("wrong-api-key"))
+			self.tvdb.login(MockArgs("wrong-api-key"))
 
-		with self.assertRaises(InvalidLoginError):
-			tvdb.login(MockArgs("wrong-api-key"))
-
-		tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.login(MockArgs("fake-api-key"))
 
 	def test_search_no_hit(self):
 
-		tvdb = TVDB()
-		tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.login(MockArgs("fake-api-key"))
 
 		with self.assertRaises(TVDBShowNotFoundError):
-			tvdb.lookup("NoSuchShow", self.args)
+			self.tvdb.lookup("NoSuchShow", self.args)
 
 	def test_search_single(self):
 
-		tvdb = TVDB()
-		tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.login(MockArgs("fake-api-key"))
 
-		shows = list(tvdb.lookup("Frasier", self.args))
+		shows = list(self.tvdb.lookup("Frasier", self.args))
 
 		req = self.req.requests[-1]
 		self.assertEqual(req.url,
@@ -250,10 +213,9 @@ class TVDBTest(TestCase):
 
 	def test_search_multiple(self):
 
-		tvdb = TVDB()
-		tvdb.login(MockArgs("fake-api-key"))
+		self.tvdb.login(MockArgs("fake-api-key"))
 
-		shows = list(tvdb.lookup("Friends", self.args))
+		shows = list(self.tvdb.lookup("Friends", self.args))
 
 		self.assertEqual(len(shows), 3)
 		self.assertEqual(shows[0].name, "Friends")
@@ -267,38 +229,32 @@ class TVDBTest(TestCase):
 
 	def test_encoding_utf8(self):
 
-		tvdb = TVDB()
-		tvdb.login(self.args)
+		self.tvdb.login(self.args)
 
 		show = Show(u"unnamed show", url=u"73739")
-		show.show_id = 73739 # TODO: wtf?
+		show.show_id = 73739
 		self.assertTrue(TVDB.accept(show.url))
-		store = MockStore()
 
-		tvdb.parse(show, store, self.args)
+		self.tvdb.parse(show, self.db, self.args)
 
 		self.assertEqual("Lost", show.name)
 		self.assertEqual(Show.ENDED, show.status)
-		self.assertEqual(len(store.episodes), 1)
+		self.assertEqual(len(self.db.episodes), 1)
 
-		episode = store.episodes[0]
+		episode = self.db.episodes[0]
 		self.assertEqual(episode.title, u"Exposé")
-
 
 	def test_parse(self):
 
-		tvdb = TVDB()
-
 		show = Show(u"unnamed show", url=u"260")
-		show.show_id = 260 # TODO: wtf?
+		show.show_id = 260
 		self.assertTrue(TVDB.accept(show.url))
-		store = MockStore()
 
 		with self.assertRaises(TVDBNotLoggedInError):
-			tvdb.parse(show, None, self.args)
+			self.tvdb.parse(show, None, self.args)
 
-		tvdb.login(self.args)
-		tvdb.parse(show, store, self.args)
+		self.tvdb.login(self.args)
+		self.tvdb.parse(show, self.db, self.args)
 
 		req = self.req.requests[-2]
 		self.assertEqual(req.url, "https://api.thetvdb.com/series/260")
@@ -331,9 +287,9 @@ class TVDBTest(TestCase):
 		timediff = datetime.now() - show.updated
 		self.assertTrue(timediff.total_seconds() < 1)
 
-		self.assertEqual(len(store.episodes), 2)
+		self.assertEqual(len(self.db.episodes), 2)
 
-		episode = store.episodes[0]
+		episode = self.db.episodes[0]
 		self.assertEqual(episode.title, "Unnamed episode")
 		self.assertEqual(episode.season, 0)
 		self.assertEqual(episode.episode, 0)
@@ -341,7 +297,7 @@ class TVDBTest(TestCase):
 		self.assertEqual(episode.prodnum, "UNK")
 		self.assertEqual(episode.total, 1)
 
-		episode = store.episodes[1]
+		episode = self.db.episodes[1]
 		self.assertEqual(episode.title, "The Good Son")
 		self.assertEqual(episode.season, 1)
 		self.assertEqual(episode.episode, 1)
@@ -350,72 +306,65 @@ class TVDBTest(TestCase):
 
 	def test_parse_paginated(self):
 
-		tvdb = TVDB()
-		store = MockStore()
 		show = Show(u"unnamed show", url=u"261")
 		show.show_id = 261
 
-		tvdb.login(self.args)
-		tvdb.parse(show, store, self.args)
+		self.tvdb.login(self.args)
+		self.tvdb.parse(show, self.db, self.args)
 
 		self.assertEqual(show.status, Show.ENDED)
-		self.assertEqual(len(store.episodes), 8)
+		self.assertEqual(len(self.db.episodes), 8)
 
-		episode = store.episodes[0]
+		episode = self.db.episodes[0]
 		self.assertEqual(episode.title, "First")
 
-		episode = store.episodes[1]
+		episode = self.db.episodes[1]
 		self.assertEqual(episode.title, "Second")
 
-		episode = store.episodes[2]
+		episode = self.db.episodes[2]
 		self.assertEqual(episode.title, "Third")
 
-		episode = store.episodes[3]
+		episode = self.db.episodes[3]
 		self.assertEqual(episode.title, "Fourth")
 
-		episode = store.episodes[4]
+		episode = self.db.episodes[4]
 		self.assertEqual(episode.title, "Fifth")
 
-		episode = store.episodes[5]
+		episode = self.db.episodes[5]
 		self.assertEqual(episode.title, "Sixth")
 
-		episode = store.episodes[6]
+		episode = self.db.episodes[6]
 		self.assertEqual(episode.title, "Seventh")
 
-		episode = store.episodes[7]
+		episode = self.db.episodes[7]
 		self.assertEqual(episode.title, "Eighth")
 
 	def test_parse_invalid_show(self):
 
-		tvdb = TVDB()
-		tvdb.login(self.args)
+		self.tvdb.login(self.args)
 
 		show = Show(u"test show", url=u"293")
 
 		with self.assertRaises(TVDBShowNotFoundError):
-			tvdb.parse(show, None, self.args)
+			self.tvdb.parse(show, None, self.args)
 
 	def test_parse_show_with_invalid_data(self):
 
-		tvdb = TVDB()
-		store = MockStore()
-		tvdb.login(self.args)
+		self.tvdb.login(self.args)
 		show = Show(u"unnamed show", url=u"262")
 		show.show_id = 262
 
-		tvdb.parse(show, store, self.args)
-		self.assertEqual(len(store.episodes), 2)
+		self.tvdb.parse(show, self.db, self.args)
+		self.assertEqual(len(self.db.episodes), 2)
 
 	def test_user_agent(self):
 
-		tvdb = TVDB()
-		store = MockStore()
 		show = Show(u"unnamed show", url=u"262")
 		show.show_id = 262
 
-		tvdb.login(self.args)
-		tvdb.lookup("Frasier", self.args)
-		tvdb.parse(show, store, self.args)
+		self.tvdb.login(self.args)
+		self.tvdb.lookup("Frasier", self.args)
+		self.tvdb.parse(show, self.db, self.args)
 
 		self.assertEqual(len(self.req.requests), 4)
 
