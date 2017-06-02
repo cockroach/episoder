@@ -55,7 +55,6 @@ class EpguidesTest(TestCase):
 	def setUp(self):
 
 		self.parser = Epguides()
-		self.parser.awkfile = "extras/episoder_helper_epguides.awk"
 		self.db = MockDB()
 
 		self.req = MockRequestHandler()

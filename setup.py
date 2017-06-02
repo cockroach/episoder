@@ -9,10 +9,6 @@ files = []
 manpage = 'episoder.1'
 files.append((path.join('man', 'man1'), ['episoder.1']))
 
-# awk parser
-awkfile = path.join('extras', 'episoder_helper_epguides.awk')
-files.append(('extras', [awkfile]))
-
 # documentation
 for file in [ 'AUTHORS', 'CHANGELOG', 'COPYING', 'README' ]:
 	files.append((path.join('doc', 'episoder'), [file]))
