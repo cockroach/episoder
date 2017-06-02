@@ -152,7 +152,7 @@ class TVDBTest(TestCase):
 	def setUp(self):
 
 		self.req = MockRequests()
-		self.args = MockArgs("fake-api-key")
+		self.args = MockArgs("fake-api-key", "episoder/test")
 
 		self.__get_orig = requests.get
 		self.__post_orig = requests.post
@@ -169,19 +169,19 @@ class TVDBTest(TestCase):
 		parser = TVDB()
 		self.assertEqual(u"thetvdb.com parser", str(parser))
 
-	def testNeedLogin(self):
+	def test_need_login(self):
 
 		tvdb = TVDB()
 		with self.assertRaises(TVDBNotLoggedInError):
-			tvdb.lookup(u"Frasier")
+			tvdb.lookup(u"Frasier", self.args)
 
 		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.lookup(u"Frasier")
+		tvdb.lookup(u"Frasier", self.args)
 
 		tvdb.login(MockArgs("fake-api-key"))
-		tvdb.lookup(u"Frasier")
+		tvdb.lookup(u"Frasier", self.args)
 
-	def testLogin(self):
+	def test_login(self):
 
 		tvdb = TVDB()
 		tvdb.login(MockArgs("fake-api-key"))
@@ -194,13 +194,13 @@ class TVDBTest(TestCase):
 		self.assertEqual(req.method, "POST")
 		self.assertEqual(req.body.decode("utf8"),
 						'{"apikey": "fake-api-key"}')
-		self.assertEqual(req.headers, {"Content-type":
-							"application/json"})
+		headers = req.headers
+		self.assertEqual(headers.get("Content-type"),"application/json")
 
 		tvdb.login(MockArgs("fake-api-key"))
 		self.assertEqual(reqs, len(self.req.requests))
 
-	def testLoginFailure(self):
+	def test_login_failure(self):
 
 		tvdb = TVDB()
 
@@ -215,20 +215,20 @@ class TVDBTest(TestCase):
 
 		tvdb.login(MockArgs("fake-api-key"))
 
-	def testSearchNoHit(self):
+	def test_search_no_hit(self):
 
 		tvdb = TVDB()
 		tvdb.login(MockArgs("fake-api-key"))
 
 		with self.assertRaises(TVDBShowNotFoundError):
-			tvdb.lookup("NoSuchShow")
+			tvdb.lookup("NoSuchShow", self.args)
 
-	def testSearchSingle(self):
+	def test_search_single(self):
 
 		tvdb = TVDB()
 		tvdb.login(MockArgs("fake-api-key"))
 
-		shows = list(tvdb.lookup("Frasier"))
+		shows = list(tvdb.lookup("Frasier", self.args))
 
 		req = self.req.requests[-1]
 		self.assertEqual(req.url,
@@ -248,19 +248,19 @@ class TVDBTest(TestCase):
 		self.assertEqual(show.name, "Frasier")
 		self.assertEqual(show.url, "77811")
 
-	def testSearchMultiple(self):
+	def test_search_multiple(self):
 
 		tvdb = TVDB()
 		tvdb.login(MockArgs("fake-api-key"))
 
-		shows = list(tvdb.lookup("Friends"))
+		shows = list(tvdb.lookup("Friends", self.args))
 
 		self.assertEqual(len(shows), 3)
 		self.assertEqual(shows[0].name, "Friends")
 		self.assertEqual(shows[1].name, "Friends (1979)")
 		self.assertEqual(shows[2].name, "Friends of Green Valley")
 
-	def testAcceptURL(self):
+	def test_accept_url(self):
 
 		self.assertTrue(TVDB.accept("123"))
 		self.assertFalse(TVDB.accept("http://www.epguides.com/test"))
@@ -285,7 +285,7 @@ class TVDBTest(TestCase):
 		self.assertEqual(episode.title, u"Exposé")
 
 
-	def testParse(self):
+	def test_parse(self):
 
 		tvdb = TVDB()
 
@@ -348,7 +348,7 @@ class TVDBTest(TestCase):
 		self.assertEqual(episode.airdate, date(1993, 9, 16))
 		self.assertEqual(episode.total, 2)
 
-	def testParsePaginated(self):
+	def test_parse_paginated(self):
 
 		tvdb = TVDB()
 		store = MockStore()
@@ -385,7 +385,7 @@ class TVDBTest(TestCase):
 		episode = store.episodes[7]
 		self.assertEqual(episode.title, "Eighth")
 
-	def testParseInvalidShow(self):
+	def test_parse_invalid_show(self):
 
 		tvdb = TVDB()
 		tvdb.login(self.args)
@@ -395,7 +395,7 @@ class TVDBTest(TestCase):
 		with self.assertRaises(TVDBShowNotFoundError):
 			tvdb.parse(show, None, self.args)
 
-	def testParseShowWithInvalidData(self):
+	def test_parse_show_with_invalid_data(self):
 
 		tvdb = TVDB()
 		store = MockStore()
@@ -405,6 +405,35 @@ class TVDBTest(TestCase):
 
 		tvdb.parse(show, store, self.args)
 		self.assertEqual(len(store.episodes), 2)
+
+	def test_user_agent(self):
+
+		tvdb = TVDB()
+		store = MockStore()
+		show = Show(u"unnamed show", url=u"262")
+		show.show_id = 262
+
+		tvdb.login(self.args)
+		tvdb.lookup("Frasier", self.args)
+		tvdb.parse(show, store, self.args)
+
+		self.assertEqual(len(self.req.requests), 4)
+
+		req = self.req.requests[0]
+		headers = req.headers
+		self.assertEqual(headers.get("User-Agent"), "episoder/test")
+
+		req = self.req.requests[1]
+		headers = req.headers
+		self.assertEqual(headers.get("User-Agent"), "episoder/test")
+
+		req = self.req.requests[2]
+		headers = req.headers
+		self.assertEqual(headers.get("User-Agent"), "episoder/test")
+
+		req = self.req.requests[3]
+		headers = req.headers
+		self.assertEqual(headers.get("User-Agent"), "episoder/test")
 
 
 def test_suite():

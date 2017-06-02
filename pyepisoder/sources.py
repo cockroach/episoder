@@ -58,12 +58,13 @@ class TVDBOffline(object):
 
 		self._tvdb = tvdb
 
-	def _post_login(self, data):
+	def _post_login(self, data, user_agent):
 
 		url = "https://api.thetvdb.com/login"
-		headers = {"Content-type": "application/json"}
+		head = {"Content-type": "application/json",
+			"User-Agent": user_agent}
 		body = json.dumps(data).encode("utf8")
-		response = requests.post(url, body, headers=headers)
+		response = requests.post(url, body, headers=head)
 		data = response.json()
 
 		if response.status_code == 401:
@@ -71,16 +72,16 @@ class TVDBOffline(object):
 
 		return data.get("token")
 
-	def lookup(self, text):
+	def lookup(self, text, user_agent):
 
 		raise TVDBNotLoggedInError()
 
 	def login(self, args):
 
 		body = {"apikey": args.tvdb_key}
-		self.token = self._post_login(body)
+		self.token = self._post_login(body, args.agent)
 
-	def parse(self, show, db):
+	def parse(self, show, db, user_agent):
 
 		raise TVDBNotLoggedInError()
 
@@ -98,10 +99,11 @@ class TVDBOnline(object):
 		self._token = token
 		self._logger = logging.getLogger("TVDB (online)")
 
-	def _get(self, url, params):
+	def _get(self, url, params, agent):
 
 		url = "https://api.thetvdb.com/%s" % url
 		head = {"Content-type": "application/json",
+			"User-Agent": agent,
 			"Authorization": "Bearer %s" % self._token}
 		response = requests.get(url, headers = head, params = params)
 		data = response.json()
@@ -111,13 +113,14 @@ class TVDBOnline(object):
 
 		return data
 
-	def _get_episodes(self, show, page):
+	def _get_episodes(self, show, page, agent):
 
 		id = int(show.url)
-		result = self._get("series/%d/episodes" % id, {"page": page})
+		opts = {"page": page}
+		result = self._get("series/%d/episodes" % id, opts, agent)
 		return (result.get("data"), result.get("links"))
 
-	def lookup(self, term):
+	def lookup(self, term, agent):
 
 		def mkshow(entry):
 
@@ -125,14 +128,14 @@ class TVDBOnline(object):
 			url = str(entry.get("id")).encode("utf8").decode("utf8")
 			return Show(name, url=url)
 
-		matches = self._get("search/series", {"name": term})
+		matches = self._get("search/series", {"name": term}, agent)
 		return map(mkshow, matches.get("data"))
 
 	def login(self, args):
 
 		pass
 
-	def _fetch_episodes(self, show, page=1):
+	def _fetch_episodes(self, show, page, user_agent):
 
 		def mkepisode(row):
 
@@ -150,20 +153,21 @@ class TVDBOnline(object):
 
 			return row.get("firstAired") not in [None, ""]
 
-		(data, links) = self._get_episodes(show, page)
+		(data, links) = self._get_episodes(show, page, user_agent)
 		valid = filter(isvalid, data)
 		episodes = [mkepisode(row) for row in valid]
 
 		# handle pagination
 		next_page = links.get("next") or 0
 		if next_page > page:
-			episodes.extend(self._fetch_episodes(show, next_page))
+			more = self._fetch_episodes(show, next_page, user_agent)
+			episodes.extend(more)
 
 		return episodes
 
-	def parse(self, show, db):
+	def parse(self, show, db, user_agent):
 
-		result = self._get("series/%d" % int(show.url), {})
+		result = self._get("series/%d" % int(show.url), {}, user_agent)
 		data = result.get("data")
 
 		# update show data
@@ -176,7 +180,7 @@ class TVDBOnline(object):
 			show.setEnded()
 
 		# load episodes
-		episodes = sorted(self._fetch_episodes(show))
+		episodes = sorted(self._fetch_episodes(show, 1, user_agent))
 		for (idx, episode) in enumerate(episodes):
 
 			episode.total = idx + 1
@@ -199,13 +203,13 @@ class TVDB(object):
 
 		self._state.login(args)
 
-	def lookup(self, text):
+	def lookup(self, text, args):
 
-		return self._state.lookup(text)
+		return self._state.lookup(text, args.agent)
 
 	def parse(self, show, db, args):
 
-		return self._state.parse(show, db)
+		return self._state.parse(show, db, args.agent)
 
 	def change(self, state):
 

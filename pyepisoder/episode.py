@@ -85,8 +85,7 @@ class Episode(object):
 	def _setShow(self, show):
 
 		self._show = show
-		show.show_id = show.show_id
-
+		self.show_id = show.show_id
 
 	airdate = property(getAirDate, setAirDate)
 	season = property(_getSeason, _setSeason)

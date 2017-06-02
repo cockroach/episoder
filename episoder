@@ -170,7 +170,7 @@ def search(args):
 
 	try:
 		print("ID\tName\n-------\t--------------------")
-		for show in tvdb.lookup(term):
+		for show in tvdb.lookup(term, args):
 			print("%s\t%s" % (show.url, show.name))
 
 	except TVDBShowNotFoundError:
