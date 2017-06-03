@@ -39,7 +39,7 @@ def update(args):
 	db.update()
 
 	if args.show:
-		show = db.getShowById(args.show)
+		show = db.get_show_by_id(args.show)
 
 		if not show:
 			logging.error("Show #%d not found" % args.show)
@@ -75,7 +75,7 @@ def add(args):
 	db = DataStore(args.datafile)
 	db.update()
 
-	show = db.getShowByUrl(url)
+	show = db.get_show_by_url(url)
 
 	if show:
 		stderr.write("A show with url %s already exists\n" % url)
@@ -87,7 +87,7 @@ def add(args):
 
 	show = Show(u"Unknown Show", url=url)
 
-	db.addShow(show)
+	db.add_show(show)
 	db.commit()
 
 def remove(args):
@@ -95,12 +95,12 @@ def remove(args):
 	db = DataStore(args.datafile)
 	db.update()
 
-	db.removeShow(args.show)
+	db.remove_show(args.show)
 	db.commit()
 
 def set_show_enabled(db, id, enabled):
 
-	show = db.getShowById(id)
+	show = db.get_show_by_id(id)
 
 	if not show:
 		stderr.write("There is no show with id=%s\n" % id)
@@ -126,7 +126,7 @@ def shows(args):
 	db = DataStore(args.datafile)
 	db.update()
 
-	shows = db.getShows()
+	shows = db.get_shows()
 
 	statusStrings = ["?Invalid", "Running", "Suspended", "Ended" ]
 	enabledStrings = ["Disabled", "Enabled"]
@@ -155,7 +155,7 @@ def episodes(args):
 	if args.search:
 		episodes = db.search(args.search)
 	else:
-		episodes = db.getEpisodes(startdate, n_days)
+		episodes = db.get_episodes(startdate, n_days)
 
 	renderer.render(episodes, not args.nocolor)
 
@@ -304,16 +304,22 @@ def parse_args():
 
 def load_config(args):
 
+	def valid(line):
+
+		return "=" in line
+
 	def mkconfig(line):
 
-		line = line.strip().decode("ascii")
 		(key, value) = line.split("=")
 		logging.debug("%s=%s" % (key, value))
 		return (key, value)
 
 	if path.exists(args.c):
 		with open(args.c, "rb") as rc:
-			cfg = dict(map(mkconfig, rc.readlines()))
+			lines = rc.readlines()
+			lines = [x.strip().decode("ascii") for x in lines]
+			lines = filter(valid, lines)
+			cfg = dict(map(mkconfig, lines))
 	else:
 		stderr.write("No config file found, using default settings\n")
 
