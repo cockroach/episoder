@@ -25,13 +25,33 @@ from datetime import datetime
 from .database import Episode, Show
 
 
-def parser_for(url):
+class ParserSelector(object):
 
-	for parser in [TVDB, Epguides, TVCom]:
-		if parser.accept(url):
-			return parser()
+	class __Inner(object):
 
-	return None
+		def __init__(self):
+
+			self._tvdb = TVDB()
+			self._epguides = Epguides()
+			self._tvcom = TVCom()
+
+		def parser_for(self, url):
+
+			for parser in [self._tvdb, self._epguides, self._tvcom]:
+				if parser.accept(url):
+					return parser
+
+			return None
+
+	_instance = None
+
+	@staticmethod
+	def instance():
+
+		if not ParserSelector._instance:
+			ParserSelector._instance = ParserSelector.__Inner()
+
+		return ParserSelector._instance
 
 
 class InvalidLoginError(Exception):

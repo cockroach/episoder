@@ -30,7 +30,7 @@ from traceback import print_exc
 
 from pyepisoder.database import Show
 from pyepisoder.episoder import Database
-from pyepisoder.sources import TVDB, TVDBShowNotFoundError, parser_for
+from pyepisoder.sources import TVDB, TVDBShowNotFoundError, ParserSelector
 from pyepisoder.output import ConsoleRenderer
 from pyepisoder.version import __version__
 
@@ -53,9 +53,11 @@ def update(args):
 	else:
 		shows = db.get_expired_shows()
 
+	selector = ParserSelector.instance()
+
 	for show in shows:
 		try:
-			parser = parser_for(show.url)
+			parser = selector.parser_for(show.url)
 			parser.login(args)
 			parser.parse(show, db, args)
 		except:
@@ -83,7 +85,8 @@ def add(args):
 		stderr.write("A show with url %s already exists\n" % url)
 		return
 
-	if not parser_for(url):
+	selector = ParserSelector.instance()
+	if not selector.parser_for(url):
 		stderr.write("Invalid show url/id: %s\n" % url)
 		return
 
