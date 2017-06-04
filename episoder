@@ -136,6 +136,9 @@ def shows(args):
 
 	for show in db.get_shows():
 
+		if args.active and show.status == Show.ENDED:
+			continue
+
 		status = statusStrings[show.status]
 		enabled = enabledStrings[show.enabled]
 
@@ -243,6 +246,8 @@ def parse_args():
 
 	parser_shows = subparsers.add_parser("shows",
 		help="List shows in the database")
+	parser_shows.add_argument("-a", "--active", action="store_true",
+		help="only lists shows that are running or suspended")
 	parser_shows.set_defaults(func=shows)
 
 	# OPTIONS FOR DATABASE UPDATE
