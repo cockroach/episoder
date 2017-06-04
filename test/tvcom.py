@@ -37,6 +37,7 @@ class TVComTest(TestCase):
 		parser = TVCom()
 		expect = u"dummy tv.com parser to detect old urls"
 		self.assertEqual(expect, str(parser))
+		self.assertEqual("TVCom()", repr(parser))
 
 
 def test_suite():

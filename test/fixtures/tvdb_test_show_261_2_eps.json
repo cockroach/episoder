@@ -8,16 +8,16 @@
 		"airedEpisodeNumber": 3,
 		"airedSeason": 2,
 		"episodeName": "Sixth",
-		"firstAired": "1993-01-01"
+		"firstAired": "1992-01-03"
 	},{
 		"airedEpisodeNumber": 2,
 		"airedSeason": 1,
 		"episodeName": "Second",
-		"firstAired": "1992-01-01"
+		"firstAired": "1991-01-02"
 	},{
 		"airedEpisodeNumber": 2,
 		"airedSeason": 3,
 		"episodeName": "Eighth",
-		"firstAired": "1989-01-01"
+		"firstAired": "1993-01-02"
 	}
 ]}

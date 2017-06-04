@@ -28,15 +28,16 @@ from re import match
 from sys import exit, stderr
 from traceback import print_exc
 
-from pyepisoder.episoder import DataStore, Show, version
+from pyepisoder.database import Show
+from pyepisoder.episoder import Database, version
 from pyepisoder.sources import TVDB, TVDBShowNotFoundError, parser_for
 from pyepisoder.output import ConsoleRenderer
 
 
 def update(args):
 
-	db = DataStore(args.datafile)
-	db.update()
+	db = Database(args.datafile)
+	db.migrate()
 
 	if args.show:
 		show = db.get_show_by_id(args.show)
@@ -47,15 +48,15 @@ def update(args):
 
 		shows = [show]
 	elif args.force:
-		shows = db.getEnabledShows()
+		shows = db.get_enabled_shows()
 	else:
-		shows = db.getExpiredShows()
+		shows = db.get_expired_shows()
 
 	for show in shows:
 		try:
 			parser = parser_for(show.url)
 			parser.login(args)
-			show.update(db, args, parser)
+			parser.parse(show, db, args)
 		except:
 			logging.error("Error parsing %s" % show)
 			print_exc()
@@ -63,7 +64,7 @@ def update(args):
 
 		if not args.nodate:
 			basedate = args.date
-			show.removeEpisodesBefore(db, basedate)
+			show.remove_episodes_before(db, basedate)
 
 	if not shows:
 		logging.info("None of your shows need to be updated")
@@ -72,8 +73,8 @@ def add(args):
 
 	url = args.show
 
-	db = DataStore(args.datafile)
-	db.update()
+	db = Database(args.datafile)
+	db.migrate()
 
 	show = db.get_show_by_url(url)
 
@@ -92,8 +93,8 @@ def add(args):
 
 def remove(args):
 
-	db = DataStore(args.datafile)
-	db.update()
+	db = Database(args.datafile)
+	db.migrate()
 
 	db.remove_show(args.show)
 	db.commit()
@@ -111,38 +112,36 @@ def set_show_enabled(db, id, enabled):
 
 def enable(args):
 
-	db = DataStore(args.datafile)
-	db.update()
+	db = Database(args.datafile)
+	db.migrate()
 	set_show_enabled(db, args.show, True)
 
 def disable(args):
 
-	db = DataStore(args.datafile)
-	db.update()
+	db = Database(args.datafile)
+	db.migrate()
 	set_show_enabled(db, args.show, False)
 
 def shows(args):
 
-	db = DataStore(args.datafile)
-	db.update()
-
-	shows = db.get_shows()
+	db = Database(args.datafile)
+	db.migrate()
 
 	statusStrings = ["?Invalid", "Running", "Suspended", "Ended" ]
 	enabledStrings = ["Disabled", "Enabled"]
 
-	for show in shows:
-		status = show.status
+	for show in db.get_shows():
 
-		print("[%4d] %s" % (show.show_id, show.url))
-		print("       %s, %s, %s" % (show.show_name,
-			statusStrings[status], enabledStrings[show.enabled]))
+		status = statusStrings[show.status]
+		enabled = enabledStrings[show.enabled]
+
+		print("[%4d] %s" % (show.id, show.url))
+		print("       %s, %s, %s" % (show.name, status, enabled))
 		print("       Last update: %s" % (show.updated))
-
 
 def episodes(args):
 
-	db = DataStore(args.datafile)
+	db = Database(args.datafile)
 	renderer = ConsoleRenderer(args.format, args.dateformat)
 
 	if args.nodate:

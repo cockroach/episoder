@@ -22,11 +22,12 @@ from unittest import TestCase, TestSuite, TestLoader
 
 import requests
 
-from pyepisoder.episoder import Show
+from pyepisoder.database import Show
+from pyepisoder.episoder import Database
 from pyepisoder.sources import TVDB, TVDBNotLoggedInError, InvalidLoginError
 from pyepisoder.sources import TVDBShowNotFoundError
 
-from .util import MockResponse, MockArgs, LoggedRequest, MockDB
+from .util import MockResponse, MockArgs, LoggedRequest
 
 
 class MockRequestHandler(object):
@@ -119,7 +120,7 @@ class TVDBTest(TestCase):
 
 	def setUp(self):
 
-		self.db = MockDB()
+		self.db = Database("sqlite://")
 		self.tvdb = TVDB()
 		self.req = MockRequestHandler()
 		self.args = MockArgs("fake-api-key", "episoder/test")
@@ -136,7 +137,13 @@ class TVDBTest(TestCase):
 
 	def test_parser_name(self):
 
-		self.assertEqual(u"thetvdb.com parser", str(self.tvdb))
+		self.assertEqual("thetvdb.com parser (ready)", str(self.tvdb))
+		self.assertEqual("TVDB <TVDBOffline>", repr(self.tvdb))
+
+		self.tvdb.login(MockArgs("fake-api-key"))
+		self.assertEqual("thetvdb.com parser (authorized)",
+								str(self.tvdb))
+		self.assertEqual("TVDB <TVDBOnline>", repr(self.tvdb))
 
 	def test_need_login(self):
 
@@ -231,23 +238,23 @@ class TVDBTest(TestCase):
 
 		self.tvdb.login(self.args)
 
-		show = Show(u"unnamed show", url=u"73739")
-		show.show_id = 73739
+		show = self.db.add_show(Show(u"unnamed show", url=u"73739"))
 		self.assertTrue(TVDB.accept(show.url))
 
 		self.tvdb.parse(show, self.db, self.args)
 
 		self.assertEqual("Lost", show.name)
 		self.assertEqual(Show.ENDED, show.status)
-		self.assertEqual(len(self.db.episodes), 1)
 
-		episode = self.db.episodes[0]
+		episodes = self.db.get_episodes(date(1988,1,1), 99999)
+		self.assertEqual(len(episodes), 1)
+
+		episode = episodes[0]
 		self.assertEqual(episode.title, u"Exposé")
 
 	def test_parse(self):
 
-		show = Show(u"unnamed show", url=u"260")
-		show.show_id = 260
+		show = self.db.add_show(Show(u"unnamed show", url=u"260"))
 		self.assertTrue(TVDB.accept(show.url))
 
 		with self.assertRaises(TVDBNotLoggedInError):
@@ -287,63 +294,64 @@ class TVDBTest(TestCase):
 		timediff = datetime.now() - show.updated
 		self.assertTrue(timediff.total_seconds() < 1)
 
-		self.assertEqual(len(self.db.episodes), 2)
+		episodes = self.db.get_episodes(date(1988,1,1), 99999)
+		self.assertEqual(len(episodes), 2)
 
-		episode = self.db.episodes[0]
+		episode = episodes[0]
 		self.assertEqual(episode.title, "Unnamed episode")
 		self.assertEqual(episode.season, 0)
 		self.assertEqual(episode.episode, 0)
 		self.assertEqual(episode.airdate, date(1990, 1, 18))
 		self.assertEqual(episode.prodnum, "UNK")
-		self.assertEqual(episode.total, 1)
+		self.assertEqual(episode.totalnum, 1)
 
-		episode = self.db.episodes[1]
+		episode = episodes[1]
 		self.assertEqual(episode.title, "The Good Son")
 		self.assertEqual(episode.season, 1)
 		self.assertEqual(episode.episode, 1)
 		self.assertEqual(episode.airdate, date(1993, 9, 16))
-		self.assertEqual(episode.total, 2)
+		self.assertEqual(episode.totalnum, 2)
 
 	def test_parse_paginated(self):
 
-		show = Show(u"unnamed show", url=u"261")
-		show.show_id = 261
+		show = self.db.add_show(Show(u"unnamed show", url=u"261"))
 
 		self.tvdb.login(self.args)
 		self.tvdb.parse(show, self.db, self.args)
 
 		self.assertEqual(show.status, Show.ENDED)
-		self.assertEqual(len(self.db.episodes), 8)
+		episodes = self.db.get_episodes(date(1988,1,1), 99999)
+		self.assertEqual(len(episodes), 8)
 
-		episode = self.db.episodes[0]
+		episode = episodes[0]
 		self.assertEqual(episode.title, "First")
 
-		episode = self.db.episodes[1]
+		episode = episodes[1]
 		self.assertEqual(episode.title, "Second")
 
-		episode = self.db.episodes[2]
+		episode = episodes[2]
 		self.assertEqual(episode.title, "Third")
 
-		episode = self.db.episodes[3]
+		episode = episodes[3]
 		self.assertEqual(episode.title, "Fourth")
 
-		episode = self.db.episodes[4]
+		episode = episodes[4]
 		self.assertEqual(episode.title, "Fifth")
 
-		episode = self.db.episodes[5]
+		episode = episodes[5]
 		self.assertEqual(episode.title, "Sixth")
 
-		episode = self.db.episodes[6]
+		episode = episodes[6]
 		self.assertEqual(episode.title, "Seventh")
 
-		episode = self.db.episodes[7]
+		episode = episodes[7]
 		self.assertEqual(episode.title, "Eighth")
 
 	def test_parse_invalid_show(self):
 
 		self.tvdb.login(self.args)
 
-		show = Show(u"test show", url=u"293")
+		show = self.db.add_show(Show(u"test show", url=u"293"))
 
 		with self.assertRaises(TVDBShowNotFoundError):
 			self.tvdb.parse(show, None, self.args)
@@ -351,16 +359,15 @@ class TVDBTest(TestCase):
 	def test_parse_show_with_invalid_data(self):
 
 		self.tvdb.login(self.args)
-		show = Show(u"unnamed show", url=u"262")
-		show.show_id = 262
+		show = self.db.add_show(Show(u"unnamed show", url=u"262"))
 
 		self.tvdb.parse(show, self.db, self.args)
-		self.assertEqual(len(self.db.episodes), 2)
+		episodes = self.db.get_episodes(date(1988,1,1), 99999)
+		self.assertEqual(len(episodes), 2)
 
 	def test_user_agent(self):
 
-		show = Show(u"unnamed show", url=u"262")
-		show.show_id = 262
+		show = self.db.add_show(Show(u"unnamed show", url=u"262"))
 
 		self.tvdb.login(self.args)
 		self.tvdb.lookup("Frasier", self.args)

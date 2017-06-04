@@ -15,22 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
 import logging
 import requests
 
 from re import search, match
+from json import dumps
 from datetime import datetime
 
-from .episoder import Show
-from .episode import Episode
+from .database import Episode, Show
 
 
 def parser_for(url):
 
-	parsers = [TVDB, Epguides, TVCom]
-
-	for parser in parsers:
+	for parser in [TVDB, Epguides, TVCom]:
 		if parser.accept(url):
 			return parser()
 
@@ -58,12 +55,20 @@ class TVDBOffline(object):
 
 		self._tvdb = tvdb
 
+	def __str__(self):
+
+		return "thetvdb.com parser (ready)"
+
+	def __repr__(self):
+
+		return "<TVDBOffline>"
+
 	def _post_login(self, data, user_agent):
 
 		url = "https://api.thetvdb.com/login"
 		head = {"Content-type": "application/json",
 			"User-Agent": user_agent}
-		body = json.dumps(data).encode("utf8")
+		body = dumps(data).encode("utf8")
 		response = requests.post(url, body, headers=head)
 		data = response.json()
 
@@ -98,6 +103,14 @@ class TVDBOnline(object):
 
 		self._token = token
 		self._logger = logging.getLogger("TVDB (online)")
+
+	def __str__(self):
+
+		return "thetvdb.com parser (authorized)"
+
+	def __repr__(self):
+
+		return "<TVDBOnline>"
 
 	def _get(self, url, params, agent):
 
@@ -147,7 +160,7 @@ class TVDBOnline(object):
 			pnum = u"UNK"
 
 			self._logger.debug("Found episode %s" % name)
-			return Episode(show, name, season, num, aired, pnum, 0)
+			return Episode(name, season, num, aired, pnum, 0)
 
 		def isvalid(row):
 
@@ -175,16 +188,16 @@ class TVDBOnline(object):
 		show.updated = datetime.now()
 
 		if data.get("status") == "Continuing":
-			show.setRunning()
+			show.status = Show.RUNNING
 		else:
-			show.setEnded()
+			show.status = Show.ENDED
 
 		# load episodes
 		episodes = sorted(self._fetch_episodes(show, 1, user_agent))
 		for (idx, episode) in enumerate(episodes):
 
-			episode.total = idx + 1
-			db.addEpisode(episode)
+			episode.totalnum = idx + 1
+			db.add_episode(episode, show)
 
 		db.commit()
 
@@ -197,7 +210,11 @@ class TVDB(object):
 
 	def __str__(self):
 
-		return "thetvdb.com parser"
+		return str(self._state)
+
+	def __repr__(self):
+
+		return "TVDB %s" % repr(self._state)
 
 	def login(self, args):
 
@@ -230,6 +247,10 @@ class Epguides(object):
 	def __str__(self):
 
 		return "epguides.com parser"
+
+	def __repr__(self):
+
+		return "Epguides()"
 
 	@staticmethod
 	def accept(url):
@@ -275,13 +296,13 @@ class Epguides(object):
 		if match:
 			text = match.groups()[0]
 			if "current" in text:
-				show.setRunning()
+				show.status = Show.RUNNING
 			else:
-				show.setEnded()
+				show.status = Show.ENDED
 		else:
 			match = search("aired.*to.*[\d+]", line)
 			if match:
-				show.setEnded()
+				show.status = Show.ENDED
 
 		# Known formatting supported by this fine regex:
 		# 4.     1-4            19 Jun 02  <a [..]>title</a>
@@ -301,8 +322,8 @@ class Epguides(object):
 			airtime = datetime.strptime(day, "%d %b %y")
 
 			self.logger.debug("Found episode %s" % title)
-			db.addEpisode(Episode(show, title, season or 0, epnum,
-						airtime.date(), prodnum, total))
+			db.add_episode(Episode(title, season or 0, epnum,
+					airtime.date(), prodnum, total), show)
 
 
 class TVCom(object):
@@ -310,6 +331,10 @@ class TVCom(object):
 	def __str__(self):
 
 		return "dummy tv.com parser to detect old urls"
+
+	def __repr__(self):
+
+		return "TVCom()"
 
 	@staticmethod
 	def accept(url):

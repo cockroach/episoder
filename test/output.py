@@ -23,8 +23,7 @@ try:
 except ImportError:
 	from io import StringIO
 
-from pyepisoder.episoder import Show
-from pyepisoder.episode import Episode
+from pyepisoder.database import Show, Episode
 from pyepisoder.output import ConsoleRenderer
 
 
@@ -37,8 +36,20 @@ class OutputTest(TestCase):
 		self.io = StringIO()
 
 		then = date(2008, 1, 1)
-		self.episode = Episode(self.show, u"Episode 41", 2, 5, then,
-								u"NX01", 3)
+		self.episode = Episode(u"Episode 41", 2, 5, then, u"NX01", 3)
+		self.episode.show = self.show
+
+	def test_str_and_repr(self):
+
+		renderer = ConsoleRenderer("%show", "%Y%m%d", self.io)
+		self.assertEqual(str(renderer), "ConsoleRenderer")
+		self.assertEqual(repr(renderer),
+			'ConsoleRenderer("%show", "%Y%m%d", <..>)')
+
+		renderer = ConsoleRenderer("%show", "%Y%m%d")
+		self.assertEqual(str(renderer), "ConsoleRenderer")
+		self.assertEqual(repr(renderer),
+			'ConsoleRenderer("%show", "%Y%m%d", <..>)')
 
 	def test_render_airdate(self):
 
@@ -96,7 +107,7 @@ class OutputTest(TestCase):
 		renderer.render([self.episode], False)
 		self.assertEqual(self.io.getvalue(), u"3\n")
 
-		self.episode.total = 90
+		self.episode.totalnum = 90
 		renderer.render([self.episode], False)
 		self.assertEqual(self.io.getvalue(), u"3\n90\n")
 

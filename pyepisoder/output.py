@@ -33,6 +33,15 @@ class ConsoleRenderer(object):
 		self._dateformat = dateformat
 		self._dest = dest
 
+	def __str__(self):
+
+		return "ConsoleRenderer"
+
+	def __repr__(self):
+
+		return 'ConsoleRenderer("%s", "%s", <..>)' % (self._format,
+							self._dateformat)
+
 	def _render_color(self, text, col):
 
 		self._dest.write("%s%s%s\n" % (col, text, ConsoleRenderer.GREY))
@@ -50,7 +59,7 @@ class ConsoleRenderer(object):
 		string = string.replace("%season", str(episode.season))
 		string = string.replace("%epnum", "%02d" % episode.episode)
 		string = string.replace("%eptitle", episode.title)
-		string = string.replace("%totalep", str(episode.total))
+		string = string.replace("%totalep", str(episode.totalnum))
 		string = string.replace("%prodnum", episode.prodnum)
 
 		render(string, color)

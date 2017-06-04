@@ -16,54 +16,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
+from unittest import TestCase, TestSuite, TestLoader
+
+from pyepisoder.database import Meta
 
 
-class RawWrapper(object):
+class MetaInformationTest(TestCase):
 
-	def __init__(self, text):
+	def test_str_and_repr(self):
 
-		self._text = text
+		meta = Meta()
+		meta.key = "version"
+		meta.value = "1.0"
 
-	def read(self):
+		self.assertEqual(str(meta), "Meta: version = 1.0")
+		self.assertEqual(repr(meta), "Meta: version = 1.0")
 
-		return self._text
+def test_suite():
 
-
-class MockResponse(object):
-
-	def __init__(self, data, encoding, status=200):
-
-		self.raw = RawWrapper(data)
-		self.encoding = encoding
-		self.status_code = status
-
-	def _get_text(self):
-
-		text = self.raw.read()
-		return text.decode(self.encoding, "replace")
-
-	def json(self):
-
-		return json.loads(self.text)
-
-	text = property(_get_text)
-
-
-class MockArgs(dict):
-
-	def __init__(self, tvdb_key, agent=None):
-
-		self.tvdb_key = tvdb_key
-		self.agent = agent
-
-
-class LoggedRequest(object):
-
-	def __init__(self, method, url, body, headers, params):
-
-		self.method = method
-		self.url = url
-		self.body = body
-		self.headers = headers
-		self.params = params
+	suite = TestSuite()
+	loader = TestLoader()
+	suite.addTests(loader.loadTestsFromTestCase(MetaInformationTest))
+	return suite

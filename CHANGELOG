@@ -3,6 +3,7 @@
  * Switched from distutils to setuptools
  * We now use the new TVDB JSON API
  * Rewrote the epguides.com parser in pure Python
+ * Rewrote large parts of the database code
 
 == v0.7.3 (7 Nov 2015) ==
  * Fixed a syntax error in the list of shows
