@@ -145,6 +145,7 @@ def shows(args):
 		print("[%4d] %s" % (show.id, show.url))
 		print("       %s, %s, %s" % (show.name, status, enabled))
 		print("       Last update: %s" % (show.updated))
+		print("       Episodes: %d" % len(show.episodes))
 
 def episodes(args):
 
