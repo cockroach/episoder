@@ -27,8 +27,6 @@ from sqlalchemy.orm import create_session
 
 from .database import Episode, Show, Meta
 
-version='0.7.2'
-
 Base = declarative_base()
 
 

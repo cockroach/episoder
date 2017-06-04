@@ -29,9 +29,10 @@ from sys import exit, stderr
 from traceback import print_exc
 
 from pyepisoder.database import Show
-from pyepisoder.episoder import Database, version
+from pyepisoder.episoder import Database
 from pyepisoder.sources import TVDB, TVDBShowNotFoundError, parser_for
 from pyepisoder.output import ConsoleRenderer
+from pyepisoder.version import __version__
 
 
 def update(args):
@@ -270,7 +271,7 @@ def parse_args():
 	parser.add_argument("-l", metavar="file", dest="logfile",
 		action="store", help="log to file instead of stdout")
 	parser.add_argument("-V", "--version", action="version",
-		version="episoder %s" % version,
+		version="episoder %s" % __version__,
 		help="show version information")
 
 	args = parser.parse_args()
@@ -326,7 +327,7 @@ def load_config(args):
 		logging.error("Specifying shows in the configuration file is "
 							"no longer supported.")
 
-	args.agent = cfg.get("agent", "episoder/" + version)
+	args.agent = cfg.get("agent", "episoder/" + __version__)
 	args.datafile = cfg.get("data", path.join(environ["HOME"], ".episodes"))
 	args.dateformat = cfg.get("dateformat", "%a, %b %d, %Y")
 	args.format = cfg.get("format", "%airdate %show %seasonx%epnum")

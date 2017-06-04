@@ -2,6 +2,9 @@
 from setuptools import setup
 from os import path
 
+# fallback
+__version__ = "0.0.0"
+
 # files to install
 files = []
 
@@ -13,10 +16,13 @@ files.append((path.join("man", "man1"), ["episoder.1"]))
 for file in ["AUTHORS", "CHANGELOG", "COPYING", "README"]:
 	files.append((path.join('doc', 'episoder'), [file]))
 
+# get version number
+exec(open("pyepisoder/version.py").read())
+
 files.append((path.join("doc", "episoder", "examples"), ["home.episoder"]))
 
 setup(	name			= "episoder",
-	version			= "0.7.3",
+	version			= __version__,
 	license			= "GPLv3",
 	description		= "TV episode notifier",
 	author			= "Stefan Ott",
