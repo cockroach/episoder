@@ -25,40 +25,16 @@ from argparse import ArgumentParser
 from datetime import date, timedelta
 from os import environ, path
 from re import match
-from smtplib import SMTP
 from sys import exit, stderr
 from traceback import print_exc
 
 from pyepisoder.database import Show
 from pyepisoder.episoder import Database
 from pyepisoder.sources import TVDB, TVDBShowNotFoundError, ParserSelector
-from pyepisoder.output import ConsoleRenderer
+from pyepisoder.output import ConsoleRenderer, EmailNotifier
+from pyepisoder.output import NewEpisodesNotification
 from pyepisoder.version import __version__
 
-
-def send_email(args, subject, body):
-
-	parts = {
-		"From": args.email_to,
-		"To": args.email_to,
-		"Subject": subject
-	}
-	header = "\r\n".join("%s: %s" % (k, v) for k, v in parts.items())
-	msg = header + '\r\n' + body
-
-	print("Sending email..")
-	if args.dryrun:
-		print(msg)
-	else:
-		server = SMTP(args.email_server, args.email_port)
-		if args.email_tls:
-			server.starttls()
-
-		if args.email_username:
-			server.login(args.email_username, args.email_password)
-
-		server.sendmail(args.email_to, args.email_to, msg)
-		server.quit()
 
 def update(args):
 
@@ -174,7 +150,9 @@ def shows(args):
 
 def notify(args):
 
-	assert args.email_to, "No email address specified"
+	if args.email_to is None:
+		stderr.write("No e-mail address specified in config file\n")
+		return
 
 	db = Database(args.datafile)
 	db.migrate()
@@ -183,20 +161,21 @@ def notify(args):
 	n_days = args.days
 
 	all_episodes = db.get_episodes(startdate, n_days)
-	new_episodes = [e for e in all_episodes if not e.notified]
+	episodes = [e for e in all_episodes if not e.notified]
 
-	if len(new_episodes) < 1:
+	if len(episodes) < 1:
+		logging.info("No new episodes")
 		return
 
-	body = "Your upcoming episodes:\n\n"
-	for e in new_episodes:
+	msg = NewEpisodesNotification(episodes, args.format, args.dateformat)
+	notifier = EmailNotifier(args.email_server, args.email_port)
 
-		if not args.dryrun:
-			e.notified = date.today()
+	if args.email_username:
+		notifier.authenticate(args.email_username, args.email_password)
+	if args.email_tls:
+		notifier.use_tls = True
 
-		body += "%s: %s\n" % (e.airdate, e)
-
-	send_email(args, "Upcoming TV episodes", body)
+	msg.send(notifier, args.email_to)
 	db.commit()
 
 def episodes(args):
