@@ -20,3 +20,10 @@
 
 # Your favourite dateformat as used by the date command (see `man date`)
 #dateformat=%a, %b %d, %Y
+
+# Settings for e-mail notifications
+#email_username=username@domain.com
+#email_password=hunter2
+#email_server=smtp.gmail.com
+#email_port=587
+#email_tls=1

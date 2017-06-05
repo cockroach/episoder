@@ -372,7 +372,7 @@ class DatabaseTest(TestCase):
 
 	def test_set_get_schema_version(self):
 
-		self.assertEqual(self.db.get_schema_version(), 3)
+		self.assertEqual(self.db.get_schema_version(), 4)
 
 		self.db.set_schema_version(1)
 		self.assertEqual(self.db.get_schema_version(), 1)

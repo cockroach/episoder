@@ -22,7 +22,7 @@ from os import unlink
 from tempfile import mktemp
 from unittest import TestCase, TestLoader, TestSuite
 
-from sqlalchemy import create_engine, MetaData, Table, Sequence, DateTime
+from sqlalchemy import create_engine, MetaData, Table, Sequence, DateTime, Date
 from sqlalchemy import Column, Integer, Text, Boolean
 from sqlalchemy.engine import reflection
 from sqlalchemy.orm import create_session
@@ -145,7 +145,6 @@ class MigrationTest(TestCase):
 		self._set_schema_version(engine, 2)
 		engine.dispose()
 
-
 	def _create_v3(self):
 
 		engine = self._get_engine()
@@ -182,6 +181,43 @@ class MigrationTest(TestCase):
 		self._set_schema_version(engine, 3)
 		engine.dispose()
 
+	def _create_v4(self):
+
+		engine = self._get_engine()
+		metadata = MetaData()
+		metadata.bind = engine
+
+		Table("shows", metadata,
+			Column("show_id", Integer,
+				Sequence("shows_show_id_seq"),
+				primary_key=True),
+			Column("show_name", Text),
+			Column("url", Text),
+			Column("updated", DateTime),
+			Column("enabled", Boolean),
+			Column("status", Integer, default=Show.RUNNING)
+		)
+
+		Table("meta", metadata,
+			Column("key", Text),
+			Column("value", Text)
+		)
+
+		Table("episodes", metadata,
+			Column("show_id", Integer),
+			Column("num", Integer),
+			Column("airdate", Integer),
+			Column("season", Integer),
+			Column("title", Text),
+			Column("totalnum", Integer),
+			Column("prodnum", Integer),
+			Column("notified", Date)
+		)
+
+		metadata.create_all()
+		self._set_schema_version(engine, 4)
+		engine.dispose()
+
 	def _tables_dict(self, engine, table):
 
 		inspector = reflection.Inspector.from_engine(engine)
@@ -210,17 +246,20 @@ class MigrationTest(TestCase):
 		self.assertTrue(engine.has_table("meta"))
 
 		columns = self._tables_dict(engine, "shows")
-		col = columns.get("url")
-		self.assertIsNotNone(col)
+		self.assertIsNotNone(columns.get("url"))
 
 		# Version 3 adds shows.enabled and shows.status
 		self.assertIsNotNone(columns.get("enabled"))
 		self.assertIsNotNone(columns.get("status"))
+
+		# Version 4 adds episodes.notified
+		columns = self._tables_dict(engine, "episodes")
+		self.assertIsNotNone(columns.get("notified"))
 		engine.dispose()
 
 		# Check new schema version
 		db = Database("sqlite:///%s" % self.path)
-		self.assertEqual(3, db.get_schema_version())
+		self.assertEqual(4, db.get_schema_version())
 		db.close()
 
 	def test_migrate_from_v2(self):
@@ -238,6 +277,9 @@ class MigrationTest(TestCase):
 		self.assertIsNotNone(columns.get("url"))
 		self.assertIsNone(columns.get("enabled"))
 		self.assertIsNone(columns.get("status"))
+
+		columns = self._tables_dict(engine, "episodes")
+		self.assertIsNone(columns.get("notified"))
 		engine.dispose()
 
 		# Migrate to latest version
@@ -248,11 +290,15 @@ class MigrationTest(TestCase):
 		columns = self._tables_dict(engine, "shows")
 		self.assertIsNotNone(columns.get("enabled"))
 		self.assertIsNotNone(columns.get("status"))
+
+		# Version 4 adds episodes.notified
+		columns = self._tables_dict(engine, "episodes")
+		self.assertIsNotNone(columns.get("notified"))
 		engine.dispose()
 
 		# Check new schema version
 		db = Database("sqlite:///%s" % self.path)
-		self.assertEqual(3, db.get_schema_version())
+		self.assertEqual(4, db.get_schema_version())
 		db.close()
 
 	def test_migrate_from_v3(self):
@@ -270,11 +316,49 @@ class MigrationTest(TestCase):
 		self.assertIsNotNone(columns.get("url"))
 		self.assertIsNotNone(columns.get("enabled"))
 		self.assertIsNotNone(columns.get("status"))
+
+		columns = self._tables_dict(engine, "episodes")
+		self.assertIsNone(columns.get("notified"))
+		engine.dispose()
+
+		# Migrate to latest version
+		self._migrate(self.path)
+
+		# Version 4 adds episodes.notified
+		engine = self._get_engine()
+		columns = self._tables_dict(engine, "episodes")
+		self.assertIsNotNone(columns.get("notified"))
+		engine.dispose()
+
+		db = Database("sqlite:///%s" % self.path)
+		self.assertEqual(4, db.get_schema_version())
+		db.close()
+
+	def test_migrate_from_v4(self):
+
+		# Create version 3 database
+		self._create_v4()
+
+		# Verify
+		engine = self._get_engine()
+		self.assertTrue(engine.has_table("shows"))
+		self.assertTrue(engine.has_table("episodes"))
+		self.assertTrue(engine.has_table("meta"))
+
+		columns = self._tables_dict(engine, "shows")
+		self.assertIsNotNone(columns.get("url"))
+		self.assertIsNotNone(columns.get("enabled"))
+		self.assertIsNotNone(columns.get("status"))
+
+		columns = self._tables_dict(engine, "episodes")
+		self.assertIsNotNone(columns.get("notified"))
 		engine.dispose()
 
 		# Migrate to latest version (noop)
+		self._migrate(self.path)
+
 		db = Database("sqlite:///%s" % self.path)
-		self.assertEqual(3, db.get_schema_version())
+		self.assertEqual(4, db.get_schema_version())
 		db.close()
 
 	def test_disable_auto_migration(self):
