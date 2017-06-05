@@ -1,7 +1,7 @@
 # Datafile
 #data=/home/stefan/.episodes
 
-# User agent to be used for epguides.com
+# User agent to be used. Default is "episoder/x.y.z" (current version)
 #agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 
 # Output format
