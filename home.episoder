@@ -1,7 +1,7 @@
 # Datafile
 #data=/home/stefan/.episodes
 
-# User agent to be used for epguides.com
+# User agent to be used. Default is "episoder/x.y.z" (current version)
 #agent=Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)
 
 # Output format
@@ -20,3 +20,10 @@
 
 # Your favourite dateformat as used by the date command (see `man date`)
 #dateformat=%a, %b %d, %Y
+
+# Settings for e-mail notifications
+#email_username=username@domain.com
+#email_password=hunter2
+#email_server=smtp.gmail.com
+#email_port=587
+#email_tls=1

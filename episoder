@@ -25,6 +25,7 @@ from argparse import ArgumentParser
 from datetime import date, timedelta
 from os import environ, path
 from re import match
+from smtplib import SMTP
 from sys import exit, stderr
 from traceback import print_exc
 
@@ -34,6 +35,30 @@ from pyepisoder.sources import TVDB, TVDBShowNotFoundError, ParserSelector
 from pyepisoder.output import ConsoleRenderer
 from pyepisoder.version import __version__
 
+
+def send_email(args, subject, body):
+
+	parts = {
+		"From": args.email_to,
+		"To": args.email_to,
+		"Subject": subject
+	}
+	header = "\r\n".join("%s: %s" % (k, v) for k, v in parts.items())
+	msg = header + '\r\n' + body
+
+	print("Sending email..")
+	if args.dryrun:
+		print(msg)
+	else:
+		server = SMTP(args.email_server, args.email_port)
+		if args.email_tls:
+			server.starttls()
+
+		if args.email_username:
+			server.login(args.email_username, args.email_password)
+
+		server.sendmail(args.email_to, args.email_to, msg)
+		server.quit()
 
 def update(args):
 
@@ -136,12 +161,43 @@ def shows(args):
 
 	for show in db.get_shows():
 
+		if args.active and show.status == Show.ENDED:
+			continue
+
 		status = statusStrings[show.status]
 		enabled = enabledStrings[show.enabled]
 
 		print("[%4d] %s" % (show.id, show.url))
 		print("       %s, %s, %s" % (show.name, status, enabled))
 		print("       Last update: %s" % (show.updated))
+		print("       Episodes: %d" % len(show.episodes))
+
+def notify(args):
+
+	assert args.email_to, "No email address specified"
+
+	db = Database(args.datafile)
+	db.migrate()
+
+	startdate = args.date
+	n_days = args.days
+
+	all_episodes = db.get_episodes(startdate, n_days)
+	new_episodes = [e for e in all_episodes if not e.notified]
+
+	if len(new_episodes) < 1:
+		return
+
+	body = "Your upcoming episodes:\n\n"
+	for e in new_episodes:
+
+		if not args.dryrun:
+			e.notified = date.today()
+
+		body += "%s: %s\n" % (e.airdate, e)
+
+	send_email(args, "Upcoming TV episodes", body)
+	db.commit()
 
 def episodes(args):
 
@@ -243,6 +299,8 @@ def parse_args():
 
 	parser_shows = subparsers.add_parser("shows",
 		help="List shows in the database")
+	parser_shows.add_argument("-a", "--active", action="store_true",
+		help="only lists shows that are running or suspended")
 	parser_shows.set_defaults(func=shows)
 
 	# OPTIONS FOR DATABASE UPDATE
@@ -259,6 +317,21 @@ def parse_args():
 	parser_update.add_argument("-s", "--show", metavar="id", type=int,
 		help="only update the show with this id")
 	parser_update.set_defaults(func=update)
+
+	# OPTIONS FOR EMAIL NOTIFY
+
+	parser_notify = subparsers.add_parser("notify",
+		help="Send e-mail notifications about new episodes")
+	parser_notify.add_argument("-d", metavar="YYYY-MM-DD|n", dest="date",
+		default=yesterday.strftime("%Y-%m-%d"),
+		help="only show episodes prior to this date or n days back")
+	parser_notify.add_argument("-n", "--days", type=int, default=2,
+		help="number of future days to show (default: 2)")
+	parser_notify.add_argument("-s", "--show", metavar="id", type=int,
+		help="only notify for the show with this id")
+	parser_notify.add_argument("--dryrun", action="store_true", default=False,
+		help="pretend, do not send email")
+	parser_notify.set_defaults(func=notify)
 
 	# GLOBAL OPTIONS
 
@@ -335,6 +408,12 @@ def load_config(args):
 	args.dateformat = cfg.get("dateformat", "%a, %b %d, %Y")
 	args.format = cfg.get("format", "%airdate %show %seasonx%epnum")
 	args.tvdb_key = cfg.get("tvdb_key", "8F15287C4B23B36E")
+	args.email_to = cfg.get("email_to")
+	args.email_username = cfg.get("email_username")
+	args.email_password = cfg.get("email_password")
+	args.email_server = cfg.get("email_server", "localhost")
+	args.email_port = int(cfg.get("email_port", 25))
+	args.email_tls = bool(cfg.get("email_tls", 0))
 
 	logging.info("Loaded rcfile")
 

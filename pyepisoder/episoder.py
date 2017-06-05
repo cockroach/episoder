@@ -59,7 +59,7 @@ class Database(object):
 			Show.__table__.create(bind = self.engine)
 			Episode.__table__.create(bind = self.engine)
 			Meta.__table__.create(bind = self.engine)
-			self.set_schema_version(3)
+			self.set_schema_version(4)
 
 	def open(self):
 
@@ -137,7 +137,7 @@ class Database(object):
 			Episode.__table__.create(bind = self.engine)
 			Meta.__table__.create(bind = self.engine)
 
-			schema_version = 3
+			schema_version = 4
 			self.set_schema_version(schema_version)
 
 		if schema_version == 2:
@@ -150,15 +150,34 @@ class Database(object):
 
 			self.close()
 
-			db = sqlite3.connect(self._path)
-			db.execute("ALTER TABLE shows ADD COLUMN enabled "
-								"TYPE boolean")
-			db.execute("ALTER TABLE shows ADD COLUMN status "
-								"TYPE integer")
-			db.close()
+			upgrade = sqlite3.connect(self._path)
+			upgrade.execute("ALTER TABLE shows "
+					"ADD COLUMN enabled TYPE boolean")
+			upgrade.execute("ALTER TABLE shows "
+					"ADD COLUMN status TYPE integer")
+			upgrade.close()
 
 			self.open()
 			schema_version = 3
+			self.set_schema_version(schema_version)
+
+		if schema_version == 3:
+
+			# Add a new column to the episodes table
+			self.logger.debug("Upgrading to schema version 4")
+
+			# We can only do this with sqlite databases
+			assert(self.engine.driver == "pysqlite")
+
+			self.close()
+
+			upgrade = sqlite3.connect(self._path)
+			upgrade.execute("ALTER TABLE episodes "
+					"ADD COLUMN notified TYPE date")
+			upgrade.close()
+
+			self.open()
+			schema_version = 4
 			self.set_schema_version(schema_version)
 
 	def get_expired_shows(self, today=date.today()):

@@ -82,6 +82,7 @@ class Episode(Base):
 	title = Column(Text)
 	totalnum = Column(Integer)
 	prodnum = Column(Text)
+	notified = Column(Date)
 	show = relationship(Show, backref=backref("episodes", cascade="all"))
 
 	def __init__(self, name, season, episode, aired, prodnum, total):
