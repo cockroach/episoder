@@ -86,6 +86,9 @@ Don't remove any old episodes, regardless of their date.
 .B \-s, \-\-show \fIID\fR
 Only update the show with this \fIID\fR (as shown by the \fBshows \fRcommand), regardless of the last update time and whether or not updates are currently enabled for this show.
 .TP
+.B \-n, \-\-num \fINUM\fR
+Limit the number of shows to be updated to \fINUM\fR. If you have a lot of shows in your database this option allows you to prevent load spikes, i.e. to distribute your updates more evenly by only updating a few of them at a time.
+.TP
 Note that the \fB-d\fP and \fB-i\fP options cannot be combined and that \fB-f\fP has no effect when using \fB-s\fP.
 .SS List Episodes in the Database
 .B episoder \fR[options] \fBlist \fR[list-options]

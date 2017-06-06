@@ -210,6 +210,8 @@ class TVDBOnline(object):
 		show.name = data.get("seriesName", show.name)
 		show.updated = datetime.now()
 
+		self._log.debug("Updating show '%s'", show.name)
+
 		if data.get("status") == "Continuing":
 			show.status = Show.RUNNING
 		else:

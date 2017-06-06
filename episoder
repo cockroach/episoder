@@ -124,6 +124,8 @@ class EpisoderOptions(object):
 			help="ignore date, do not remove old episodes")
 		parser.add_argument("-s", "--show", metavar="id", type=int,
 			help="only update the show with this id")
+		parser.add_argument("-n", "--num", metavar="num", type=int,
+			help="update no more than num shows at a time")
 		parser.set_defaults(func="update")
 
 		# options for email notify
@@ -281,7 +283,8 @@ class Episoder(object):
 
 		selector = ParserSelector.instance()
 
-		for show in shows:
+		for show in shows[0:self._args.num]:
+
 			try:
 				parser = selector.parser_for(show.url)
 				parser.login(self._args)
