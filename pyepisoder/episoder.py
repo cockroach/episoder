@@ -111,7 +111,7 @@ class Database(object):
 	def migrate(self):
 
 		schema_version = self.get_schema_version()
-		self.logger.debug("Found v%s schema", schema_version)
+		self.logger.debug("Found schema version %s", schema_version)
 
 		if schema_version < 0:
 

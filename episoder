@@ -365,7 +365,7 @@ class Episoder(object):
 			if self._args.active and show.status == Show.ENDED:
 				continue
 
-			name = show.name
+			name = show.name.encode("utf8")
 			status = status_strings[show.status or 0]
 			enabled = enabled_strings[show.enabled]
 
