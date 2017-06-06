@@ -13,7 +13,7 @@ manpage = "episoder.1"
 files.append((path.join("man", "man1"), ["episoder.1"]))
 
 # documentation
-for file in ["AUTHORS", "CHANGELOG", "COPYING", "README"]:
+for file in ["AUTHORS", "CHANGELOG", "COPYING", "README.md"]:
 	files.append((path.join("doc", "episoder"), [file]))
 
 # get version number
