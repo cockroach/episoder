@@ -235,7 +235,7 @@ class EpisoderOptions(object):
 		self._args.email_username = cfg.get("email_username")
 		self._args.email_password = cfg.get("email_password")
 		self._args.email_server = cfg.get("email_server", "localhost")
-		self._args.email_port = int(cfg.get("email_port", 25))
+		self._args.email_port = int(cfg.get("email_port", 587))
 		self._args.email_tls = bool(cfg.get("email_tls", 0))
 
 		self._log.info("Loaded configuration")
