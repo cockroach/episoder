@@ -43,13 +43,14 @@ class EpisoderOptions(object):
 		self._parser = ArgumentParser()
 		self._add_options()
 		self._args = None
-		self.loglevel = logging.WARNING
 		self._log = logging.getLogger("EpisoderOptions")
+		self.loglevel = logging.WARNING
 
 	def _add_options(self):
 
 		yesterday = date.today() - timedelta(1)
 
+		self._parser.set_defaults(func=None)
 		commands = self._parser.add_subparsers(help="commands")
 
 		# options for adding shows
@@ -185,6 +186,12 @@ class EpisoderOptions(object):
 	def parse_args(self):
 
 		self._args = self._parser.parse_args()
+
+		# this happens automatically in python 2 but not in 3.4
+		if self._args.func is None:
+			self._parser.print_usage()
+			stderr.write("error: too few arguments\n")
+			exit(1)
 
 		# turn our date string into a proper date object
 		if hasattr(self._args, "date"):
