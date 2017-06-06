@@ -366,7 +366,7 @@ class Episoder(object):
 				continue
 
 			name = show.name
-			status = status_strings[show.status]
+			status = status_strings[show.status or 0]
 			enabled = enabled_strings[show.enabled]
 
 			print("[%4d] %s" % (show.id, show.url))
