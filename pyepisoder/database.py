@@ -43,8 +43,7 @@ class Show(Base):
 	enabled = Column(Boolean)
 	status = Column(Integer, default=RUNNING)
 
-	def __init__(self, name, id=-1, url=u"",
-					updated=datetime.fromtimestamp(0)):
+	def __init__(self, name, url=u"", updated=datetime.fromtimestamp(0)):
 
 		self.name = name
 		self.url = url
@@ -52,11 +51,6 @@ class Show(Base):
 		self.status = Show.RUNNING
 		self.episodes = []
 		self.enabled = True
-
-	def remove_episodes_before(self, store, date):
-
-		logging.debug("Removing episodes from before %s" % date)
-		store.remove_before(date, show=self)
 
 	def __str__(self):
 
@@ -68,7 +62,12 @@ class Show(Base):
 
 	def __eq__(self, other):
 
-		return (self.name == other.name and self.url == other.url)
+		return self.name == other.name and self.url == other.url
+
+	def remove_episodes_before(self, store, date):
+
+		logging.debug("Removing episodes from before %s", date)
+		store.remove_before(date, show=self)
 
 
 class Episode(Base):

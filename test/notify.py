@@ -276,7 +276,7 @@ class NotificationTest(TestCase):
 		message = NewEpisodesNotification([], "", "")
 
 		notifier = EmailNotifier("localhost", 97, MockSMTP)
-		notifier.authenticate("someuser", "somepass")
+		notifier.login("someuser", "somepass")
 		message.send(notifier, "xy@example.org")
 
 		self.assertEqual(self.smtp.count, 1)

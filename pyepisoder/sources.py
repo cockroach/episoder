@@ -16,18 +16,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import requests
 
 from re import search, match
 from json import dumps
 from datetime import datetime
+
+import requests
 
 from .database import Episode, Show
 
 
 class ParserSelector(object):
 
-	class __Inner(object):
+	class _Inner(object):
 
 		def __init__(self):
 
@@ -49,7 +50,7 @@ class ParserSelector(object):
 	def instance():
 
 		if not ParserSelector._instance:
-			ParserSelector._instance = ParserSelector.__Inner()
+			ParserSelector._instance = ParserSelector._Inner()
 
 		return ParserSelector._instance
 
@@ -74,6 +75,7 @@ class TVDBOffline(object):
 	def __init__(self, tvdb):
 
 		self._tvdb = tvdb
+		self._log = logging.getLogger("TVDB (offline)")
 
 	def __str__(self):
 
@@ -95,9 +97,10 @@ class TVDBOffline(object):
 		if response.status_code == 401:
 			raise InvalidLoginError(data.get("Error"))
 
+		self._log.info("Successful login")
 		return data.get("token")
 
-	def lookup(self, text, user_agent):
+	def lookup(self, _, __):
 
 		raise TVDBNotLoggedInError()
 
@@ -106,7 +109,7 @@ class TVDBOffline(object):
 		body = {"apikey": args.tvdb_key}
 		self.token = self._post_login(body, args.agent)
 
-	def parse(self, show, db, user_agent):
+	def parse(self, _, __, ___):
 
 		raise TVDBNotLoggedInError()
 
@@ -122,7 +125,7 @@ class TVDBOnline(object):
 	def __init__(self, token):
 
 		self._token = token
-		self._logger = logging.getLogger("TVDB (online)")
+		self._log = logging.getLogger("TVDB (online)")
 
 	def __str__(self):
 
@@ -138,7 +141,7 @@ class TVDBOnline(object):
 		head = {"Content-type": "application/json",
 			"User-Agent": agent,
 			"Authorization": "Bearer %s" % self._token}
-		response = requests.get(url, headers = head, params = params)
+		response = requests.get(url, headers=head, params=params)
 		data = response.json()
 
 		if response.status_code == 404:
@@ -148,9 +151,9 @@ class TVDBOnline(object):
 
 	def _get_episodes(self, show, page, agent):
 
-		id = int(show.url)
+		show_id = int(show.url)
 		opts = {"page": page}
-		result = self._get("series/%d/episodes" % id, opts, agent)
+		result = self._get("series/%d/episodes" % show_id, opts, agent)
 		return (result.get("data"), result.get("links"))
 
 	def lookup(self, term, agent):
@@ -179,7 +182,7 @@ class TVDBOnline(object):
 			aired = datetime.strptime(aired, "%Y-%m-%d").date()
 			pnum = u"UNK"
 
-			self._logger.debug("Found episode %s" % name)
+			self._log.debug("Found episode %s", name)
 			return Episode(name, season, num, aired, pnum, 0)
 
 		def isvalid(row):
@@ -306,22 +309,21 @@ class Epguides(object):
 	def _parse_line(self, line, show, db):
 
 		# Name of the show
-		match = search("<title>(.*)</title>", line)
-		if match:
-			title = match.groups()[0]
+		res = search(r"<title>(.*)</title>", line)
+		if res:
+			title = res.groups()[0]
 			show.name = title.split(" (a ")[0]
 
 		# Current status (running / ended)
-		match = search('<span class="status">(.*)</span>', line)
-		if match:
-			text = match.groups()[0]
+		res = search(r'<span class="status">(.*)</span>', line)
+		if res:
+			text = res.groups()[0]
 			if "current" in text:
 				show.status = Show.RUNNING
 			else:
 				show.status = Show.ENDED
 		else:
-			match = search("aired.*to.*[\d+]", line)
-			if match:
+			if search(r"aired.*to.*[\d+]", line):
 				show.status = Show.ENDED
 
 		# Known formatting supported by this fine regex:
@@ -331,22 +333,26 @@ class Epguides(object):
 		# 65.   17-10           23 Apr 05  <a [..]>title</a>
 		# 101.   5-15           09 May 09  <a [..]>title</a>
 		# 254.    - 5  05-254   15 Jan 92  <a [..]>title</a>
-		match = search("^ *(\d+)\.? +(\d*)- ?(\d+) +([a-zA-Z0-9-]*)"\
-		" +(\d{1,2}[ /][A-Z][a-z]{2}[ /]\d{2}) *<a.*>(.*)</a>", line)
+		res = search(r"^ *(\d+)\.? +(\d*)- ?(\d+) +([a-zA-Z0-9-]*)"\
+		r" +(\d{1,2}[ /][A-Z][a-z]{2}[ /]\d{2}) *<a.*>(.*)</a>", line)
 
-		if match:
-			fields = match.groups()
+		if res:
+			fields = res.groups()
 			(total, season, epnum, prodnum, day, title) = fields
 
 			day = day.replace("/", " ")
 			airtime = datetime.strptime(day, "%d %b %y")
 
-			self.logger.debug("Found episode %s" % title)
+			self.logger.debug("Found episode %s", title)
 			db.add_episode(Episode(title, season or 0, epnum,
 					airtime.date(), prodnum, total), show)
 
 
 class TVCom(object):
+
+	def __init__(self):
+
+		self._log = logging.getLogger("TVCom")
 
 	def __str__(self):
 
@@ -362,9 +368,9 @@ class TVCom(object):
 		exp = "http://(www.)?tv.com/.*"
 		return match(exp, url)
 
-	def parse(self, source, db, args):
+	def parse(self, source, _, __):
 
-		logging.error("The url %s is no longer supported" % source.url)
+		self._log.error("The url %s is no longer supported", source.url)
 
 	def login(self):
 

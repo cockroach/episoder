@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from setuptools import setup
 from os import path
+from setuptools import setup
 
 # fallback
 __version__ = "0.0.0"
@@ -14,7 +14,7 @@ files.append((path.join("man", "man1"), ["episoder.1"]))
 
 # documentation
 for file in ["AUTHORS", "CHANGELOG", "COPYING", "README"]:
-	files.append((path.join('doc', 'episoder'), [file]))
+	files.append((path.join("doc", "episoder"), [file]))
 
 # get version number
 exec(open("pyepisoder/version.py").read())

@@ -22,9 +22,9 @@ from smtplib import SMTP
 
 class FormattingRenderer(object):
 
-	def __init__(self, format, dateformat):
+	def __init__(self, fmt, dateformat):
 
-		self._format = format
+		self._format = fmt
 		self._dateformat = dateformat
 
 	def format(self, episode):
@@ -51,9 +51,9 @@ class ConsoleRenderer(FormattingRenderer):
 	GREEN = "\033[32;1m"
 	YELLOW = "\033[33;1m"
 
-	def __init__(self, format, dateformat, dest=stdout):
+	def __init__(self, fmt, dateformat, dest=stdout):
 
-		super(ConsoleRenderer, self).__init__(format, dateformat)
+		super(ConsoleRenderer, self).__init__(fmt, dateformat)
 		self._dest = dest
 
 	def __str__(self):
@@ -106,9 +106,9 @@ class ConsoleRenderer(FormattingRenderer):
 
 class NewEpisodesNotification(FormattingRenderer):
 
-	def __init__(self, episodes, format, datefmt):
+	def __init__(self, episodes, fmt, datefmt):
 
-		super(NewEpisodesNotification, self).__init__(format, datefmt)
+		super(NewEpisodesNotification, self).__init__(fmt, datefmt)
 		self._episodes = episodes
 
 	def __str__(self):
@@ -118,8 +118,8 @@ class NewEpisodesNotification(FormattingRenderer):
 	def __repr__(self):
 
 		eps = "<(%d x Episode)" % len(self._episodes)
-		format = 'NewEpisodesNotification(%s, "%s", "%s")'
-		return format % (eps, self._format, self._dateformat)
+		fmt = 'NewEpisodesNotification(%s, "%s", "%s")'
+		return fmt % (eps, self._format, self._dateformat)
 
 	def get(self):
 
@@ -156,14 +156,14 @@ class EmailNotifier(object):
 
 	def __repr__(self):
 
-		format = 'EmailNotifier("%s", %d, %s)'
-		return format % (self._server, self._port, str(self._smtp))
+		fmt = 'EmailNotifier("%s", %d, %s)'
+		return fmt % (self._server, self._port, str(self._smtp))
 
 	def _get_header(self, to, subject):
 
 		return "From: %s\nTo: %s\nSubject: %s" % (to, to, subject)
 
-	def authenticate(self, user, password):
+	def login(self, user, password):
 
 		self._user = user
 		self._password = password
@@ -186,8 +186,3 @@ class EmailNotifier(object):
 
 		server.sendmail(to, to, message)
 		server.quit()
-
-	def send_mail(self, message, to, auth=None, tls=False, pretend=False):
-
-		body = message.get()
-		self.send(body, to, auth, tls, pretend)

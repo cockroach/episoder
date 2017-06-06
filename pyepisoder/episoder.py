@@ -22,12 +22,9 @@ from datetime import date, timedelta
 
 import sqlite3
 from sqlalchemy import Table, MetaData, create_engine, or_, and_
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import create_session
 
 from .database import Episode, Show, Meta
-
-Base = declarative_base()
 
 
 class Database(object):
@@ -53,12 +50,12 @@ class Database(object):
 		# Initialize the database if all tables are missing
 		tables = [Show, Episode, Meta]
 		tables = map(lambda x: x.__table__.exists, tables)
-		found = [x for x in tables if x(bind = self.engine)]
+		found = [x for x in tables if x(bind=self.engine)]
 
 		if len(found) < 1:
-			Show.__table__.create(bind = self.engine)
-			Episode.__table__.create(bind = self.engine)
-			Meta.__table__.create(bind = self.engine)
+			Show.__table__.create(bind=self.engine)
+			Episode.__table__.create(bind=self.engine)
+			Meta.__table__.create(bind=self.engine)
 			self.set_schema_version(4)
 
 	def open(self):
@@ -93,14 +90,14 @@ class Database(object):
 
 	def get_schema_version(self):
 
-		if not Meta.__table__.exists(bind = self.engine):
+		if not Meta.__table__.exists(bind=self.engine):
 			return 1
 
 		res = self.session.query(Meta).get("schema")
 		if res:
 			return int(res.value)
 
-		return 0;
+		return 0
 
 	def clear(self):
 
@@ -114,7 +111,7 @@ class Database(object):
 	def migrate(self):
 
 		schema_version = self.get_schema_version()
-		self.logger.debug("Found v%s schema" % schema_version)
+		self.logger.debug("Found v%s schema", schema_version)
 
 		if schema_version < 0:
 
@@ -133,9 +130,9 @@ class Database(object):
 			table = Table("shows", self.metadata, autoload=True)
 			table.drop()
 
-			Show.__table__.create(bind = self.engine)
-			Episode.__table__.create(bind = self.engine)
-			Meta.__table__.create(bind = self.engine)
+			Show.__table__.create(bind=self.engine)
+			Episode.__table__.create(bind=self.engine)
+			Meta.__table__.create(bind=self.engine)
 
 			schema_version = 4
 			self.set_schema_version(schema_version)
@@ -146,7 +143,7 @@ class Database(object):
 			self.logger.debug("Upgrading to schema version 3")
 
 			# We can only do this with sqlite databases
-			assert(self.engine.driver == "pysqlite")
+			assert self.engine.driver == "pysqlite"
 
 			self.close()
 
@@ -167,7 +164,7 @@ class Database(object):
 			self.logger.debug("Upgrading to schema version 4")
 
 			# We can only do this with sqlite databases
-			assert(self.engine.driver == "pysqlite")
+			assert self.engine.driver == "pysqlite"
 
 			self.close()
 
@@ -182,25 +179,25 @@ class Database(object):
 
 	def get_expired_shows(self, today=date.today()):
 
-		deltaRunning = timedelta(2)	# 2 days
-		deltaSuspended = timedelta(7)	# 1 week
-		deltaNotRunning = timedelta(14)	# 2 weeks
+		delta_running = timedelta(2)	# 2 days
+		delta_suspended = timedelta(7)	# 1 week
+		delta_ended = timedelta(14)	# 2 weeks
 
 		shows = self.session.query(Show).filter(or_(
 				and_(
-					Show.enabled == True,
+					Show.enabled,
 					Show.status == Show.RUNNING,
-					Show.updated < today - deltaRunning
+					Show.updated < today - delta_running
 				),
 				and_(
-					Show.enabled == True,
+					Show.enabled,
 					Show.status == Show.SUSPENDED,
-					Show.updated < today - deltaSuspended
+					Show.updated < today - delta_suspended
 				),
 				and_(
-					Show.enabled == True,
+					Show.enabled,
 					Show.status == Show.ENDED,
-					Show.updated < today - deltaNotRunning
+					Show.updated < today - delta_ended
 				)
 		))
 
@@ -208,7 +205,7 @@ class Database(object):
 
 	def get_enabled_shows(self):
 
-		shows = self.session.query(Show).filter(Show.enabled == True)
+		shows = self.session.query(Show).filter(Show.enabled)
 		return shows.all()
 
 	def get_show_by_url(self, url):
@@ -220,9 +217,9 @@ class Database(object):
 
 		return shows.first()
 
-	def get_show_by_id(self, id):
+	def get_show_by_id(self, show_id):
 
-		return self.session.query(Show).get(id)
+		return self.session.query(Show).get(show_id)
 
 	def add_show(self, show):
 
@@ -230,18 +227,17 @@ class Database(object):
 		self.session.flush()
 		return show
 
-	def remove_show(self, id):
+	def remove_show(self, show_id):
 
-		show = self.session.query(Show).get(id)
+		show = self.session.query(Show).get(show_id)
 
 		if not show:
 			self.logger.error("No such show")
 			return
 
-		episodes = self.session.query(Episode).filter(
-						Episode.show_id == show.id)
+		episodes = self.session.query(Episode)
 
-		for episode in episodes:
+		for episode in episodes.filter(Episode.show_id == show.id):
 			self.session.delete(episode)
 
 		self.session.delete(show)
@@ -284,9 +280,9 @@ class Database(object):
 		self.session.rollback()
 		self.session.begin()
 
-	def remove_before(self, date, show=None):
+	def remove_before(self, then, show=None):
 
-		eps = self.session.query(Episode).filter(Episode.airdate < date)
+		eps = self.session.query(Episode).filter(Episode.airdate < then)
 
 		if show:
 			eps = eps.filter(Episode.show == show)
