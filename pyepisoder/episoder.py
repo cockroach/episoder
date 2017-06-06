@@ -1,6 +1,6 @@
 # episoder, https://github.com/cockroach/episoder
 #
-# Copyright (C) 2004-2015 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,43 +17,87 @@
 
 from __future__ import absolute_import
 
-from datetime import date, timedelta
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer
-from sqlalchemy import MetaData, Sequence, Table, Text
-from sqlalchemy import create_engine, or_, and_
-from sqlalchemy.orm import clear_mappers, create_session, mapper, relation
-
 import logging
+from datetime import date, timedelta
 
-from .episode import Episode
-from .plugins import parser_for
+import sqlite3
+from sqlalchemy import Table, MetaData, create_engine, or_, and_
+from sqlalchemy.orm import create_session
 
-version='0.7.2'
+from .database import Episode, Show, Meta
 
 
-class DataStore(object):
+class Database(object):
 
 	def __init__(self, path):
 
-		self.logger = logging.getLogger('DataStore')
+		self._path = path
+		self.logger = logging.getLogger("Database")
 
-		if path.find('://') > -1:
-			engine = create_engine(path, convert_unicode=True)
-		else:
-			engine = create_engine('sqlite:///%s' % path)
-
-		self.conn = engine.connect()
-		self.metadata = MetaData()
-		self.metadata.bind = engine
-		self.session = create_session(bind=engine)
-		self.session.begin()
+		self.open()
 		self._initdb()
-
 
 	def __str__(self):
 
-		return 'DataStore(%s)' % self.conn
+		return "Episoder Database at %s" % self._path
 
+	def __repr__(self):
+
+		return "Database(%s)" % self._path
+
+	def _initdb(self):
+
+		# Initialize the database if all tables are missing
+		tables = [Show, Episode, Meta]
+		tables = map(lambda x: x.__table__.exists, tables)
+		found = [x for x in tables if x(bind=self.engine)]
+
+		if len(found) < 1:
+			Show.__table__.create(bind=self.engine)
+			Episode.__table__.create(bind=self.engine)
+			Meta.__table__.create(bind=self.engine)
+			self.set_schema_version(4)
+
+	def open(self):
+
+		if self._path.find("://") > -1:
+			self.engine = create_engine(self._path,
+							convert_unicode=True)
+		else:
+			self.engine = create_engine("sqlite:///%s" % self._path)
+
+		self.conn = self.engine.connect()
+		self.metadata = MetaData()
+		self.metadata.bind = self.engine
+		self.session = create_session(bind=self.engine)
+		self.session.begin()
+
+	def close(self):
+
+		self.session.commit()
+		self.session.close()
+		self.conn.close()
+		self.engine.dispose()
+
+	def set_schema_version(self, version):
+
+		meta = Meta()
+		meta.key = "schema"
+		meta.value = "%d" % version
+
+		self.session.merge(meta)
+		self.session.flush()
+
+	def get_schema_version(self):
+
+		if not Meta.__table__.exists(bind=self.engine):
+			return 1
+
+		res = self.session.query(Meta).get("schema")
+		if res:
+			return int(res.value)
+
+		return 0
 
 	def clear(self):
 
@@ -64,121 +108,107 @@ class DataStore(object):
 
 		self.session.flush()
 
+	def migrate(self):
 
-	def update(self):
+		schema_version = self.get_schema_version()
+		self.logger.debug("Found schema version %s", schema_version)
 
-		result = self.meta.select().execute()
-		meta = {}
+		if schema_version < 0:
 
-		for key in result:
-			meta[key[0]] = key[1]
-
-		if not 'schema' in meta:
-			meta['schema'] = '1'
-
-		self.logger.debug('Found v%s schema' % meta['schema'])
-
-		if meta['schema'] == '-1':
-			self.logger.debug('Automatic schema updates disabled')
+			self.logger.debug("Automatic schema updates disabled")
 			return
 
-		if meta['schema'] < '3':
-			self.logger.info('Updating database schema')
-			self.episodes.drop()
-			self.shows.drop()
-			self._initdb()
-			self.session.commit()
-			self.session.begin()
+		if schema_version == 1:
 
-			insert = self.meta.insert().values(key='schema',
-					value=3)
-			self.conn.execute(insert)
+			# Upgrades from version 1 are rather harsh, we
+			# simply drop and re-create the tables
+			self.logger.debug("Upgrading to schema version 2")
 
+			table = Table("episodes", self.metadata, autoload=True)
+			table.drop()
 
-	def _initdb(self):
+			table = Table("shows", self.metadata, autoload=True)
+			table.drop()
 
-		clear_mappers()
+			Show.__table__.create(bind=self.engine)
+			Episode.__table__.create(bind=self.engine)
+			Meta.__table__.create(bind=self.engine)
 
-		self.shows = Table('shows', self.metadata,
-			Column('show_id', Integer,
-				Sequence('shows_show_id_seq'),
-				primary_key=True),
-			Column('show_name', Text),
-			Column('url', Text, unique=True),
-			Column('updated', DateTime),
-			Column('enabled', Boolean),
-			Column('status', Integer, default=Show.RUNNING),
-			extend_existing=True)
+			schema_version = 4
+			self.set_schema_version(schema_version)
 
-		showmapper = mapper(Show, self.shows, properties={
-			'name': self.shows.c.show_name,
-			'episodes': relation(Episode, backref='show',
-				cascade='all')
-		})
+		if schema_version == 2:
 
-		self.meta = Table('meta', self.metadata,
-			Column('key', Text, primary_key=True),
-			Column('value', Text),
-			extend_existing=True)
+			# Add two new columns to the shows table
+			self.logger.debug("Upgrading to schema version 3")
 
-		self.episodes = Table('episodes', self.metadata,
-			Column('show_id', ForeignKey('shows.show_id'),
-				primary_key=True),
-			Column('num', Integer, primary_key=True),
-			Column('airdate', Date),
-			Column('season', Integer, primary_key=True),
-			Column('title', Text),
-			Column('totalnum', Integer),
-			Column('prodnum', Text),
-			extend_existing=True)
+			# We can only do this with sqlite databases
+			assert self.engine.driver == "pysqlite"
 
-		episodemapper = mapper(Episode, self.episodes, properties={
-			'title': self.episodes.c.title,
-			'season': self.episodes.c.season,
-			'episode': self.episodes.c.num,
-			'airdate': self.episodes.c.airdate,
-			'prodnum': self.episodes.c.prodnum,
-			'total': self.episodes.c.totalnum
-		})
+			self.close()
 
-		self.metadata.create_all()
+			upgrade = sqlite3.connect(self._path)
+			upgrade.execute("ALTER TABLE shows "
+					"ADD COLUMN enabled TYPE boolean")
+			upgrade.execute("ALTER TABLE shows "
+					"ADD COLUMN status TYPE integer")
+			upgrade.close()
 
+			self.open()
+			schema_version = 3
+			self.set_schema_version(schema_version)
 
-	def getExpiredShows(self):
+		if schema_version == 3:
 
-		today = date.today()
-		deltaRunning = timedelta(2)	# 2 days
-		deltaSuspended = timedelta(7)	# 1 week
-		deltaNotRunning = timedelta(14)	# 2 weeks
+			# Add a new column to the episodes table
+			self.logger.debug("Upgrading to schema version 4")
+
+			# We can only do this with sqlite databases
+			assert self.engine.driver == "pysqlite"
+
+			self.close()
+
+			upgrade = sqlite3.connect(self._path)
+			upgrade.execute("ALTER TABLE episodes "
+					"ADD COLUMN notified TYPE date")
+			upgrade.close()
+
+			self.open()
+			schema_version = 4
+			self.set_schema_version(schema_version)
+
+	def get_expired_shows(self, today=date.today()):
+
+		delta_running = timedelta(2)	# 2 days
+		delta_suspended = timedelta(7)	# 1 week
+		delta_ended = timedelta(14)	# 2 weeks
 
 		shows = self.session.query(Show).filter(or_(
 				and_(
-					Show.enabled == True,
+					Show.enabled,
 					Show.status == Show.RUNNING,
-					Show.updated < today - deltaRunning
+					Show.updated < today - delta_running
 				),
 				and_(
-					Show.enabled == True,
+					Show.enabled,
 					Show.status == Show.SUSPENDED,
-					Show.updated < today - deltaSuspended
+					Show.updated < today - delta_suspended
 				),
 				and_(
-					Show.enabled == True,
+					Show.enabled,
 					Show.status == Show.ENDED,
-					Show.updated < today - deltaNotRunning
+					Show.updated < today - delta_ended
 				)
 		))
 
 		return shows.all()
 
+	def get_enabled_shows(self):
 
-	def getEnabledShows(self):
-
-		shows = self.session.query(Show).filter(Show.enabled == True)
+		shows = self.session.query(Show).filter(Show.enabled)
 		return shows.all()
 
-
-	def getShowByUrl(self, url):
+	def get_show_by_url(self, url):
 
 		shows = self.session.query(Show).filter(Show.url == url)
 
@@ -187,195 +217,77 @@ class DataStore(object):
 
 		return shows.first()
 
+	def get_show_by_id(self, show_id):
 
-	def getShowById(self, id):
+		return self.session.query(Show).get(show_id)
 
-		shows = self.session.query(Show).filter(Show.show_id == id)
-
-		if shows.count() < 1:
-			return None
-
-		return shows.first()
-
-
-	def addShow(self, show):
+	def add_show(self, show):
 
 		show = self.session.merge(show)
 		self.session.flush()
 		return show
 
+	def remove_show(self, show_id):
 
-	def removeShow(self, id):
+		show = self.session.query(Show).get(show_id)
 
-		shows = self.session.query(Show).filter(Show.show_id == id)
-
-		if shows.count() < 1:
-			self.logger.error('No such show')
+		if not show:
+			self.logger.error("No such show")
 			return
 
-		self.session.delete(shows.first())
+		episodes = self.session.query(Episode)
+
+		for episode in episodes.filter(Episode.show_id == show.id):
+			self.session.delete(episode)
+
+		self.session.delete(show)
 		self.session.flush()
 
+	def get_shows(self):
 
-	def getShows(self):
+		return self.session.query(Show).all()
 
-		select = self.shows.select()
-		result = select.execute()
+	def add_episode(self, episode, show):
 
-		shows = []
-
-		for show in result:
-			shows.append(show)
-
-		return shows
-
-
-	def addEpisode(self, episode):
-
+		episode.show_id = show.id
 		self.session.merge(episode)
 		self.session.flush()
 
-
-	def getEpisodes(self, basedate=date.today(), n_days=0):
-
-		shows = []
-		episodes = []
+	def get_episodes(self, basedate=date.today(), n_days=0):
 
 		enddate = basedate + timedelta(n_days)
 
-		data = self.session.query(Episode).add_entity(Show). \
-			select_from(self.episodes.join(self.shows)). \
+		return self.session.query(Episode).\
 			filter(Episode.airdate >= basedate). \
 			filter(Episode.airdate <= enddate). \
-			order_by(Episode.airdate)
-
-		for row in data:
-			(episode, show) = row
-			episode.show = show
-
-			if show in shows:
-				show = shows[shows.index(show)]
-			else:
-				shows.append(show)
-
-			episodes.append(episode)
-
-		return episodes
-
+			order_by(Episode.airdate).all()
 
 	def search(self, search):
 
-		shows = []
-		episodes = []
-
-		data = self.session.query(Episode).add_entity(Show). \
-			select_from(self.episodes.join(self.shows)). \
+		return self.session.query(Episode).\
 			filter(or_( \
-				Episode.title.like('%%%s%%' % search),
-				Show.name.like('%%%s%%' % search))). \
-			order_by(Episode.airdate)
-
-		for row in data:
-			(episode, show) = row
-			episode.show = show
-
-			if show in shows:
-				show = shows[shows.index(show)]
-			else:
-				shows.append(show)
-
-			episodes.append(episode)
-
-		return episodes
-
+				Episode.title.like("%%%s%%" % search),
+				Show.name.like("%%%s%%" % search))). \
+			order_by(Episode.airdate).all()
 
 	def commit(self):
 
 		self.session.commit()
 		self.session.begin()
 
-
 	def rollback(self):
 
 		self.session.rollback()
 		self.session.begin()
 
+	def remove_before(self, then, show=None):
 
-	def removeBefore(self, date, show=None):
-
-		episodes = self.session.query(Episode).filter(
-				Episode.airdate < date)
+		eps = self.session.query(Episode).filter(Episode.airdate < then)
 
 		if show:
-			episodes = episodes.filter(
-					Episode.show_id == show.show_id)
+			eps = eps.filter(Episode.show == show)
 
-		for episode in episodes:
+		for episode in eps:
 			self.session.delete(episode)
 
 		self.commit()
-
-
-class Show(object):
-
-	RUNNING = 1
-	SUSPENDED = 2
-	ENDED = 3
-
-	def __init__(self, name, id=-1, url='', updated=date(1970, 1, 1)):
-
-		self.name = name
-		self.url = url
-		self.updated = updated
-		self.status = Show.RUNNING
-		self.episodes = []
-		self.enabled = True
-
-
-	def addEpisode(self, episode):
-
-		self.episodes.append(episode)
-
-
-	def setRunning(self):
-
-		self.status = Show.RUNNING
-
-
-	def setSuspended(self):
-
-		self.status = Show.SUSPENDED
-
-
-	def setEnded(self):
-
-		self.status = Show.ENDED
-
-
-	def update(self, store, args):
-
-		parser = parser_for(self.url)
-
-		if not parser:
-			raise RuntimeError('No parser found for %s' % self.url)
-
-		if 'agent' in args:
-			parser.user_agent = args.agent
-
-		parser.parse(self, store, args)
-
-
-	def removeEpisodesBefore(self, store, date):
-
-		logging.debug('Removing episodes from before %s' % date)
-		store.removeBefore(date, show=self)
-
-
-	def __str__(self):
-
-		return 'Show("%s")' % self.name
-
-
-	def __eq__(self, other):
-
-		return (self.name == other.name and self.url == other.url)

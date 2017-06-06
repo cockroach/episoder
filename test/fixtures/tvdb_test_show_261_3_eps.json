@@ -1,0 +1,18 @@
+{"links": {
+	"first": 1,
+	"last": 3,
+	"next": null,
+	"prev": 2
+	},
+"data": [{
+		"airedEpisodeNumber": 3,
+		"airedSeason": 1,
+		"episodeName": "Third",
+		"firstAired": "1991-01-03"
+	},{
+		"airedEpisodeNumber": 2,
+		"airedSeason": 2,
+		"episodeName": "Fifth",
+		"firstAired": "1992-01-02"
+	}
+]}

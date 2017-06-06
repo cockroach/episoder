@@ -1,0 +1,19 @@
+{"links": {
+	"first": 1,
+	"last": 1,
+	"next": null,
+	"prev": null
+},
+"data": [
+	{ },{
+		"firstAired": "1990-01-18"
+	},{
+		"absoluteNumber": null,
+		"airedEpisodeNumber": 1,
+		"airedSeason": 1,
+		"airedSeasonID": 13659,
+		"dvdEpisodeNumber": 1,
+		"dvdSeason": 1,
+		"episodeName": "The Good Son",
+		"firstAired": "1993-09-16"
+	}]}

@@ -2,7 +2,7 @@
 
 # episoder, https://github.com/cockroach/episoder
 #
-# Copyright (C) 2004-2015 Stefan Ott. All rights reserved.
+# Copyright (C) 2004-2017 Stefan Ott. All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,351 +25,446 @@ from argparse import ArgumentParser
 from datetime import date, timedelta
 from os import environ, path
 from re import match
-from sys import exit, stderr
+from sys import stderr
 from traceback import print_exc
 
-from pyepisoder.episoder import DataStore, Show, version
-from pyepisoder.plugins import ConsoleRenderer, TVDB, parser_for
+from pyepisoder.database import Show
+from pyepisoder.episoder import Database
+from pyepisoder.sources import TVDB, TVDBShowNotFoundError, ParserSelector
+from pyepisoder.output import ConsoleRenderer, EmailNotifier
+from pyepisoder.output import NewEpisodesNotification
+from pyepisoder.version import __version__
+
+
+class EpisoderOptions(object):
+
+	def __init__(self):
+
+		self._parser = ArgumentParser()
+		self._add_options()
+		self._args = None
+		self._log = logging.getLogger("EpisoderOptions")
+		self.loglevel = logging.WARNING
+
+	def _add_options(self):
+
+		yesterday = date.today() - timedelta(1)
+
+		self._parser.set_defaults(func=None)
+		commands = self._parser.add_subparsers(help="commands")
+
+		# options for adding shows
+		parser = commands.add_parser("add",
+			help="Add a show")
+		parser.add_argument("show", action="store",
+			help="the show to add (TVDV ID or epguides.com URL)")
+		parser.set_defaults(func="add")
+
+		# options for removing shows
+		parser = commands.add_parser("remove",
+			help="Remove a show from the database")
+		parser.add_argument("show", action="store", type=int,
+			help="the show ID to remove")
+		parser.set_defaults(func="remove")
+
+		# options for enabling shows
+		parser = commands.add_parser("enable",
+			help="Enable updates for a show")
+		parser.add_argument("show", action="store", type=int,
+			help="the show ID to enable updates for")
+		parser.set_defaults(func="enable")
+
+		# options for disabling shows
+		parser = commands.add_parser("disable",
+			help="Disable updates for a show")
+		parser.add_argument("show", action="store", type=int,
+			help="the show ID to disable updates for")
+		parser.set_defaults(func="disable")
+
+		# options for showing episodes
+		parser = commands.add_parser("list",
+			help="Show upcoming episodes")
+		parser.add_argument("-C", "--nocolor", action="store_true",
+			help="do not use colors")
+		parser.add_argument("-d", metavar="YYYY-MM-DD|n", dest="date",
+			default=yesterday.strftime("%Y-%m-%d"),
+			help="only show episodes after this date / n days back")
+		parser.add_argument("-n", "--days", type=int, default=2,
+			help="number of future days to show (default: 2)")
+		parser.add_argument("-i", "--nodate", action="store_true",
+			help="ignore date, show all episodes")
+		parser.add_argument("-s", dest="search",
+			help="search episodes")
+		parser.set_defaults(func="episodes")
+
+		# options for searching shows
+		parser = commands.add_parser("search",
+			help="Find shows on TVDB")
+		parser.add_argument("keyword", action="store",
+			help="search string")
+		parser.set_defaults(func="search")
+
+		# options for listing shows
+		parser = commands.add_parser("shows",
+			help="List shows in the database")
+		parser.add_argument("-a", "--active", action="store_true",
+			help="only lists shows that are running or suspended")
+		parser.set_defaults(func="shows")
+
+		# options for database update
+		parser = commands.add_parser("update",
+			help="Update the database")
+		parser.add_argument("-d", metavar="YYYY-MM-DD|n", dest="date",
+			default=yesterday.strftime("%Y-%m-%d"),
+			help="remove episodes prior to this date "
+				"or n days back")
+		parser.add_argument("-f", "--force", action="store_true",
+			help="force update, disregard last update time")
+		parser.add_argument("-i", "--nodate", action="store_true",
+			help="ignore date, do not remove old episodes")
+		parser.add_argument("-s", "--show", metavar="id", type=int,
+			help="only update the show with this id")
+		parser.add_argument("-n", "--num", metavar="num", type=int,
+			help="update no more than num shows at a time")
+		parser.set_defaults(func="update")
+
+		# options for email notify
+		parser = commands.add_parser("notify",
+			help="Send e-mail notifications about new episodes")
+		parser.add_argument("-d", metavar="YYYY-MM-DD|n", dest="date",
+			default=yesterday.strftime("%Y-%m-%d"),
+			help="only show episodes prior to this date "
+				"or n days back")
+		parser.add_argument("-n", "--days", type=int, default=2,
+			help="number of future days to show (default: 2)")
+		parser.add_argument("-s", "--show", metavar="id", type=int,
+			help="only notify for the show with this id")
+		parser.add_argument("--dryrun", action="store_true",
+			default=False, help="pretend, do not send email")
+		parser.set_defaults(func="notify")
+
+		# global options
+		group = self._parser.add_mutually_exclusive_group()
+
+		self._parser.add_argument("-c", metavar="file", action="store",
+			default=path.join(environ["HOME"], ".episoder"),
+			help="use configuration from file")
+		group.add_argument("-v", "--verbose", action="store_true",
+			help="verbose operation")
+		group.add_argument("-d", "--debug", action="store_true",
+			help="debug (very verbose) operation")
+		self._parser.add_argument("-l", metavar="file", dest="logfile",
+			action="store", help="log to file instead of stdout")
+		self._parser.add_argument("-V", "--version", action="version",
+			version="episoder %s" % __version__,
+			help="show version information")
+
+	def _replace_parsed_date(self, args):
 
-
-def update(args):
-
-	store = DataStore(args.datafile)
-	store.update()
-
-	if args.show:
-		show = store.getShowById(args.show)
-
-		if not show:
-			logging.error('Show #%d not found' % args.show)
-			return
-
-		shows = [show]
-	elif args.force:
-		shows = store.getEnabledShows()
-	else:
-		shows = store.getExpiredShows()
-
-	for show in shows:
-		try:
-			show.update(store, args)
-		except:
-			logging.error('Error parsing %s' % show)
-			print_exc()
-			store.rollback()
-
-		if not args.nodate:
-			basedate = args.date
-			show.removeEpisodesBefore(store, basedate)
-
-	if not shows:
-		logging.info('None of your shows need to be updated')
-
-
-def add(args):
-
-	url = args.show
-
-	store = DataStore(args.datafile)
-	store.update()
-
-	show = store.getShowByUrl(url)
-
-	if show:
-		stderr.write('A show with that url/id already exists\n')
-		return
-
-	if not parser_for(url):
-		stderr.write('Invalid show url/id: %s\n' % url)
-		return
-
-	show = Show('Unknown Show', url=url)
-
-	store.addShow(show)
-	store.commit()
-
-
-def remove(args):
-
-	id = args.show
-
-	store = DataStore(args.datafile)
-	store.update()
-
-	store.removeShow(id)
-	store.commit()
-
-
-def set_show_enabled(store, id, enabled):
-
-	show = store.getShowById(id)
-
-	if not show:
-		stderr.write('There is no show with that ID\n')
-		return
-
-	show.enabled = enabled
-	store.commit()
-
-
-def enable(args):
-
-	store = DataStore(args.datafile)
-	store.update()
-	set_show_enabled(store, args.show, True)
-
-
-def disable(args):
-
-	store = DataStore(args.datafile)
-	store.update()
-	set_show_enabled(store, args.show, False)
-
-
-def shows(args):
-
-	store = DataStore(args.datafile)
-	store.update()
-
-	shows = store.getShows()
-
-	statusStrings = ['?Invalid', 'Running', 'Suspended', 'Ended' ]
-	enabledStrings = ['Disabled', 'Enabled']
-
-	for show in shows:
-		status = show.status
-
-		print('[%4d] %s' % (show.show_id, show.url))
-		print('       %s, %s, %s' % (show.show_name,
-			statusStrings[status], enabledStrings[show.enabled]))
-		print('       Last update: %s' % (show.updated))
-
-
-def episodes(args):
-
-	store = DataStore(args.datafile)
-	renderer = ConsoleRenderer(args.format, args.dateformat)
-
-	if args.nodate:
-		startdate = date(1900, 1, 1)
-		n_days = 109500 # should be fine until late 21xx :)
-	else:
-		startdate = args.date
-		n_days = args.days
-
-	if args.search:
-		episodes = store.search(args.search)
-	else:
-		episodes = store.getEpisodes(startdate, n_days)
-
-	renderer.render(episodes, not args.nocolor)
-
-
-def search(args):
-
-	search = args.keyword
-
-	try:
-		res = TVDB.lookup(search)
-
-		print("ID\tName\n-------\t--------------------")
-		for x in res:
-			print("%s\t%s" % (x['seriesid'], x['seriesname']))
-
-	except:
-		print('Nothing found')
-
-
-def parseArgs():
-
-	yesterday = date.today() - timedelta(1)
-
-	parser = ArgumentParser()
-	subparsers = parser.add_subparsers(help='commands')
-
-	# OPTIONS FOR ADDING SHOWS
-
-	parser_add = subparsers.add_parser('add',
-		help='Add a show')
-	parser_add.add_argument('show', action='store',
-		help='the show to add (TVDV ID or epguides.com URL)')
-	parser_add.set_defaults(func=add)
-
-	# OPTIONS FOR REMOVING SHOWS
-
-	parser_remove = subparsers.add_parser('remove',
-		help='Remove a show from the database')
-	parser_remove.add_argument('show', action='store', type=int,
-		help='the show ID to remove')
-	parser_remove.set_defaults(func=remove)
-
-	# OPTIONS FOR ENABLING SHOWS
-
-	parser_enable = subparsers.add_parser('enable',
-		help='Enable updates for a show')
-	parser_enable.add_argument('show', action='store', type=int,
-		help='the show ID to enable updates for')
-	parser_enable.set_defaults(func=enable)
-
-	# OPTIONS FOR DISABLING SHOWS
-
-	parser_disable = subparsers.add_parser('disable',
-		help='Disable updates for a show')
-	parser_disable.add_argument('show', action='store', type=int,
-		help='the show ID to disable updates for')
-	parser_disable.set_defaults(func=disable)
-
-	# OPTIONS FOR SHOWING EPISODES
-
-	parser_list = subparsers.add_parser('list',
-		help='Show upcoming episodes')
-	parser_list.add_argument('-C', '--nocolor', action='store_true',
-		help="don't use colors")
-	parser_list.add_argument('-d', metavar='YYYY-MM-DD|n', dest='date',
-		default = yesterday.strftime('%Y-%m-%d'),
-		help='only show episodes prior to this date or n days back')
-	parser_list.add_argument('-n', '--days', type=int, default=2,
-		help='number of future days to show (default: 2)')
-	parser_list.add_argument('-i', '--nodate', action='store_true',
-		help="ignore date, show all episodes")
-	parser_list.add_argument('-s', dest='search',
-		help='search episodes')
-	parser_list.set_defaults(func=episodes)
-
-	# OPTIONS FOR SEARCHING SHOWS
-
-	parser_search = subparsers.add_parser('search',
-		help='Find shows on TVDB')
-	parser_search.add_argument('keyword', action='store',
-		help='search string')
-	parser_search.set_defaults(func=search)
-
-	# OPTIONS FOR LISTING SHOWS
-
-	parser_shows = subparsers.add_parser('shows',
-		help='List shows in the database')
-	parser_shows.set_defaults(func=shows)
-
-	# OPTIONS FOR DATABASE UPDATE
-
-	parser_update = subparsers.add_parser('update',
-		help='Update the database')
-	parser_update.add_argument('-d', metavar='YYYY-MM-DD|n', dest='date',
-		default = yesterday.strftime('%Y-%m-%d'),
-		help='remove episodes prior to this date or n days back')
-	parser_update.add_argument('-f', '--force', action='store_true',
-		help='force-update the database, disregard last update time')
-	parser_update.add_argument('-i', '--nodate', action='store_true',
-		help="ignore date, don't remove old episodes")
-	parser_update.add_argument('-s', '--show', metavar='id', type=int,
-		help='only update the show with this id')
-	parser_update.set_defaults(func=update)
-
-	# GLOBAL OPTIONS
-
-	group = parser.add_mutually_exclusive_group()
-
-	parser.add_argument('-c', metavar='file', action='store',
-		default=path.join(environ['HOME'], '.episoder'),
-		help='use configuration from file')
-	group.add_argument('-v', '--verbose', action='store_true',
-		help='verbose operation')
-	group.add_argument('-d', '--debug', action='store_true',
-		help='debug (very verbose) operation')
-	parser.add_argument('-l', metavar='file', dest='logfile',
-		action='store', help='log to file instead of stdout')
-	parser.add_argument('-V', '--version', action='version',
-		version='episoder %s' % version,
-		help='show version information')
-
-	args = parser.parse_args()
-
-	# turn our date string into a proper date object
-	if hasattr(args, 'date'):
 		if args.date.isdigit():
 			daysback = int(args.date)
 			args.date = date.today() - timedelta(daysback)
-		elif match('^[0-9]{4}(-[0-9]{2}){2}$', args.date):
-			d = args.date.split('-')
-			args.date = date(int(d[0]), int(d[1]), int(d[2]))
+		elif match("^[0-9]{4}(-[0-9]{2}){2}$", args.date):
+			(year, month, day) = args.date.split("-")
+			args.date = date(int(year), int(month), int(day))
 		else:
-			parser.error('%s: Wrong date format' % args.date)
+			self._parser.error("%s: Wrong date format" % args.date)
 
-	# configure the logger
-	loglevel = logging.WARNING
+	def _setup_logging(self):
 
-	if args.verbose:
-		loglevel = logging.INFO
-	if args.debug:
-		loglevel = logging.DEBUG
+		if self._args.debug:
+			self.loglevel = logging.DEBUG
+		elif self._args.verbose:
+			self.loglevel = logging.INFO
 
-	if args.logfile:
-		logging.basicConfig(level=loglevel, filename=args.logfile)
-	else:
-		logging.basicConfig(level=loglevel)
+		level = self.loglevel
+		logfile = self._args.logfile
 
-	return args
+		if logfile:
+			logging.basicConfig(level=level, filename=logfile)
+		else:
+			logging.basicConfig(level=level)
+
+	def parse_args(self):
+
+		self._args = self._parser.parse_args()
+
+		# this happens automatically in python 2 but not in 3.4
+		if self._args.func is None:
+			self._parser.print_usage()
+			stderr.write("error: too few arguments\n")
+			exit(1)
+
+		# turn our date string into a proper date object
+		if hasattr(self._args, "date"):
+			self._replace_parsed_date(self._args)
+
+		self._setup_logging()
+
+	def load_rcfile(self, file_):
+
+		def strip_comments(line):
+
+			return line.split("#")[0]
+
+		def valid(line):
+
+			return "=" in line
+
+		self._log.info("Loading config file")
+		lines = file_.readlines()
+		lines = [x.decode("utf8").strip() for x in lines]
+		lines = map(strip_comments, lines)
+		lines = filter(valid, lines)
+		return dict(line.split("=") for line in lines)
+
+	def load_config(self):
 
 
-def loadConfig(args):
+		if path.exists(self.args.c):
+			with open(self.args.c, "rb") as file_:
+				cfg = self.load_rcfile(file_)
+				self._log.debug("Settings loaded: %s", cfg)
+		else:
+			stderr.write("No config file found, using defaults\n")
+			cfg = {}
 
-	rcfile = args.c
-	config = {}
+		if "src" in cfg:
+			stderr.write("Please remove src= lines from config\n")
 
-	try:
-		rc = open(rcfile)
-	except IOError as e:
-		stderr.write('%s: %s\n' % (rcfile, e.strerror))
-		exit(2)
-	except Exception as e:
-		stderr.write('%s\n' % e)
-		exit(2)
+		self._args.agent = cfg.get("agent", "episoder/" + __version__)
 
-	for line in rc:
-		line = line.strip()
-		if line.startswith('data='):
-			(_, config['datafile']) = line.split('=')
-		elif line.startswith('format='):
-			(_, config['format']) = line.split('=')
-		elif line.startswith('dateformat='):
-			(_, config['dateformat']) = line.split('=')
-		elif line.startswith('agent='):
-			(_, config['agent']) = line.split('=')
-		elif line.startswith('src='):
-			logging.warn('Specifying shows in the configuration '
-				'file is no longer supported.')
+		datafile = path.join(environ["HOME"], ".episodes")
+		self._args.datafile = cfg.get("data", datafile)
+		self._args.dateformat = cfg.get("dateformat", "%a, %b %d, %Y")
+		format_ = "%airdate %show %seasonx%epnum"
+		self._args.format = cfg.get("format", format_)
+		self._args.tvdb_key = cfg.get("tvdb_key", "8F15287C4B23B36E")
+		self._args.email_to = cfg.get("email_to")
+		self._args.email_username = cfg.get("email_username")
+		self._args.email_password = cfg.get("email_password")
+		self._args.email_server = cfg.get("email_server", "localhost")
+		self._args.email_port = int(cfg.get("email_port", 587))
+		self._args.email_tls = bool(cfg.get("email_tls", 0))
 
-	rc.close()
+		self._log.info("Loaded configuration")
 
-	for key in config:
-		logging.debug('%s=%s' % (key, config.get(key)))
+	def _get_args(self):
 
-	args.agent = config.get('agent', 'episoder/' + version)
-	args.datafile = config.get('datafile',
-				path.join(environ['HOME'], '.episodes'))
-	args.dateformat = config.get('dateformat', '%a, %b %d, %Y')
-	args.format = config.get('format', '%airdate %show %seasonx%epnum')
-	args.tvdb_key = config.get('tvdb_key', '8F15287C4B23B36E')
+		return self._args
 
-	logging.info('Loaded rcfile')
+	args = property(_get_args)
 
+
+class Episoder(object):
+
+	def __init__(self, args):
+
+		self._args = args
+		self._log = logging.getLogger("Episoder")
+
+	def update(self):
+
+		database = Database(self._args.datafile)
+		database.migrate()
+
+		if self._args.show:
+			show = database.get_show_by_id(self._args.show)
+
+			if not show:
+				self._log.error("Show not found")
+				return
+
+			shows = [show]
+		elif self._args.force:
+			shows = database.get_enabled_shows()
+		else:
+			shows = database.get_expired_shows()
+
+		selector = ParserSelector.instance()
+
+		for show in shows[0:self._args.num]:
+
+			try:
+				parser = selector.parser_for(show.url)
+				parser.login(self._args)
+				parser.parse(show, database, self._args)
+			except:
+				self._log.error("Error parsing %s", show)
+				print_exc()
+				database.rollback()
+
+			if not self._args.nodate:
+				basedate = self._args.date
+				show.remove_episodes_before(database, basedate)
+
+		if not shows:
+			self._log.info("None of your shows need to be updated")
+
+	def add(self):
+
+		url = self._args.show
+
+		database = Database(self._args.datafile)
+		database.migrate()
+
+		show = database.get_show_by_url(url)
+
+		if show:
+			stderr.write("A show with that url already exists\n")
+			return
+
+		selector = ParserSelector.instance()
+		if not selector.parser_for(url):
+			stderr.write("Invalid show url/id: %s\n" % url)
+			return
+
+		show = Show(u"Unknown Show", url=url)
+
+		database.add_show(show)
+		database.commit()
+
+	def remove(self):
+
+		database = Database(self._args.datafile)
+		database.migrate()
+		database.remove_show(self._args.show)
+		database.commit()
+
+	def _set_show_enabled(self, database, enabled):
+
+		show_id = self._args.show
+		show = database.get_show_by_id(show_id)
+
+		if not show:
+			stderr.write("There is no show with id=%s\n" % show_id)
+			return
+
+		show.enabled = enabled
+		database.commit()
+
+	def enable(self):
+
+		database = Database(self._args.datafile)
+		database.migrate()
+		self._set_show_enabled(database, True)
+
+	def disable(self):
+
+		database = Database(self._args.datafile)
+		database.migrate()
+		self._set_show_enabled(database, False)
+
+	def shows(self):
+
+		database = Database(self._args.datafile)
+		database.migrate()
+
+		status_strings = ["?Invalid", "Running", "Suspended", "Ended"]
+		enabled_strings = ["Disabled", "Enabled"]
+
+		for show in database.get_shows():
+
+			if self._args.active and show.status == Show.ENDED:
+				continue
+
+			name = show.name.encode("utf8")
+			status = status_strings[show.status or 0]
+			enabled = enabled_strings[show.enabled]
+
+			print("[%4d] %s" % (show.id, show.url))
+			print("       %s, %s, %s" % (name, status, enabled))
+			print("       Last update: %s" % (show.updated))
+			print("       Episodes: %d" % len(show.episodes))
+
+	def notify(self):
+
+		opt = self._args
+
+		if opt.email_to is None:
+			stderr.write("No e-mail address configured\n")
+			return
+
+		database = Database(opt.datafile)
+		database.migrate()
+
+		startdate = opt.date
+		n_days = opt.days
+
+		all_episodes = database.get_episodes(startdate, n_days)
+		fresh = [e for e in all_episodes if not e.notified]
+
+		if len(fresh) < 1:
+			self._log.info("No new episodes")
+			return
+
+		msg = NewEpisodesNotification(fresh, opt.format, opt.dateformat)
+		notifier = EmailNotifier(opt.email_server, opt.email_port)
+
+		if opt.email_username:
+			notifier.login(opt.email_username, opt.email_password)
+		if opt.email_tls:
+			notifier.use_tls = True
+
+		msg.send(notifier, opt.email_to)
+		database.commit()
+
+	def episodes(self):
+
+		database = Database(self._args.datafile)
+		out = ConsoleRenderer(self._args.format, self._args.dateformat)
+
+		if self._args.nodate:
+			startdate = date(1900, 1, 1)
+			n_days = 109500 # should be fine until late 21xx :)
+		else:
+			startdate = self._args.date
+			n_days = self._args.days
+
+		if self._args.search:
+			episodes = database.search(self._args.search)
+		else:
+			episodes = database.get_episodes(startdate, n_days)
+
+		out.render(episodes, not self._args.nocolor)
+
+	def search(self):
+
+		tvdb = TVDB()
+		tvdb.login(self._args)
+
+		try:
+			print("ID\tName\n-------\t--------------------")
+			for show in tvdb.lookup(self._args.keyword, self._args):
+				print("%s\t%s" % (show.url, show.name))
+
+		except TVDBShowNotFoundError:
+			print("Nothing found")
+
+	def check_data_file(self):
+
+		filename = self._args.datafile
+		if not path.exists(filename):
+			return
+
+		with open(filename, "rb") as file:
+			data = file.read(6)
+
+		if data != b"SQLite":
+			message = "%s: Please remove old data file\n"
+			stderr.write(message % filename)
+			exit(4)
 
 def main():
 
-	args = parseArgs()
-	loadConfig(args)
+	options = EpisoderOptions()
+	options.parse_args()
+	options.load_config()
 
-	if path.exists(args.datafile):
-		file = open(args.datafile)
-		if file.read(6) != 'SQLite':
-			stderr.write('episoder found an old data file at ' +
-				'%s. You have to delete ' % args.datafile +
-				'that file before episoder can proceed.\n')
-			exit(4)
-		file.close()
+	episoder = Episoder(options.args)
+	episoder.check_data_file()
+	func = getattr(episoder, options.args.func)
+	func()
 
-	args.func(args)
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 	main()
