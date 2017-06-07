@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from datetime import date, datetime
 from json import loads
 from unittest import TestCase, TestSuite, TestLoader
@@ -119,6 +121,8 @@ class MockRequestHandler(object):
 class TVDBTest(TestCase):
 
 	def setUp(self):
+
+		logging.disable(logging.ERROR)
 
 		self.db = Database("sqlite://")
 		self.tvdb = TVDB()

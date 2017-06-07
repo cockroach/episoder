@@ -171,7 +171,7 @@ class TVDBOnline(object):
 
 		pass
 
-	def _fetch_episodes(self, show, page, user_agent):
+	def _fetch_episodes(self, show, page, agent):
 
 		def mkepisode(row):
 
@@ -189,15 +189,19 @@ class TVDBOnline(object):
 
 			return row.get("firstAired") not in [None, ""]
 
-		(data, links) = self._get_episodes(show, page, user_agent)
+		(data, links) = self._get_episodes(show, page, agent)
 		valid = filter(isvalid, data)
 		episodes = [mkepisode(row) for row in valid]
 
 		# handle pagination
-		next_page = links.get("next") or 0
-		if next_page > page:
-			more = self._fetch_episodes(show, next_page, user_agent)
-			episodes.extend(more)
+		next_ = links.get("next") or 0
+		if next_ > page:
+			try:
+				more = self._fetch_episodes(show, next_, agent)
+				episodes.extend(more)
+			except TVDBShowNotFoundError:
+				msg = "Error parsing %s: failed to load page %d"
+				self._log.error(msg, show.name, next_)
 
 		return episodes
 
