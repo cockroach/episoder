@@ -1,6 +1,5 @@
 == v0.8.1 (UNRELEASED) ==
  * Handle failures to load TVDB API pages
- * Correctly update tv show timestamp when updating shows
 
 == v0.8.0 (7 Jun 2017) ==
  * Switched from distutils to setuptools

@@ -301,8 +301,6 @@ class Episoder(object):
 		if not shows:
 			self._log.info("None of your shows need to be updated")
 
-		database.commit()
-
 	def add(self):
 
 		url = self._args.show
