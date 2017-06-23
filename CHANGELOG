@@ -1,3 +1,6 @@
+== v0.8.1 (24 Jun 2017) ==
+ * Handle failures to load TVDB API pages
+
 == v0.8.0 (7 Jun 2017) ==
  * Switched from distutils to setuptools
  * We now use the new TVDB JSON API
