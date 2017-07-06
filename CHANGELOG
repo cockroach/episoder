@@ -1,3 +1,6 @@
+== v0.8.2 (UNRELEASED) ==
+ * Fixed a crash when rendering episodes without a title
+
 == v0.8.1 (24 Jun 2017) ==
  * Handle failures to load TVDB API pages
 

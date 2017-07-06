@@ -101,6 +101,13 @@ class OutputTest(TestCase):
 		renderer.render([self.episode], False)
 		self.assertEqual(self.io.getvalue(), u"Episode 41\nEpisode 8\n")
 
+	def test_render_episode_without_title(self):
+
+		renderer = ConsoleRenderer("%eptitle", "", self.io)
+		self.episode.title = None
+		renderer.render([self.episode], False)
+		self.assertEqual(self.io.getvalue(), u"None\n")
+
 	def test_render_total_episode_number(self):
 
 		renderer = ConsoleRenderer("%totalep", "", self.io)

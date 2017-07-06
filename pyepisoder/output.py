@@ -36,7 +36,7 @@ class FormattingRenderer(object):
 		string = string.replace("%show", episode.show.name)
 		string = string.replace("%season", str(episode.season))
 		string = string.replace("%epnum", "%02d" % episode.episode)
-		string = string.replace("%eptitle", episode.title)
+		string = string.replace("%eptitle", str(episode.title))
 		string = string.replace("%totalep", str(episode.totalnum))
 		string = string.replace("%prodnum", episode.prodnum)
 
