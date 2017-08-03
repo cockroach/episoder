@@ -175,10 +175,10 @@ class TVDBOnline(object):
 
 		def mkepisode(row):
 
-			num = int(row.get("airedEpisodeNumber", "0"))
+			num = int(row.get("airedEpisodeNumber", "0") or 0)
 			aired = row.get("firstAired")
 			name = row.get("episodeName") or u"Unnamed episode"
-			season = int(row.get("airedSeason", "0"))
+			season = int(row.get("airedSeason", "0") or 0)
 			aired = datetime.strptime(aired, "%Y-%m-%d").date()
 			pnum = u"UNK"
 

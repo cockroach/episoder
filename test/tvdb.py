@@ -256,6 +256,16 @@ class TVDBTest(TestCase):
 		episode = episodes[0]
 		self.assertEqual(episode.title, u"Exposé")
 
+	def test_null_values(self):
+
+		self.tvdb.login(self.args)
+		show = self.db.add_show(Show(u"unnamed show", url=u"268156"))
+		self.assertTrue(TVDB.accept(show.url))
+
+		# this show has some null values that can confuse the parser
+		self.tvdb.parse(show, self.db, self.args)
+		self.assertEqual("Sense8", show.name)
+
 	def test_parse(self):
 
 		show = self.db.add_show(Show(u"unnamed show", url=u"260"))
