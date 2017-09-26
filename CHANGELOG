@@ -1,4 +1,4 @@
-== v0.8.3 (UNRELEASED) ==
+== v0.8.3 (27 Sep 2017) ==
  * Fixed a crash related to unexpected null values in TVDB JSON data
  * Use correct path for example config file in setup.py (fixes #7)
 
