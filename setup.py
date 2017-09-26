@@ -19,7 +19,8 @@ for file in ["AUTHORS", "CHANGELOG", "COPYING", "README.md"]:
 # get version number
 exec(open("pyepisoder/version.py").read())
 
-files.append((path.join("doc", "episoder", "examples"), ["home.episoder"]))
+files.append((path.join("doc", "episoder", "examples"),
+						["examples/home.episoder"]))
 
 setup(	name			= "episoder",
 	version			= __version__,

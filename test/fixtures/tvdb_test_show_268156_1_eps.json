@@ -1,0 +1,520 @@
+{
+    "data": [
+        {
+            "absoluteNumber": 1,
+            "airedEpisodeNumber": 1,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 1,
+            "dvdSeason": 1,
+            "episodeName": "Limbic Resonance",
+            "firstAired": "2015-06-05",
+            "id": 5219323,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1483698634,
+            "overview": "Eight strangers from cities around the globe begin having experiences that defy explanation."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": null,
+            "airedSeason": null,
+            "airedSeasonID": null,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": null,
+            "firstAired": "2015-06-05",
+            "id": null,
+            "language": {
+                "episodeName": null,
+                "overview": null
+            },
+            "lastUpdated": null,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 13,
+            "airedEpisodeNumber": 1,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 1,
+            "dvdSeason": 2,
+            "episodeName": "Happy F*cking New Year",
+            "firstAired": "2016-12-23",
+            "id": 5893011,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1494549650,
+            "overview": "The journey continues as these eight singular hearts and minds weave in and out of each other's lives finding deeper connections, learning darker secrets about one another and struggling to identify with more than just oneself."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": 1,
+            "airedSeason": null,
+            "airedSeasonID": 723065,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": "the angels",
+            "firstAired": "2019-03-08",
+            "id": 6232928,
+            "language": {
+                "episodeName": "en",
+                "overview": ""
+            },
+            "lastUpdated": 1501588033,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 2,
+            "airedEpisodeNumber": 2,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 2,
+            "dvdSeason": 1,
+            "episodeName": "I Am Also a We",
+            "firstAired": "2015-06-05",
+            "id": 5219322,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1483698654,
+            "overview": "Nomi's fortunes take a dark turn, while the rest of the Sensates' connections become stronger and more dangerous."
+        },
+        {
+            "absoluteNumber": 14,
+            "airedEpisodeNumber": 2,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 2,
+            "dvdSeason": 2,
+            "episodeName": "Who Am I?",
+            "firstAired": "2017-05-05",
+            "id": 5960446,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775111,
+            "overview": "Will and Whispers each race to piece together the other's location, while Lito heads to his first movie premiere since the photos leaked."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": 2,
+            "airedSeason": null,
+            "airedSeasonID": 723065,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": "the destiny",
+            "firstAired": "2019-03-08",
+            "id": 6233036,
+            "language": {
+                "episodeName": "en",
+                "overview": ""
+            },
+            "lastUpdated": 1501588076,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 3,
+            "airedEpisodeNumber": 3,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 3,
+            "dvdSeason": 1,
+            "episodeName": "Smart Money is On the Skinny Bitch",
+            "firstAired": "2015-06-05",
+            "id": 5219321,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1483698689,
+            "overview": "With many of the Sensates' lives becoming more complicated, their newfound gift -- while still a mystery -- proves vital for survival."
+        },
+        {
+            "absoluteNumber": 15,
+            "airedEpisodeNumber": 3,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 3,
+            "dvdSeason": 2,
+            "episodeName": "Obligate Mutualisms",
+            "firstAired": "2017-05-05",
+            "id": 6075844,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775122,
+            "overview": "The Sensates make contact with a key figure in BPO. Ripped from her prison cell, Sun sends out a plea for help. Wolfgang meets an intriguing stranger."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": 3,
+            "airedSeason": null,
+            "airedSeasonID": 723065,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": "the war",
+            "firstAired": "2019-03-08",
+            "id": 6233037,
+            "language": {
+                "episodeName": "en",
+                "overview": ""
+            },
+            "lastUpdated": 1501588111,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 4,
+            "airedEpisodeNumber": 4,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 4,
+            "dvdSeason": 1,
+            "episodeName": "What's Going On?",
+            "firstAired": "2015-06-05",
+            "id": 4961784,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1482747663,
+            "overview": "Nomi's fate draws nearer, Capheus and Wolfgang's fortunes seem to have turned, but Sun is faced with an impossible choice."
+        },
+        {
+            "absoluteNumber": 16,
+            "airedEpisodeNumber": 4,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 4,
+            "dvdSeason": 2,
+            "episodeName": "Polyphony",
+            "firstAired": "2017-05-05",
+            "id": 6075845,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775134,
+            "overview": "Kala and Capheus are caught in the middle of angry protests. Lito looks into a journalist's disappearance and uncovers new info on Angelica's cluster."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": 4,
+            "airedSeason": null,
+            "airedSeasonID": 723065,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": "do not cry my child",
+            "firstAired": "2019-03-08",
+            "id": 6233038,
+            "language": {
+                "episodeName": "en",
+                "overview": ""
+            },
+            "lastUpdated": 1501588138,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 5,
+            "airedEpisodeNumber": 5,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 5,
+            "dvdSeason": 1,
+            "episodeName": "Art is Like Religion",
+            "firstAired": "2015-06-05",
+            "id": 5228260,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1482747679,
+            "overview": "The Sensates struggle with intensifying connections, which results in some interesting days on set for Lito and a wedding day surprise for Kala."
+        },
+        {
+            "absoluteNumber": 17,
+            "airedEpisodeNumber": 5,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 5,
+            "dvdSeason": 2,
+            "episodeName": "Fear Never Fixed Anything",
+            "firstAired": "2017-05-05",
+            "id": 6075846,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775145,
+            "overview": "Bug hits on a solution to Nomi's legal troubles, new cracks begin to appear in Kala's perfect life, and the Sensates consider a bold change of plans."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": 5,
+            "airedSeason": null,
+            "airedSeasonID": 723065,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": "The beginning of the end",
+            "firstAired": "2019-03-08",
+            "id": 6233039,
+            "language": {
+                "episodeName": "en",
+                "overview": ""
+            },
+            "lastUpdated": 1501588165,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 6,
+            "airedEpisodeNumber": 6,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 6,
+            "dvdSeason": 1,
+            "episodeName": "Demons",
+            "firstAired": "2015-06-05",
+            "id": 5228261,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1482747698,
+            "overview": "While the Sensates bond, Nomi takes a bold move to gain her freedom and Sun makes a choice she might someday regret."
+        },
+        {
+            "absoluteNumber": 18,
+            "airedEpisodeNumber": 6,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 6,
+            "dvdSeason": 2,
+            "episodeName": "Isolated Above, Connected Below",
+            "firstAired": "2017-05-05",
+            "id": 6075847,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775162,
+            "overview": "While Capheus enjoys a welcome surprise, Lito makes a splash at a high-profile event. Riley works to gain the trust of a Sensate she saw at the rave."
+        },
+        {
+            "absoluteNumber": null,
+            "airedEpisodeNumber": 6,
+            "airedSeason": null,
+            "airedSeasonID": 723065,
+            "dvdEpisodeNumber": null,
+            "dvdSeason": null,
+            "episodeName": "the end of sense (series final)",
+            "firstAired": "2019-03-08",
+            "id": 6233040,
+            "language": {
+                "episodeName": "en",
+                "overview": ""
+            },
+            "lastUpdated": 1501588190,
+            "overview": null
+        },
+        {
+            "absoluteNumber": 7,
+            "airedEpisodeNumber": 7,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 7,
+            "dvdSeason": 1,
+            "episodeName": "W. W. N. Double D?",
+            "firstAired": "2015-06-05",
+            "id": 5228262,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1483656069,
+            "overview": "Nomi makes a shocking discovery about her former doctor, while Will gets closer to the truth behind his visions and Kala's doubts grow stronger."
+        },
+        {
+            "absoluteNumber": 19,
+            "airedEpisodeNumber": 7,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 7,
+            "dvdSeason": 2,
+            "episodeName": "I Have No Room In My Heart For Hate",
+            "firstAired": "2017-05-05",
+            "id": 6075848,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775175,
+            "overview": "Will asks an old friend for help as Riley embarks on a risky journey. Kala makes a troubling discovery. Sun has an intense encounter in the cemetery."
+        },
+        {
+            "absoluteNumber": 8,
+            "airedEpisodeNumber": 8,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 8,
+            "dvdSeason": 1,
+            "episodeName": "We Will All Be Judged By the Courage of Our Hearts",
+            "firstAired": "2015-06-05",
+            "id": 5228263,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1483698732,
+            "overview": "Sun fights to adjust to her new life as Capheus tries to change his. Will and Nomi dig up disturbing information that could change everything."
+        },
+        {
+            "absoluteNumber": 20,
+            "airedEpisodeNumber": 8,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 8,
+            "dvdSeason": 2,
+            "episodeName": "All I Want Right Now Is One More Bullet",
+            "firstAired": "2017-05-05",
+            "id": 6075849,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775190,
+            "overview": "A familiar face comes back from the dead, a depressed Lito turns to Sun for comfort, and Lila lures Wolfgang into a trap."
+        },
+        {
+            "absoluteNumber": 9,
+            "airedEpisodeNumber": 9,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 9,
+            "dvdSeason": 1,
+            "episodeName": "Death Doesn't Let You Say Goodbye",
+            "firstAired": "2015-06-05",
+            "id": 5228264,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1483698751,
+            "overview": "Riley learns about her new life and its dangers, Kala deals with the aftermath of the attack on Rajan\u2019s father, and Lito's world spins out of control."
+        },
+        {
+            "absoluteNumber": 21,
+            "airedEpisodeNumber": 9,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 9,
+            "dvdSeason": 2,
+            "episodeName": "What Family Actually Means",
+            "firstAired": "2017-05-05",
+            "id": 6075850,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775201,
+            "overview": "A family wedding stirs up more trouble for Nomi. Daniela goes all out to land Lito the perfect role. One of the Sensates faces a devastating loss."
+        },
+        {
+            "absoluteNumber": 10,
+            "airedEpisodeNumber": 10,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 10,
+            "dvdSeason": 1,
+            "episodeName": "What is Human?",
+            "firstAired": "2015-06-05",
+            "id": 5228265,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1482747762,
+            "overview": "Will learns more about his origins and the threat to his future, while Wolfgang's actions catch up with him, even as his bond with Kala strengthens."
+        },
+        {
+            "absoluteNumber": 22,
+            "airedEpisodeNumber": 10,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 10,
+            "dvdSeason": 2,
+            "episodeName": "If All The World's a Stage, Identity Is Nothing But a Costume",
+            "firstAired": "2017-05-05",
+            "id": 6075851,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775213,
+            "overview": "Sun moves ahead with her undercover mission, while Lito heads to Hollywood for the audition of a lifetime. Capheus prepares for his first big speech."
+        },
+        {
+            "absoluteNumber": 11,
+            "airedEpisodeNumber": 11,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 11,
+            "dvdSeason": 1,
+            "episodeName": "Just Turn the Wheel and the Future Changes",
+            "firstAired": "2015-06-05",
+            "id": 5228266,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1482747777,
+            "overview": "Riley's fate draws nearer, while Capheus and Sun are put to the test, and Wolfgang makes his boldest move yet."
+        },
+        {
+            "absoluteNumber": 23,
+            "airedEpisodeNumber": 11,
+            "airedSeason": 2,
+            "airedSeasonID": 671394,
+            "dvdEpisodeNumber": 11,
+            "dvdSeason": 2,
+            "episodeName": "You Want a War?",
+            "firstAired": "2017-05-05",
+            "id": 6075852,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1496775224,
+            "overview": "At the gala, Sun braces for a showdown with her brother. Soon a dire new threat sends the Sensates scrambling to save another member of the cluster."
+        },
+        {
+            "absoluteNumber": 12,
+            "airedEpisodeNumber": 12,
+            "airedSeason": 1,
+            "airedSeasonID": 515988,
+            "dvdEpisodeNumber": 12,
+            "dvdSeason": 1,
+            "episodeName": "I Can't Leave Her",
+            "firstAired": "2015-06-05",
+            "id": 5228267,
+            "language": {
+                "episodeName": "en",
+                "overview": "en"
+            },
+            "lastUpdated": 1482747789,
+            "overview": "With Riley in the hands of Whispers, all of the Sensates' skills are needed to give them any chance at survival."
+        }
+    ],
+    "links": {
+        "first": 1,
+        "last": 1,
+        "next": null,
+        "prev": null
+    }
+}

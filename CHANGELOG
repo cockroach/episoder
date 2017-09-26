@@ -1,3 +1,7 @@
+== v0.8.3 (27 Sep 2017) ==
+ * Fixed a crash related to unexpected null values in TVDB JSON data
+ * Use correct path for example config file in setup.py (fixes #7)
+
 == v0.8.2 (7 Jul 2017) ==
  * Fixed a crash when rendering episodes without a title
 
